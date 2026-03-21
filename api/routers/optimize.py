@@ -1,0 +1,297 @@
+"""
+routers/optimize.py
+-------------------
+POST /api/optimize
+  → single optimal portfolio  (target_return is None or a float)
+  → efficient frontier        (target_return == "frontier")
+"""
+
+from __future__ import annotations
+
+import math
+import numpy as np
+import pandas as pd
+import cvxpy as cp
+from scipy.linalg import sqrtm as matrix_sqrt
+from fastapi import APIRouter, HTTPException
+
+from portfolio_engine.data       import download_prices, compute_returns
+from portfolio_engine.parameters import Portfolio
+from portfolio_engine.utils      import compute_metrics
+
+from ..schemas.requests  import OptimizeRequest
+from ..schemas.responses import (
+    FrontierPoint,
+    FrontierResponse,
+    OptimizeResponse,
+    PortfolioMetrics,
+)
+
+router = APIRouter(prefix="/api", tags=["optimize"])
+
+
+def _safe(v) -> float | None:
+    if v is None:
+        return None
+    f = float(v)
+    return None if (math.isnan(f) or math.isinf(f)) else f
+
+
+def _download_returns(body: OptimizeRequest) -> pd.DataFrame:
+    if body.start >= body.end:
+        raise HTTPException(status_code=422, detail="'start' must be before 'end'")
+    try:
+        tickers = sorted(set(t.upper() for t in body.tickers))
+        prices  = download_prices(tickers, body.start, body.end)
+        returns = compute_returns(prices)
+        if returns.empty or returns.shape[0] < 30:
+            raise ValueError("Too few observations (<30) after computing returns.")
+        return returns[tickers]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Data download failed: {exc}")
+
+
+def _build_params(returns: pd.DataFrame, body: OptimizeRequest) -> tuple:
+    try:
+        port = Portfolio(returns)
+        port.estimate_mu(method=body.mu_method)
+        port.estimate_cov_matrix(method=body.cov_method)
+        return np.array(port.mu).flatten(), np.array(port.cov_matrix)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422, detail=f"Parameter estimation failed: {exc}"
+        )
+
+
+def _solve_single(
+    method: str,
+    mu_vec: np.ndarray,
+    cov: np.ndarray,
+    R: np.ndarray,
+    lo: float,
+    hi: float,
+    target_return,
+    solver: str,
+) -> np.ndarray | None:
+    """
+    Build and solve the full CVXPY problem for the given method.
+    Box constraints [lo, hi] and an optional return floor are added to every
+    problem uniformly.
+
+    Returns the weight array or None if infeasible.
+    """
+    T, n = R.shape
+
+    # ── Define the decision variable ─────────────────────────────────────────
+    x = cp.Variable((n, 1))
+    base_constraints = [cp.sum(x) == 1, x >= lo, x <= hi]
+
+    if target_return is not None and target_return != "frontier":
+        base_constraints.append(mu_vec @ x >= float(target_return))
+
+    # ── Risk expression + auxiliary variables per method ─────────────────────
+    aux_constraints: list = []
+
+    if method == "markowitz":
+        risk = cp.quad_form(x, cov)
+
+    elif method == "GMD":
+        D = np.empty((0, n))
+        for j in range(T - 1):
+            D = np.vstack([D, R[j + 1:] - R[j, :]])
+        d    = cp.Variable((int(T * (T - 1) / 2), 1))
+        risk = cp.sum(d) / ((T - 1) * T)
+        aux_constraints = [d >= D @ x, d >= -(D @ x)]
+
+    elif method == "MAD":
+        C_T  = np.eye(T) - np.ones((T, T)) / T
+        d    = cp.Variable((T, 1))
+        risk = cp.sum(d) / T
+        aux_constraints = [d >= C_T @ R @ x, d >= -(C_T @ R @ x), d >= 0]
+
+    elif method == "SMAD":
+        C_T  = np.eye(T) - np.ones((T, T)) / T
+        d    = cp.Variable((T, 1))
+        risk = cp.sum(d) / T
+        aux_constraints = [d >= -(C_T @ R @ x), d >= 0]
+
+    elif method == "Brownian":
+        ones = np.ones((T, 1))
+        D    = cp.Variable((T, T), symmetric=True)
+        y    = R @ x
+        risk = cp.sum_squares(D) / T ** 2 + cp.sum(D) ** 2 / T ** 4
+        aux_constraints = [
+            D >= y @ ones.T - ones @ y.T,
+            D >= -(y @ ones.T - ones @ y.T),
+        ]
+
+    elif method == "SemiVariance":
+        C_T  = np.eye(T) - np.ones((T, T)) / T
+        d    = cp.Variable((T, 1))
+        risk = cp.sum_squares(d) / T
+        aux_constraints = [d >= -(C_T @ R @ x), d >= 0]
+
+    elif method == "LowerPartialMoments":
+        tau  = 0.03 / 252
+        d    = cp.Variable((T, 1))
+        risk = cp.sum(d) / T
+        aux_constraints = [d >= tau - R @ x, d >= 0]
+
+    elif method == "CVaR":
+        alpha = 0.05
+        t     = cp.Variable()
+        u     = cp.Variable((T, 1))
+        risk  = t + 1 / (alpha * T) * cp.sum(u)
+        aux_constraints = [u >= -R @ x - t, u >= 0]
+
+    elif method == "EVaR":
+        alpha = 0.05
+        ones  = np.ones((T, 1))
+        t     = cp.Variable((1, 1))
+        z     = cp.Variable((1, 1), nonneg=True)
+        u     = cp.Variable((T, 1))
+        risk  = t + z * np.log(1 / (alpha * T))
+        aux_constraints = [cp.sum(u) <= z, cp.ExpCone(-R @ x - t, ones @ z, u)]
+
+    elif method == "Ulcer":
+        d    = cp.Variable((T + 1, 1))
+        risk = cp.norm(d[1:]) / T ** 0.5
+        aux_constraints = [
+            d[1:] >= d[:-1] - R @ x,
+            d[1:] >= 0,
+            d[0]  == 0,
+        ]
+
+    else:
+        raise ValueError(f"Unknown optimisation method: '{method}'")
+
+    prob = cp.Problem(
+        cp.Minimize(risk),
+        base_constraints + aux_constraints,
+    )
+    prob.solve(solver=solver)
+    return x.value
+
+
+# ── Endpoint ──────────────────────────────────────────────────────────────────
+
+@router.post(
+    "/optimize",
+    summary="Optimise portfolio weights",
+)
+def optimize(body: OptimizeRequest):
+    """
+    Optimise portfolio weights for the requested risk measure.
+
+    **Single portfolio** (`target_return` is `null` or a `float`):
+    Returns optimal weights and in-sample performance metrics.
+
+    **Efficient frontier** (`target_return == "frontier"`):
+    Returns 40 portfolios spanning from minimum risk to maximum expected return.
+
+    Box constraints (`min_weight` / `max_weight`) are enforced in both modes.
+    """
+    returns = _download_returns(body)
+    tickers = returns.columns.to_list()
+    mu_vec, cov = _build_params(returns, body)
+    R  = returns.to_numpy()
+    lo = body.constraints.min_weight
+    hi = body.constraints.max_weight
+
+    # ── Efficient frontier ────────────────────────────────────────────────────
+    if body.target_return == "frontier":
+        Sigma_sqrt = matrix_sqrt(cov)
+        x      = cp.Variable((len(tickers), 1))
+        g      = cp.Variable(nonneg=True)
+        mu_bar = cp.Parameter()
+
+        constraints = [
+            cp.SOC(g, Sigma_sqrt @ x),
+            mu_vec @ x >= mu_bar,
+            cp.sum(x) == 1,
+            x >= lo,
+            x <= hi,
+        ]
+        prob = cp.Problem(cp.Minimize(g), constraints)
+
+        portfolios: list[FrontierPoint] = []
+        for idx, target in enumerate(
+            np.linspace(float(mu_vec.min()), float(mu_vec.max()), 40)
+        ):
+            mu_bar.value = target
+            try:
+                prob.solve(solver=body.solver)
+                w_col = x.value
+            except Exception:
+                w_col = None
+
+            if w_col is None or np.any(np.isnan(w_col)):
+                continue
+
+            w_arr   = np.clip(w_col.flatten(), 0, None)
+            w_arr  /= max(w_arr.sum(), 1e-8)
+            exp_ret = _safe(float(mu_vec @ w_arr) * 252)
+            exp_vol = _safe(float(np.sqrt(w_arr @ cov @ w_arr)) * np.sqrt(252))
+
+            portfolios.append(FrontierPoint(
+                portfolio_id=idx,
+                weights={t: round(float(w), 6) for t, w in zip(tickers, w_arr)},
+                expected_return=exp_ret,
+                expected_volatility=exp_vol,
+            ))
+
+        if not portfolios:
+            raise HTTPException(
+                status_code=422,
+                detail="Could not compute any frontier portfolio. "
+                "Try relaxing constraints or switching solver.",
+            )
+        return FrontierResponse(tickers=tickers, portfolios=portfolios)
+
+    # ── Single portfolio ──────────────────────────────────────────────────────
+    try:
+        w_raw = _solve_single(
+            method=body.opt_method,
+            mu_vec=mu_vec,
+            cov=cov,
+            R=R,
+            lo=lo,
+            hi=hi,
+            target_return=body.target_return,
+            solver=body.solver,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Optimisation failed: {exc}")
+
+    if w_raw is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Solver returned no solution. Try relaxing constraints or changing the solver.",
+        )
+
+    w_arr = np.clip(np.array(w_raw).flatten(), 0, None)
+    total = w_arr.sum()
+    if total < 1e-8:
+        raise HTTPException(status_code=422, detail="Degenerate solution (all-zero weights).")
+    w_arr /= total
+
+    port_rets = pd.Series(R @ w_arr, index=returns.index)
+    m = compute_metrics(port_rets, "Portfolio")
+
+    return OptimizeResponse(
+        tickers=tickers,
+        weights={t: round(float(w), 6) for t, w in zip(tickers, w_arr)},
+        metrics=PortfolioMetrics(
+            annualized_return     = _safe(m["Annualized Return"]),
+            annualized_volatility = _safe(m["Annualized Volatility"]),
+            sharpe_ratio          = _safe(m["Sharpe Ratio"]),
+            sortino_ratio         = _safe(m["Sortino Ratio"]),
+            max_drawdown          = _safe(m["Max Drawdown"]),
+            calmar_ratio          = _safe(m["Calmar Ratio"]),
+            var_95                = _safe(m["VaR 95% (Historical)"]),
+            cvar_95               = _safe(m["CVaR 95% (Historical)"]),
+            win_rate              = _safe(m["Win Rate"]),
+        ),
+    )

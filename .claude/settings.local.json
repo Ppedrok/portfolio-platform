@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jupyter nbconvert:*)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/jupyter nbconvert:*)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 \"/Users/alessandro/Downloads/python/script/portfolio/Portfolio_platform/portfolio_plat.ipynb\")",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/pip install:*)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=600 portfolio_plat.ipynb)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/python -c \"import pandas; import riskfolio; import cvxpy; print\\(''OK'', pandas.__version__, riskfolio.__version__, cvxpy.__version__\\)\")",
+      "Read(//Users/alessandro/Downloads/python/script/portfolio/.venv/lib/**)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/python --version)",
+      "Bash(find /Users/alessandro -name riskfolio* -maxdepth 10)",
+      "Bash(conda run:*)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/python -c \":*)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/pip show:*)"
+    ]
+  }
+}
