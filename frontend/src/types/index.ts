@@ -59,6 +59,7 @@ export interface OptimizeRequest {
   target_return:  number | 'frontier' | null
   constraints:    WeightConstraints
   rp_constraints: ConstraintRow[] | null
+  long_only:      boolean
   solver:         string
 }
 

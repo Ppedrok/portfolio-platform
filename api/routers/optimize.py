@@ -90,8 +90,18 @@ def _build_rp_constraints(
         })
     if not rows:
         return None, None
-    constraints_df    = pd.DataFrame(rows)
-    asset_classes_df  = pd.DataFrame({"Assets": tickers})
+    constraints_df   = pd.DataFrame(rows)
+    constraints_df   = constraints_df[constraints_df["Disabled"] == False].reset_index(drop=True)
+    if constraints_df.empty:
+        return None, None
+    mask_assets = constraints_df["Type"] == "Assets"
+    invalid     = constraints_df.loc[mask_assets, "Position"].isin(["", None])
+    if invalid.any():
+        raise HTTPException(
+            status_code=422,
+            detail="Constraint error: 'Assets' type requires a valid ticker in Position.",
+        )
+    asset_classes_df = pd.DataFrame({"Assets": tickers})
     return constraints_df, asset_classes_df
 
 
@@ -201,11 +211,10 @@ def _solve_single(
 
     # ── Optional riskfolio linear constraints (A @ x <= b) ───────────────────
     if constraints_df is not None:
-        try:
-            A, b = rp.assets_constraints(constraints_df, asset_classes_df)
-            aux_constraints.append(A @ x <= b)
-        except Exception as exc:
-            warnings.warn(f"[optimize router] riskfolio constraints skipped: {exc}")
+        A, b = rp.assets_constraints(constraints_df, asset_classes_df)
+        A = np.array(A)
+        b = np.array(b)
+        aux_constraints.append(A @ x <= b)
 
     prob = cp.Problem(
         cp.Minimize(risk),
@@ -237,7 +246,7 @@ def optimize(body: OptimizeRequest):
     tickers = returns.columns.to_list()
     mu_vec, cov = _build_params(returns, body)
     R  = returns.to_numpy()
-    lo = body.constraints.min_weight
+    lo = body.constraints.min_weight if body.long_only else -1.0
     hi = body.constraints.max_weight
 
     constraints_df, asset_classes_df = (

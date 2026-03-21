@@ -47,6 +47,7 @@ export default function App() {
       target_return:  isFrontier ? 'frontier' : null,
       constraints:    { max_weight: maxWeight, min_weight: minWeight },
       rp_constraints: constraints.length > 0 ? constraints : null,
+      long_only:      longOnly,
       solver:         'CLARABEL',
     })
     setActiveTab('optimization')
