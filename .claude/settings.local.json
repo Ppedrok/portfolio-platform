@@ -12,7 +12,10 @@
       "Bash(find /Users/alessandro -name riskfolio* -maxdepth 10)",
       "Bash(conda run:*)",
       "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/python -c \":*)",
-      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/pip show:*)"
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/pip show:*)",
+      "Bash(npm run:*)",
+      "Bash(grep -n \"from ''../types''\" /Users/alessandro/Downloads/python/script/portfolio/Portfolio_platform/frontend/src/components/AssetOverview.tsx)",
+      "Bash(grep -n \"from ''../api/client''\" /Users/alessandro/Downloads/python/script/portfolio/Portfolio_platform/frontend/src/components/AssetOverview.tsx)"
     ]
   }
 }

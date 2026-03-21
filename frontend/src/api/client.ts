@@ -1,5 +1,7 @@
 import type {
   SearchResponse,
+  OverviewRequest,
+  OverviewResponse,
   OptimizeRequest,
   OptimizeResponse,
   FrontierResponse,
@@ -21,6 +23,15 @@ async function handleResponse<T>(res: Response): Promise<T> {
     throw new Error(msg)
   }
   return res.json() as Promise<T>
+}
+
+export async function getAssetOverview(body: OverviewRequest): Promise<OverviewResponse> {
+  const res = await fetch(`${BASE_URL}/api/assets/overview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return handleResponse<OverviewResponse>(res)
 }
 
 export async function searchAssets(query: string): Promise<SearchResponse> {

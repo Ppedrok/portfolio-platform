@@ -39,6 +39,18 @@ class PricesResponse(BaseModel):
     prices:   dict[str, list[float | None]]    = Field(description="ticker → price series")
 
 
+# ── /api/assets/overview ──────────────────────────────────────────────────────
+
+class OverviewResponse(BaseModel):
+    tickers:            list[str]
+    method:             str
+    codependence:       dict[str, dict[str, float]]
+    distance:           dict[str, dict[str, float]]
+    annualized_returns: dict[str, float | None]
+    annualized_vols:    dict[str, float | None]
+    sharpes:            dict[str, float | None]
+
+
 # ── /api/optimize (single portfolio) ─────────────────────────────────────────
 
 class PortfolioMetrics(BaseModel):

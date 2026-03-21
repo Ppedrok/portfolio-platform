@@ -7,6 +7,11 @@ Pydantic v2 request models for every API endpoint.
 from __future__ import annotations
 
 from typing import Annotated, Literal, Union
+
+CodependenceMethod = Literal[
+    "pearson", "spearman", "kendall", "gerber2",
+    "distance", "mutual_info", "tail",
+]
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -98,6 +103,15 @@ class OptimizeRequest(BaseModel):
             "constraints": {"max_weight": 0.4, "min_weight": 0.0},
         }
     }}
+
+
+# ── /api/assets/overview ──────────────────────────────────────────────────────
+
+class OverviewRequest(BaseModel):
+    tickers: list[str]          = Field(..., min_length=2)
+    start:   str                = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    end:     str                = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    method:  CodependenceMethod = "pearson"
 
 
 # ── /api/backtest ─────────────────────────────────────────────────────────────

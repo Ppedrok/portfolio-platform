@@ -15,6 +15,10 @@ export type OptMethod =
   | 'markowitz' | 'CVaR' | 'MAD' | 'SMAD' | 'SemiVariance'
   | 'LowerPartialMoments' | 'EVaR' | 'Ulcer' | 'GMD'
 
+export type CodependenceMethod =
+  | 'pearson' | 'spearman' | 'kendall' | 'gerber2'
+  | 'distance' | 'mutual_info' | 'tail'
+
 // ── Asset search ──────────────────────────────────────────────────────────────
 
 export interface TickerMatch {
@@ -27,6 +31,25 @@ export interface TickerMatch {
 export interface SearchResponse {
   query:   string
   results: TickerMatch[]
+}
+
+// ── Asset overview ────────────────────────────────────────────────────────────
+
+export interface OverviewRequest {
+  tickers: string[]
+  start:   string
+  end:     string
+  method:  CodependenceMethod
+}
+
+export interface OverviewResponse {
+  tickers:            string[]
+  method:             string
+  codependence:       Record<string, Record<string, number>>
+  distance:           Record<string, Record<string, number>>
+  annualized_returns: Record<string, number | null>
+  annualized_vols:    Record<string, number | null>
+  sharpes:            Record<string, number | null>
 }
 
 // ── Optimize ──────────────────────────────────────────────────────────────────

@@ -10,11 +10,15 @@ from __future__ import annotations
 import math
 from typing import Annotated
 
+import numpy as np
+import riskfolio as rp
 import yfinance as yf
 from fastapi import APIRouter, HTTPException, Query
 
-from ..schemas.requests  import PricesRequest
-from ..schemas.responses import PricesResponse, SearchResponse, TickerMatch
+from portfolio_engine.data import download_prices, compute_returns
+
+from ..schemas.requests  import OverviewRequest, PricesRequest
+from ..schemas.responses import OverviewResponse, PricesResponse, SearchResponse, TickerMatch
 
 router = APIRouter(prefix="/api/assets", tags=["assets"])
 
@@ -106,6 +110,84 @@ def search_tickers(
 
     matches.sort(key=lambda x: -x[0])
     return SearchResponse(query=query, results=[m for _, m in matches])
+
+
+# ── Overview endpoint ─────────────────────────────────────────────────────────
+
+def _safe_f(v) -> float | None:
+    try:
+        f = float(v)
+        return None if (math.isnan(f) or math.isinf(f)) else round(f, 6)
+    except Exception:
+        return None
+
+
+@router.post("/overview", response_model=OverviewResponse, summary="Asset codependence overview")
+def get_overview(body: OverviewRequest) -> OverviewResponse:
+    """
+    Compute pairwise codependence/distance matrices plus per-asset statistics
+    (annualised return, volatility, Sharpe) for the requested ticker universe.
+    """
+    if body.start >= body.end:
+        raise HTTPException(status_code=422, detail="'start' must be before 'end'")
+
+    try:
+        tickers = sorted(set(t.upper() for t in body.tickers))
+        prices  = download_prices(tickers, body.start, body.end)
+        returns = compute_returns(prices)
+        if returns.empty or returns.shape[0] < 30:
+            raise ValueError("Too few observations (<30) after computing returns.")
+        returns = returns[tickers]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Data download failed: {exc}")
+
+    try:
+        codep_df, dist_df = rp.codep_dist(
+            returns=returns,
+            codependence=body.method,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Codependence computation failed ({body.method}): {exc}",
+        )
+
+    def _df_to_dict(df) -> dict[str, dict[str, float]]:
+        out: dict[str, dict[str, float]] = {}
+        for row in df.index:
+            out[str(row)] = {
+                str(col): (_safe_f(df.loc[row, col]) or 0.0)
+                for col in df.columns
+            }
+        return out
+
+    # ── Per-asset stats ───────────────────────────────────────────────────────
+    ann_returns: dict[str, float | None] = {}
+    ann_vols:    dict[str, float | None] = {}
+    sharpes:     dict[str, float | None] = {}
+
+    for t in tickers:
+        r       = returns[t].dropna()
+        ann_ret = _safe_f((1 + r.mean()) ** 252 - 1)
+        ann_vol = _safe_f(r.std() * np.sqrt(252))
+        ann_returns[t] = ann_ret
+        ann_vols[t]    = ann_vol
+        if ann_ret is not None and ann_vol is not None and ann_vol > 0:
+            sharpes[t] = _safe_f(ann_ret / ann_vol)
+        else:
+            sharpes[t] = None
+
+    return OverviewResponse(
+        tickers=tickers,
+        method=body.method,
+        codependence=_df_to_dict(codep_df),
+        distance=_df_to_dict(dist_df),
+        annualized_returns=ann_returns,
+        annualized_vols=ann_vols,
+        sharpes=sharpes,
+    )
 
 
 # ── Prices endpoint ───────────────────────────────────────────────────────────

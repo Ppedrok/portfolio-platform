@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { AssetSearch }  from './components/AssetSearch'
-import { ConfigPanel }  from './components/ConfigPanel'
-import { ResultsPanel } from './components/ResultsPanel'
+import { AssetSearch }    from './components/AssetSearch'
+import { AssetOverview }  from './components/AssetOverview'
+import { ConfigPanel }    from './components/ConfigPanel'
+import { ResultsPanel }   from './components/ResultsPanel'
 import { useOptimize }  from './hooks/useOptimize'
 import { useBacktest }  from './hooks/useBacktest'
 import type { TickerMatch, MuMethod, CovMethod, OptMethod, ConstraintRow } from './types'
@@ -108,6 +109,14 @@ export default function App() {
           onStartDate={setStartDate}
           onEndDate={setEndDate}
         />
+
+        {selected.length >= 2 && (
+          <AssetOverview
+            selected={selected}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        )}
 
         <ConfigPanel
           muMethod={muMethod}

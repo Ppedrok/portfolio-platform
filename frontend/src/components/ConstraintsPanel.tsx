@@ -164,6 +164,9 @@ export function ConstraintsPanel({ assets, onChange, onLongOnly, longOnly }: Pro
         </div>
       )}
 
+      {/* Active Constraints Summary */}
+      <ActiveSummary rows={rows} onRemove={removeRow} />
+
       {/* Add button */}
       <button
         type="button"
@@ -173,6 +176,94 @@ export function ConstraintsPanel({ assets, onChange, onLongOnly, longOnly }: Pro
         <span className="text-base leading-none">+</span>
         Add Constraint
       </button>
+    </div>
+  )
+}
+
+// ── Active Constraints Summary ────────────────────────────────────────────────
+
+const TYPE_BADGE: Record<RowState['type'], { label: string; color: string }> = {
+  'Assets':    { label: 'Asset',      color: '#4f8ef7' },
+  'All Assets':{ label: 'All Assets', color: '#00d4aa' },
+  'Classes':   { label: 'Class',      color: '#fb923c' },
+}
+
+function ActiveSummary({ rows, onRemove }: { rows: RowState[]; onRemove: (id: string) => void }) {
+  const active = rows.filter(r => r.active)
+  if (active.length === 0) return null
+
+  return (
+    <div className="rounded-panel border border-border overflow-hidden">
+      <div className="px-3 py-2 border-b border-border">
+        <span className="text-[10px] font-mono font-semibold text-muted uppercase tracking-widest">
+          Active Constraints Summary
+        </span>
+        <span className="ml-2 text-[10px] font-mono text-accent">
+          {active.length}
+        </span>
+      </div>
+      <table className="w-full text-[11px] font-mono">
+        <thead>
+          <tr className="border-b border-border">
+            {['Type', 'Position', 'Sign', 'Weight', 'Relative To', 'Factor', ''].map(h => (
+              <th
+                key={h}
+                className="px-3 py-1.5 text-left text-[9px] uppercase tracking-wider text-muted font-semibold"
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {active.map((r, i) => {
+            const badge  = TYPE_BADGE[r.type]
+            const weight = r.isRelative || r.weightStr === ''
+              ? '—'
+              : `${r.weightStr}%`
+            const relTo  = r.isRelative && r.relative ? r.relative : '—'
+            const factor = r.isRelative && r.factorStr ? `${r.factorStr}×` : '—'
+            return (
+              <tr
+                key={r.id}
+                className={i % 2 === 1 ? 'bg-white/[0.015]' : ''}
+              >
+                <td className="px-3 py-2">
+                  <span
+                    className="px-1.5 py-0.5 rounded text-[9px] font-semibold"
+                    style={{ color: badge.color, background: badge.color + '18' }}
+                  >
+                    {badge.label}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-[#e8eaf0]">
+                  {r.position || <span className="text-muted">—</span>}
+                </td>
+                <td className="px-3 py-2 font-semibold" style={{ color: r.sign === '>=' ? '#00d4aa' : '#ff4d6a' }}>
+                  {r.sign === '>=' ? '≥' : '≤'}
+                </td>
+                <td className="px-3 py-2 text-[#e8eaf0]">{weight}</td>
+                <td className="px-3 py-2 text-[#e8eaf0]">{relTo}</td>
+                <td className="px-3 py-2 text-[#e8eaf0]">{factor}</td>
+                <td className="px-3 py-2 text-right">
+                  <button
+                    type="button"
+                    onClick={() => onRemove(r.id)}
+                    aria-label="Remove constraint"
+                    className="text-muted hover:text-negative transition-colors leading-none"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <polyline points="3,4 13,4" />
+                      <path d="M5 4V3h6v1" />
+                      <path d="M4 4l1 9h6l1-9" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
     </div>
   )
 }
