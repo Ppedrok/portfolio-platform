@@ -7,9 +7,7 @@ import type {
   BacktestResponse,
 } from '../types'
 
-// In production VITE_API_URL must be set to the Render backend URL.
-// In local dev (Vite proxy active) leave it unset so calls stay on same origin.
-const BASE_URL: string = import.meta.env.VITE_API_URL ?? ''
+const BASE_URL: string = 'https://portfolio-platform-j39z.onrender.com'
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
