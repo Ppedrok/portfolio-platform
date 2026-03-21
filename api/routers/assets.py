@@ -122,72 +122,43 @@ def _safe_f(v) -> float | None:
         return None
 
 
-@router.post("/overview", response_model=OverviewResponse, summary="Asset codependence overview")
-def get_overview(body: OverviewRequest) -> OverviewResponse:
-    """
-    Compute pairwise codependence/distance matrices plus per-asset statistics
-    (annualised return, volatility, Sharpe) for the requested ticker universe.
-    """
-    if body.start >= body.end:
-        raise HTTPException(status_code=422, detail="'start' must be before 'end'")
-
+@router.post("/overview", summary="Asset codependence overview")
+def get_overview(body: OverviewRequest):
     try:
         tickers = sorted(set(t.upper() for t in body.tickers))
         prices  = download_prices(tickers, body.start, body.end)
-        returns = compute_returns(prices)
-        if returns.empty or returns.shape[0] < 30:
-            raise ValueError("Too few observations (<30) after computing returns.")
-        returns = returns[tickers]
-    except HTTPException:
-        raise
+        returns = compute_returns(prices)[tickers]
+
+        kwargs: dict = {"codependence": body.method}
+        if body.method == "mutual_info":
+            kwargs["bins_info"] = "KN"
+        elif body.method == "tail":
+            kwargs["alpha_tail"] = 0.05
+        elif body.method in ("gerber1", "gerber2"):
+            kwargs["gs_threshold"] = 0.5
+
+        codep, dist = rp.codep_dist(returns, **kwargs)
+
+        ann_ret, ann_vol, sharpes = {}, {}, {}
+        for t in tickers:
+            s = returns[t]
+            r = float((1 + s).prod() ** (252 / len(s)) - 1)
+            v = float(s.std() * np.sqrt(252))
+            ann_ret[t] = round(r, 6)
+            ann_vol[t] = round(v, 6)
+            sharpes[t] = round(r / v if v > 0 else 0, 4)
+
+        return {
+            "tickers":            tickers,
+            "method":             body.method,
+            "codependence":       codep.round(6).to_dict(),
+            "distance":           dist.round(6).to_dict(),
+            "annualized_returns": ann_ret,
+            "annualized_vols":    ann_vol,
+            "sharpes":            sharpes,
+        }
     except Exception as exc:
-        raise HTTPException(status_code=422, detail=f"Data download failed: {exc}")
-
-    try:
-        codep_df, dist_df = rp.codep_dist(
-            returns=returns,
-            codependence=body.method,
-        )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Codependence computation failed ({body.method}): {exc}",
-        )
-
-    def _df_to_dict(df) -> dict[str, dict[str, float]]:
-        out: dict[str, dict[str, float]] = {}
-        for row in df.index:
-            out[str(row)] = {
-                str(col): (_safe_f(df.loc[row, col]) or 0.0)
-                for col in df.columns
-            }
-        return out
-
-    # ── Per-asset stats ───────────────────────────────────────────────────────
-    ann_returns: dict[str, float | None] = {}
-    ann_vols:    dict[str, float | None] = {}
-    sharpes:     dict[str, float | None] = {}
-
-    for t in tickers:
-        r       = returns[t].dropna()
-        ann_ret = _safe_f((1 + r.mean()) ** 252 - 1)
-        ann_vol = _safe_f(r.std() * np.sqrt(252))
-        ann_returns[t] = ann_ret
-        ann_vols[t]    = ann_vol
-        if ann_ret is not None and ann_vol is not None and ann_vol > 0:
-            sharpes[t] = _safe_f(ann_ret / ann_vol)
-        else:
-            sharpes[t] = None
-
-    return OverviewResponse(
-        tickers=tickers,
-        method=body.method,
-        codependence=_df_to_dict(codep_df),
-        distance=_df_to_dict(dist_df),
-        annualized_returns=ann_returns,
-        annualized_vols=ann_vols,
-        sharpes=sharpes,
-    )
+        raise HTTPException(status_code=422, detail=str(exc))
 
 
 # ── Prices endpoint ───────────────────────────────────────────────────────────

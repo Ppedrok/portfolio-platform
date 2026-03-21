@@ -108,10 +108,10 @@ class OptimizeRequest(BaseModel):
 # ── /api/assets/overview ──────────────────────────────────────────────────────
 
 class OverviewRequest(BaseModel):
-    tickers: list[str]          = Field(..., min_length=2)
-    start:   str                = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
-    end:     str                = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
-    method:  CodependenceMethod = "pearson"
+    tickers: list[str] = Field(..., min_length=2)
+    start:   str       = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    end:     str       = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    method:  str       = "pearson"
 
 
 # ── /api/backtest ─────────────────────────────────────────────────────────────

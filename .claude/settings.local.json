@@ -15,7 +15,11 @@
       "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/pip show:*)",
       "Bash(npm run:*)",
       "Bash(grep -n \"from ''../types''\" /Users/alessandro/Downloads/python/script/portfolio/Portfolio_platform/frontend/src/components/AssetOverview.tsx)",
-      "Bash(grep -n \"from ''../api/client''\" /Users/alessandro/Downloads/python/script/portfolio/Portfolio_platform/frontend/src/components/AssetOverview.tsx)"
+      "Bash(grep -n \"from ''../api/client''\" /Users/alessandro/Downloads/python/script/portfolio/Portfolio_platform/frontend/src/components/AssetOverview.tsx)",
+      "Bash(/Users/alessandro/Downloads/python/script/portfolio/.venv/bin/python -c \"import api.main; print\\(''import ok''\\)\")",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/assets/overview -H \"Content-Type: application/json\" -d '{\"\"\"\"tickers\"\"\"\":[\"\"\"\"AAPL\"\"\"\",\"\"\"\"MSFT\"\"\"\",\"\"\"\"NVDA\"\"\"\"],\"\"\"\"start\"\"\"\":\"\"\"\"2022-01-01\"\"\"\",\"\"\"\"end\"\"\"\":\"\"\"\"2024-01-01\"\"\"\",\"\"\"\"method\"\"\"\":\"\"\"\"mutual_info\"\"\"\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(head -15 curl -s -X POST http://127.0.0.1:8000/api/assets/overview -H \"Content-Type: application/json\" -d '{\"\"\"\"tickers\"\"\"\":[\"\"\"\"AAPL\"\"\"\",\"\"\"\"MSFT\"\"\"\"],\"\"\"\"start\"\"\"\":\"\"\"\"2022-01-01\"\"\"\",\"\"\"\"end\"\"\"\":\"\"\"\"2024-01-01\"\"\"\",\"\"\"\"method\"\"\"\":\"\"\"\"tail\"\"\"\"}')"
     ]
   }
 }
