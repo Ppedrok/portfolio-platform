@@ -4,18 +4,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg:           '#0f1117',
-        card:         '#1a1d27',
-        'card-hover': '#1e2130',
-        border:       '#2a2d3a',
-        muted:        '#8b8fa8',
-        indigo:       { DEFAULT: '#6366f1', hover: '#4f46e5', dim: '#6366f120' },
+        bg:           '#080a0f',
+        card:         '#0d1117',
+        'card-hover': '#111722',
+        border:       '#1e2530',
+        muted:        '#8892a4',
+        accent: {
+          DEFAULT: '#4f8ef7',
+          hover:   '#3a7de8',
+          dim:     '#4f8ef712',
+          soft:    '#4f8ef728',
+        },
+        positive:     '#00d4aa',
+        negative:     '#ff4d6a',
+        header:       '#0a0c12',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans:  ['Inter', 'system-ui', 'sans-serif'],
+        mono:  ['"JetBrains Mono"', '"Roboto Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        card: '0 4px 24px 0 rgba(0,0,0,0.4)',
+        card:  '0 1px 12px 0 rgba(0,0,0,0.6)',
+        glow:  '0 0 16px 0 rgba(79,142,247,0.15)',
+      },
+      borderRadius: {
+        panel: '8px',
       },
     },
   },

@@ -6,23 +6,30 @@
   :root { color-scheme: dark; }
 
   body {
-    background-color: #0f1117;
-    color: #fff;
+    background-color: #080a0f;
+    color: #e8eaf0;
     font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Monospace numbers utility */
+  .num {
+    font-family: 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0f1117; }
-  ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #080a0f; }
+  ::-webkit-scrollbar-thumb { background: #1e2530; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f8ef7; }
 
   /* Range input */
   input[type='range'] {
     -webkit-appearance: none;
     appearance: none;
-    height: 4px;
-    background: #2a2d3a;
+    height: 3px;
+    background: #1e2530;
     border-radius: 9999px;
     outline: none;
     cursor: pointer;
@@ -30,35 +37,40 @@
   input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: #6366f1;
-    border: 2px solid #0f1117;
+    background: #4f8ef7;
+    border: 2px solid #080a0f;
     cursor: pointer;
     transition: background 0.15s;
   }
-  input[type='range']::-webkit-slider-thumb:hover { background: #4f46e5; }
+  input[type='range']::-webkit-slider-thumb:hover { background: #3a7de8; }
   input[type='range']::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: #6366f1;
-    border: 2px solid #0f1117;
+    background: #4f8ef7;
+    border: 2px solid #080a0f;
     cursor: pointer;
   }
 
   /* Date picker icon */
   input[type='date']::-webkit-calendar-picker-indicator {
-    filter: invert(0.6);
+    filter: invert(0.5);
     cursor: pointer;
   }
 
-  /* Select arrow */
+  /* Select arrow — updated colour */
   select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8fa8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238892a4' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px !important;
+    background-position: right 10px center;
+    padding-right: 32px !important;
+  }
+
+  /* Striped table rows */
+  .table-striped tr:nth-child(even) td {
+    background-color: rgba(255,255,255,0.02);
   }
 }

@@ -1,26 +1,24 @@
 import type { BacktestResponse } from '../types'
 
-interface Props {
-  data: BacktestResponse
-}
+interface Props { data: BacktestResponse }
 
-/** Linear interpolation between yellow → orange → red based on weight 0-1 */
+/** Teal → blue → indigo based on weight magnitude */
 function weightToColor(w: number): string {
-  if (w < 0.001) return '#1a1d27'
-  const t = Math.min(1, w * 2.5)   // amplify: 40%+ → full red
+  if (w < 0.001) return '#0d1117'
+  const t = Math.min(1, w * 2.5)   // 40%+ → full colour
   if (t <= 0.5) {
-    // yellow (#fef08a) → orange (#f97316)
+    // teal (#00d4aa) → blue (#4f8ef7)
     const s = t * 2
-    const r = Math.round(254 + (249 - 254) * s)
-    const g = Math.round(240 + (115 - 240) * s)
-    const b = Math.round(138 + (22  - 138) * s)
+    const r = Math.round(0   + (79  - 0)   * s)
+    const g = Math.round(212 + (142 - 212) * s)
+    const b = Math.round(170 + (247 - 170) * s)
     return `rgb(${r},${g},${b})`
   } else {
-    // orange (#f97316) → red (#dc2626)
+    // blue (#4f8ef7) → indigo/violet (#818cf8)
     const s = (t - 0.5) * 2
-    const r = Math.round(249 + (220 - 249) * s)
-    const g = Math.round(115 + (38  - 115) * s)
-    const b = Math.round(22  + (38  - 22)  * s)
+    const r = Math.round(79  + (129 - 79)  * s)
+    const g = Math.round(142 + (140 - 142) * s)
+    const b = Math.round(247 + (248 - 247) * s)
     return `rgb(${r},${g},${b})`
   }
 }
@@ -30,21 +28,22 @@ const MAX_COLS = 40
 export function WeightsHeatmap({ data }: Props) {
   const { tickers, weights_history } = data
 
-  // Downsample if too many rebalancing steps
-  const step = Math.max(1, Math.floor(weights_history.length / MAX_COLS))
+  const step    = Math.max(1, Math.floor(weights_history.length / MAX_COLS))
   const history = weights_history.filter((_, i) => i % step === 0)
 
   return (
-    <div className="bg-card rounded-2xl p-5 border border-border overflow-x-auto">
-      <h3 className="text-sm font-semibold text-white mb-1">Portfolio Weights Over Time</h3>
-      <p className="text-xs text-muted mb-4">
-        {tickers.length} assets · {weights_history.length} rebalancing steps
+    <div className="bg-card rounded-panel p-4 border border-border overflow-x-auto">
+      <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-1">
+        Weights Over Time
+      </p>
+      <p className="text-xs text-muted font-mono mb-4">
+        {tickers.length} assets · {weights_history.length} rebalancings
       </p>
 
       <div className="min-w-[560px]">
-        {/* Date header row */}
+        {/* Date header */}
         <div className="flex items-end mb-1">
-          <div className="w-20 shrink-0" />
+          <div className="w-[72px] shrink-0" />
           <div className="flex-1 flex gap-px">
             {history.map(r => (
               <div
@@ -54,10 +53,10 @@ export function WeightsHeatmap({ data }: Props) {
                   writingMode: 'vertical-rl',
                   transform: 'rotate(180deg)',
                   fontSize: 8,
-                  color: '#8b8fa8',
-                  height: 46,
+                  color: '#8892a4',
+                  height: 44,
                   textAlign: 'left',
-                  paddingTop: 2,
+                  fontFamily: '"JetBrains Mono", monospace',
                 }}
               >
                 {r.date.slice(0, 7)}
@@ -69,14 +68,19 @@ export function WeightsHeatmap({ data }: Props) {
         {/* Asset rows */}
         {tickers.map(ticker => (
           <div key={ticker} className="flex items-center gap-px mb-px">
-            <div className="w-20 shrink-0 text-xs text-white pr-2 truncate">{ticker}</div>
+            <div
+              className="w-[72px] shrink-0 text-[#e8eaf0] pr-2 truncate"
+              style={{ fontSize: 10, fontFamily: '"JetBrains Mono", monospace' }}
+            >
+              {ticker}
+            </div>
             <div className="flex-1 flex gap-px">
               {history.map(record => {
                 const w = record.weights[ticker] ?? 0
                 return (
                   <div
                     key={record.date}
-                    className="flex-1 h-6 rounded-[2px] transition-opacity hover:opacity-80"
+                    className="flex-1 h-5 rounded-[1px] transition-opacity hover:opacity-70"
                     title={`${ticker}  ${record.date}  ${(w * 100).toFixed(1)}%`}
                     style={{ backgroundColor: weightToColor(w) }}
                   />
@@ -86,14 +90,14 @@ export function WeightsHeatmap({ data }: Props) {
           </div>
         ))}
 
-        {/* Colour legend */}
-        <div className="flex items-center gap-2 mt-4 text-xs text-muted">
-          <span>0%</span>
+        {/* Colour scale legend */}
+        <div className="flex items-center gap-2 mt-3">
+          <span className="text-[10px] text-muted font-mono">0%</span>
           <div
-            className="h-2 flex-1 rounded-full"
-            style={{ background: 'linear-gradient(to right, #fef08a, #f97316, #dc2626)' }}
+            className="h-1.5 flex-1 rounded-full"
+            style={{ background: 'linear-gradient(to right, #00d4aa, #4f8ef7, #818cf8)' }}
           />
-          <span>40%+</span>
+          <span className="text-[10px] text-muted font-mono">40%+</span>
         </div>
       </div>
     </div>

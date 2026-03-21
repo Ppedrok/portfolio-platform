@@ -6,41 +6,64 @@ function fmt(v: number | null | undefined, isPercent: boolean): string {
   return v.toFixed(3)
 }
 
-function colorClass(v: number | null | undefined, invert = false): string {
-  if (v == null) return 'text-white'
+function valColor(v: number | null | undefined, invert = false): string {
+  if (v == null) return 'text-[#e8eaf0]'
   const pos = invert ? v < 0 : v > 0
-  return pos ? 'text-emerald-400' : 'text-red-400'
+  return pos ? 'text-positive' : 'text-negative'
 }
 
 // ── Single portfolio metrics ───────────────────────────────────────────────────
 
-const SINGLE_ROWS: { key: keyof PortfolioMetrics; label: string; pct: boolean; colored: boolean; invert?: boolean }[] = [
-  { key: 'annualized_return',     label: 'Annualized Return',     pct: true,  colored: true  },
-  { key: 'annualized_volatility', label: 'Annualized Volatility', pct: true,  colored: false },
-  { key: 'sharpe_ratio',          label: 'Sharpe Ratio',          pct: false, colored: true  },
-  { key: 'sortino_ratio',         label: 'Sortino Ratio',         pct: false, colored: true  },
-  { key: 'max_drawdown',          label: 'Max Drawdown',          pct: true,  colored: true, invert: true },
-  { key: 'calmar_ratio',          label: 'Calmar Ratio',          pct: false, colored: true  },
-  { key: 'var_95',                label: 'VaR 95%',               pct: true,  colored: true, invert: true },
-  { key: 'cvar_95',               label: 'CVaR 95%',              pct: true,  colored: true, invert: true },
-  { key: 'win_rate',              label: 'Win Rate',              pct: true,  colored: false },
+const SINGLE_ROWS: {
+  key: keyof PortfolioMetrics; label: string; pct: boolean; colored: boolean; invert?: boolean
+}[] = [
+  { key: 'annualized_return',     label: 'Ann. Return',     pct: true,  colored: true  },
+  { key: 'annualized_volatility', label: 'Ann. Volatility', pct: true,  colored: false },
+  { key: 'sharpe_ratio',          label: 'Sharpe Ratio',    pct: false, colored: true  },
+  { key: 'sortino_ratio',         label: 'Sortino Ratio',   pct: false, colored: true  },
+  { key: 'max_drawdown',          label: 'Max Drawdown',    pct: true,  colored: true, invert: true },
+  { key: 'calmar_ratio',          label: 'Calmar Ratio',    pct: false, colored: true  },
+  { key: 'var_95',                label: 'VaR 95%',         pct: true,  colored: true, invert: true },
+  { key: 'cvar_95',               label: 'CVaR 95%',        pct: true,  colored: true, invert: true },
+  { key: 'win_rate',              label: 'Win Rate',        pct: true,  colored: false },
 ]
 
 export function MetricsTable({ metrics }: { metrics: PortfolioMetrics }) {
+  // Highlight the two most prominent metrics at the top
+  const ret = metrics.annualized_return
+  const sr  = metrics.sharpe_ratio
+
   return (
-    <div className="bg-card rounded-2xl p-5 border border-border">
-      <h3 className="text-sm font-semibold text-white mb-1">Performance Metrics</h3>
-      <p className="text-xs text-muted mb-4">In-sample statistics</p>
-      <table className="w-full text-sm">
+    <div className="bg-card rounded-panel p-4 border border-border">
+      <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-3">
+        Performance Metrics
+      </p>
+
+      {/* Hero stats */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-bg rounded-panel p-3 border border-border">
+          <p className="text-[10px] text-muted font-mono uppercase tracking-wide mb-1">Ann. Return</p>
+          <p className={`text-xl font-mono font-semibold num ${ret != null && ret > 0 ? 'text-positive' : ret != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
+            {fmt(ret, true)}
+          </p>
+        </div>
+        <div className="bg-bg rounded-panel p-3 border border-border">
+          <p className="text-[10px] text-muted font-mono uppercase tracking-wide mb-1">Sharpe Ratio</p>
+          <p className={`text-xl font-mono font-semibold num ${sr != null && sr > 0 ? 'text-positive' : sr != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
+            {fmt(sr, false)}
+          </p>
+        </div>
+      </div>
+
+      {/* Detail table */}
+      <table className="w-full text-xs table-striped">
         <tbody>
-          {SINGLE_ROWS.map(({ key, label, pct, colored, invert }) => {
+          {SINGLE_ROWS.map(({ key, label, pct, colored, invert }, idx) => {
             const v = metrics[key]
             return (
-              <tr key={key} className="border-t border-border">
-                <td className="py-2.5 text-muted">{label}</td>
-                <td className={`py-2.5 text-right font-medium tabular-nums ${
-                  colored ? colorClass(v, invert) : 'text-white'
-                }`}>
+              <tr key={key} className={idx % 2 === 0 ? '' : 'bg-white/[0.015]'}>
+                <td className="py-2 pl-1 text-muted font-mono">{label}</td>
+                <td className={`py-2 pr-1 text-right font-mono font-medium num ${colored ? valColor(v, invert) : 'text-[#e8eaf0]'}`}>
                   {fmt(v, pct)}
                 </td>
               </tr>
@@ -54,16 +77,18 @@ export function MetricsTable({ metrics }: { metrics: PortfolioMetrics }) {
 
 // ── Backtest metrics (Portfolio + Benchmark columns) ──────────────────────────
 
-const BACKTEST_ROWS: { key: string; label: string; pct: boolean; colored: boolean; invert?: boolean }[] = [
-  { key: 'Annualized Return',     label: 'Annualized Return',     pct: true,  colored: true  },
-  { key: 'Annualized Volatility', label: 'Annualized Volatility', pct: true,  colored: false },
-  { key: 'Sharpe Ratio',          label: 'Sharpe Ratio',          pct: false, colored: true  },
-  { key: 'Sortino Ratio',         label: 'Sortino Ratio',         pct: false, colored: true  },
-  { key: 'Max Drawdown',          label: 'Max Drawdown',          pct: true,  colored: true, invert: true },
-  { key: 'Calmar Ratio',          label: 'Calmar Ratio',          pct: false, colored: true  },
-  { key: 'VaR 95% (Historical)',  label: 'VaR 95%',               pct: true,  colored: true, invert: true },
-  { key: 'CVaR 95% (Historical)', label: 'CVaR 95%',              pct: true,  colored: true, invert: true },
-  { key: 'Win Rate',              label: 'Win Rate',              pct: true,  colored: false },
+const BACKTEST_ROWS: {
+  key: string; label: string; pct: boolean; colored: boolean; invert?: boolean
+}[] = [
+  { key: 'Annualized Return',     label: 'Ann. Return',     pct: true,  colored: true  },
+  { key: 'Annualized Volatility', label: 'Ann. Volatility', pct: true,  colored: false },
+  { key: 'Sharpe Ratio',          label: 'Sharpe',          pct: false, colored: true  },
+  { key: 'Sortino Ratio',         label: 'Sortino',         pct: false, colored: true  },
+  { key: 'Max Drawdown',          label: 'Max DD',          pct: true,  colored: true, invert: true },
+  { key: 'Calmar Ratio',          label: 'Calmar',          pct: false, colored: true  },
+  { key: 'VaR 95% (Historical)',  label: 'VaR 95%',         pct: true,  colored: true, invert: true },
+  { key: 'CVaR 95% (Historical)', label: 'CVaR 95%',        pct: true,  colored: true, invert: true },
+  { key: 'Win Rate',              label: 'Win Rate',        pct: true,  colored: false },
 ]
 
 export function BacktestMetricsTable({
@@ -75,31 +100,64 @@ export function BacktestMetricsTable({
     Object.values(metrics).some(row => col in row),
   )
 
+  // Hero stats from Portfolio column
+  const heroRet = metrics['Annualized Return']?.['Portfolio'] ?? null
+  const heroSR  = metrics['Sharpe Ratio']?.['Portfolio'] ?? null
+  const heroBmRet = metrics['Annualized Return']?.['Benchmark'] ?? null
+  const heroBmSR  = metrics['Sharpe Ratio']?.['Benchmark'] ?? null
+
   return (
-    <div className="bg-card rounded-2xl p-5 border border-border">
-      <h3 className="text-sm font-semibold text-white mb-1">Performance Metrics</h3>
-      <p className="text-xs text-muted mb-4">Out-of-sample statistics</p>
-      <table className="w-full text-sm">
+    <div className="bg-card rounded-panel p-4 border border-border">
+      <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-3">
+        Performance Metrics — Out-of-Sample
+      </p>
+
+      {/* Hero stat comparison */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        {/* Portfolio */}
+        <div className="bg-bg rounded-panel p-3 border border-accent/20">
+          <p className="text-[10px] text-accent font-mono uppercase tracking-wide mb-1">Portfolio</p>
+          <p className={`text-lg font-mono font-semibold num ${heroRet != null && heroRet > 0 ? 'text-positive' : heroRet != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
+            {fmt(heroRet, true)}
+          </p>
+          <p className={`text-xs font-mono num mt-0.5 ${heroSR != null && heroSR > 0 ? 'text-positive' : heroSR != null ? 'text-negative' : 'text-muted'}`}>
+            SR {fmt(heroSR, false)}
+          </p>
+        </div>
+        {/* Benchmark */}
+        {columns.includes('Benchmark') && (
+          <div className="bg-bg rounded-panel p-3 border border-border">
+            <p className="text-[10px] text-muted font-mono uppercase tracking-wide mb-1">Benchmark EW</p>
+            <p className={`text-lg font-mono font-semibold num ${heroBmRet != null && heroBmRet > 0 ? 'text-positive' : heroBmRet != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
+              {fmt(heroBmRet, true)}
+            </p>
+            <p className={`text-xs font-mono num mt-0.5 ${heroBmSR != null && heroBmSR > 0 ? 'text-positive' : heroBmSR != null ? 'text-negative' : 'text-muted'}`}>
+              SR {fmt(heroBmSR, false)}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Full table */}
+      <table className="w-full text-xs">
         <thead>
           <tr className="border-b border-border">
-            <th className="pb-3 text-left text-muted font-normal text-xs">Metric</th>
+            <th className="pb-2 pl-1 text-left text-muted font-mono font-normal uppercase tracking-widest text-[10px]">Metric</th>
             {columns.map(col => (
-              <th key={col} className="pb-3 text-right text-muted font-normal text-xs">{col}</th>
+              <th key={col} className="pb-2 pr-1 text-right text-muted font-mono font-normal uppercase tracking-widest text-[10px]">{col}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {BACKTEST_ROWS.map(({ key, label, pct, colored, invert }) => {
+          {BACKTEST_ROWS.map(({ key, label, pct, colored, invert }, idx) => {
             const row = metrics[key] ?? {}
             return (
-              <tr key={key} className="border-t border-border">
-                <td className="py-2.5 text-muted">{label}</td>
+              <tr key={key} className={idx % 2 === 0 ? '' : 'bg-white/[0.015]'}>
+                <td className="py-2 pl-1 text-muted font-mono">{label}</td>
                 {columns.map(col => {
                   const v = row[col] ?? null
                   return (
-                    <td key={col} className={`py-2.5 text-right font-medium tabular-nums ${
-                      colored ? colorClass(v, invert) : 'text-white'
-                    }`}>
+                    <td key={col} className={`py-2 pr-1 text-right font-mono font-medium num ${colored ? valColor(v, invert) : 'text-[#e8eaf0]'}`}>
                       {fmt(v, pct)}
                     </td>
                   )

@@ -71,18 +71,24 @@ export default function App() {
     <div className="min-h-screen bg-bg font-sans text-white">
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur border-b border-border px-6 py-3.5 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#6366f1] flex items-center justify-center text-white text-sm font-bold shadow">
-          P
+      <header className="sticky top-0 z-40 bg-header border-b border-border px-6 py-3 flex items-center gap-3">
+        {/* Logo mark */}
+        <div className="w-7 h-7 rounded bg-accent flex items-center justify-center shrink-0">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <polyline points="1,12 5,6 9,9 13,3 15,5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
-        <span className="font-semibold text-white">Portfolio Optimizer</span>
-        <div className="ml-auto flex items-center gap-3 text-xs text-muted">
+        <span className="font-semibold text-[#e8eaf0] tracking-tight">Portfolio Optimizer</span>
+
+        <div className="ml-auto flex items-center gap-3">
           {tickers.length > 0 && (
-            <span className="bg-[#6366f120] border border-[#6366f140] text-[#6366f1] px-2.5 py-1 rounded-full font-medium">
-              {tickers.length} asset{tickers.length !== 1 ? 's' : ''} selected
+            <span className="font-mono text-xs bg-accent/10 border border-accent/20 text-accent px-2.5 py-1 rounded">
+              {tickers.length} asset{tickers.length !== 1 ? 's' : ''}
             </span>
           )}
-          <span>FastAPI + CVXPY</span>
+          <span className="hidden sm:inline text-xs text-muted border border-border px-2.5 py-1 rounded font-mono">
+            Powered by CVXPY + Riskfolio
+          </span>
         </div>
       </header>
 
@@ -145,8 +151,12 @@ export default function App() {
       </main>
 
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-border mt-12 px-6 py-4 text-center text-xs text-muted">
-        Portfolio Optimizer · React + Vite + Recharts · FastAPI + CVXPY backend
+      <footer className="border-t border-border mt-12 px-6 py-3 flex items-center justify-center gap-4 text-[10px] text-muted font-mono">
+        <span>Portfolio Optimizer</span>
+        <span className="text-border">|</span>
+        <span>React + Vite + Recharts</span>
+        <span className="text-border">|</span>
+        <span>FastAPI · CVXPY · Riskfolio-lib</span>
       </footer>
     </div>
   )

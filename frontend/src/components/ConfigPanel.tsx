@@ -6,8 +6,8 @@ interface Props {
   covMethod:        CovMethod
   optMethod:        OptMethod
   isFrontier:       boolean
-  maxWeight:        number     // 0–1
-  minWeight:        number     // 0–1
+  maxWeight:        number
+  minWeight:        number
   estimationWindow: number
   rebalancingFreq:  number
   assets:           TickerMatch[]
@@ -29,43 +29,75 @@ interface Props {
   backtestLoading: boolean
 }
 
-const MU_METHODS: MuMethod[] = [
-  'historical', 'JS_1', 'JS_2', 'JS_3',
-  'BS_1', 'BS_2', 'BS_3',
-  'BOP_1', 'BOP_2', 'BOP_3',
-  'BL_standard',
+// ── Method definitions with human-readable labels ─────────────────────────────
+
+const MU_METHODS: { value: MuMethod; label: string }[] = [
+  { value: 'historical', label: 'Historical Mean' },
+  { value: 'JS_1',       label: 'James-Stein (Target: Grand Mean)' },
+  { value: 'JS_2',       label: 'James-Stein (Target: Min Variance)' },
+  { value: 'JS_3',       label: 'James-Stein (Target: Equal Weights)' },
+  { value: 'BS_1',       label: 'Bayes-Stein (Target: Grand Mean)' },
+  { value: 'BS_2',       label: 'Bayes-Stein (Target: Min Variance)' },
+  { value: 'BS_3',       label: 'Bayes-Stein (Target: Equal Weights)' },
+  { value: 'BOP_1',      label: 'BOP Shrinkage (Target: Grand Mean)' },
+  { value: 'BOP_2',      label: 'BOP Shrinkage (Target: Min Variance)' },
+  { value: 'BOP_3',      label: 'BOP Shrinkage (Target: Equal Weights)' },
+  { value: 'BL_standard', label: 'Black-Litterman (Standard)' },
 ]
 
-const COV_METHODS: CovMethod[] = [
-  'historical', 'ledoit_wolf', 'oas', 'shrunk',
-  'denoised_fixed', 'spectral', 'graph_lasso', 'jlogo',
+const COV_METHODS: { value: CovMethod; label: string }[] = [
+  { value: 'historical',      label: 'Sample Covariance' },
+  { value: 'ledoit_wolf',     label: 'Ledoit-Wolf Shrinkage' },
+  { value: 'oas',             label: 'Oracle Approximating Shrinkage (OAS)' },
+  { value: 'shrunk',          label: 'Shrunk Covariance' },
+  { value: 'denoised_fixed',  label: 'RMT Denoising (Fixed)' },
+  { value: 'spectral',        label: 'RMT Denoising (Spectral)' },
+  { value: 'graph_lasso',     label: 'Graphical Lasso (CV)' },
+  { value: 'jlogo',           label: 'J-LoGo (Sparse Inverse)' },
 ]
 
-const OPT_METHODS: OptMethod[] = [
-  'markowitz', 'CVaR', 'MAD', 'SMAD', 'SemiVariance',
-  'LowerPartialMoments', 'EVaR', 'Ulcer', 'GMD',
+const OPT_METHODS: { value: OptMethod; label: string }[] = [
+  { value: 'markowitz',           label: 'Mean-Variance (Markowitz)' },
+  { value: 'CVaR',                label: 'CVaR — Conditional Value at Risk' },
+  { value: 'MAD',                 label: 'MAD — Mean Absolute Deviation' },
+  { value: 'SMAD',                label: 'SMAD — Semi Mean Absolute Deviation' },
+  { value: 'SemiVariance',        label: 'Semi-Variance (Downside Risk)' },
+  { value: 'LowerPartialMoments', label: 'Lower Partial Moments' },
+  { value: 'EVaR',                label: 'EVaR — Entropic Value at Risk' },
+  { value: 'Ulcer',               label: 'Ulcer Index' },
+  { value: 'GMD',                 label: 'GMD — Gini Mean Difference' },
 ]
 
-// Generic select component
-function Select<T extends string>({
-  label, value, options, onChange,
+// ── Shared sub-components ─────────────────────────────────────────────────────
+
+const SELECT_CLS =
+  'w-full bg-bg border border-border rounded-panel px-3 py-2.5 text-xs text-[#e8eaf0] ' +
+  'focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer'
+
+function LabeledSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
 }: {
   label:    string
   value:    T
-  options:  T[]
+  options:  { value: T; label: string }[]
   onChange: (v: T) => void
 }) {
   return (
     <div>
-      <label className="block text-xs text-muted mb-1.5 font-medium uppercase tracking-wide">
+      <label className="block text-[10px] text-muted mb-1 font-mono uppercase tracking-widest">
         {label}
       </label>
       <select
         value={value}
         onChange={e => onChange(e.target.value as T)}
-        className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#6366f1] transition-colors appearance-none cursor-pointer"
+        className={SELECT_CLS}
       >
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
+        {options.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
       </select>
     </div>
   )
@@ -84,9 +116,9 @@ function SliderRow({
 }) {
   return (
     <div>
-      <div className="flex justify-between text-xs mb-2">
-        <span className="text-muted font-medium uppercase tracking-wide">{label}</span>
-        <span className="text-white font-semibold">{format(value)}</span>
+      <div className="flex justify-between mb-2">
+        <span className="text-[10px] text-muted font-mono uppercase tracking-widest">{label}</span>
+        <span className="text-xs text-accent font-mono font-semibold">{format(value)}</span>
       </div>
       <input
         type="range" min={min} max={max} step={step} value={value}
@@ -106,6 +138,8 @@ function Spinner() {
   )
 }
 
+// ── Main component ────────────────────────────────────────────────────────────
+
 export function ConfigPanel({
   muMethod, covMethod, optMethod, isFrontier,
   maxWeight, minWeight, estimationWindow, rebalancingFreq,
@@ -116,35 +150,38 @@ export function ConfigPanel({
   onOptimize, onBacktest, canRun, optimizeLoading, backtestLoading,
 }: Props) {
   return (
-    <section className="bg-card rounded-2xl p-6 shadow-card border border-border space-y-6">
-      <h2 className="text-base font-semibold text-white flex items-center gap-2">
-        <span className="w-6 h-6 rounded-md bg-[#6366f120] flex items-center justify-center text-[#6366f1] text-xs font-bold">2</span>
-        Configuration
-      </h2>
+    <section className="bg-card rounded-panel p-5 shadow-card border border-border space-y-5">
+      {/* Section label */}
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono font-semibold text-muted uppercase tracking-widest border border-border px-2 py-0.5 rounded">
+          02
+        </span>
+        <h2 className="text-sm font-semibold text-[#e8eaf0] tracking-tight">Configuration</h2>
+      </div>
 
       {/* Method selects */}
-      <div className="grid grid-cols-3 gap-4">
-        <Select label="Expected Returns" value={muMethod}  options={MU_METHODS}  onChange={onMuMethod}  />
-        <Select label="Covariance"       value={covMethod} options={COV_METHODS} onChange={onCovMethod} />
-        <Select label="Optimization"     value={optMethod} options={OPT_METHODS} onChange={onOptMethod} />
+      <div className="grid grid-cols-3 gap-3">
+        <LabeledSelect label="Expected Returns"   value={muMethod}  options={MU_METHODS}  onChange={onMuMethod}  />
+        <LabeledSelect label="Covariance Matrix"  value={covMethod} options={COV_METHODS} onChange={onCovMethod} />
+        <LabeledSelect label="Optimization Method" value={optMethod} options={OPT_METHODS} onChange={onOptMethod} />
       </div>
 
       {/* Mode toggle */}
       <div>
-        <span className="block text-xs text-muted mb-2 font-medium uppercase tracking-wide">
+        <span className="block text-[10px] text-muted mb-2 font-mono uppercase tracking-widest">
           Optimization Mode
         </span>
-        <div className="inline-flex rounded-xl overflow-hidden border border-border bg-bg">
+        <div className="inline-flex rounded-panel overflow-hidden border border-border bg-bg">
           {(['Single Portfolio', 'Efficient Frontier'] as const).map((label, i) => {
             const active = isFrontier === (i === 1)
             return (
               <button
                 key={label}
                 onClick={() => onFrontierToggle(i === 1)}
-                className={`px-5 py-2.5 text-sm font-medium transition-colors ${
+                className={`px-4 py-2 text-xs font-mono font-medium transition-colors ${
                   active
-                    ? 'bg-[#6366f1] text-white'
-                    : 'text-muted hover:text-white'
+                    ? 'bg-accent text-white'
+                    : 'text-muted hover:text-[#e8eaf0]'
                 }`}
               >
                 {label}
@@ -155,7 +192,7 @@ export function ConfigPanel({
       </div>
 
       {/* Weight constraints */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-5">
         <SliderRow
           label="Max Weight / Asset"
           value={Math.round(maxWeight * 100)}
@@ -175,23 +212,23 @@ export function ConfigPanel({
       </div>
 
       {/* Backtest settings */}
-      <div className="border-t border-border pt-5 space-y-4">
-        <h3 className="text-xs font-semibold text-muted uppercase tracking-widest">
+      <div className="border-t border-border pt-4 space-y-4">
+        <span className="block text-[10px] text-muted font-mono uppercase tracking-widest">
           Backtest Settings
-        </h3>
-        <div className="grid grid-cols-2 gap-6">
+        </span>
+        <div className="grid grid-cols-2 gap-5">
           <SliderRow
             label="Estimation Window"
             value={estimationWindow}
             min={60} max={504} step={21}
-            format={v => `${v} days`}
+            format={v => `${v}d`}
             onChange={onEstimationWindow}
           />
           <SliderRow
-            label="Rebalancing Frequency"
+            label="Rebalancing Freq"
             value={rebalancingFreq}
             min={5} max={63}
-            format={v => `${v} days`}
+            format={v => `${v}d`}
             onChange={onRebalancingFreq}
           />
         </div>
@@ -205,12 +242,12 @@ export function ConfigPanel({
         onLongOnly={onLongOnly}
       />
 
-      {/* Buttons */}
+      {/* Action buttons */}
       <div className="flex gap-3 pt-1">
         <button
           onClick={onOptimize}
           disabled={!canRun || optimizeLoading}
-          className="flex-1 py-3 rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+          className="flex-1 py-2.5 rounded-panel bg-accent hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
         >
           {optimizeLoading && <Spinner />}
           Optimize Portfolio
@@ -218,7 +255,7 @@ export function ConfigPanel({
         <button
           onClick={onBacktest}
           disabled={!canRun || backtestLoading}
-          className="flex-1 py-3 rounded-xl border border-[#6366f1] hover:bg-[#6366f120] disabled:opacity-40 disabled:cursor-not-allowed text-[#6366f1] text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+          className="flex-1 py-2.5 rounded-panel border border-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed text-accent text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
         >
           {backtestLoading && <Spinner />}
           Run Backtest

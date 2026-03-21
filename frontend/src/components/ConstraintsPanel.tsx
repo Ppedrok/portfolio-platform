@@ -109,7 +109,7 @@ export function ConstraintsPanel({ assets, onChange, onLongOnly, longOnly }: Pro
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-muted uppercase tracking-widest">
+        <h3 className="text-[10px] font-mono font-semibold text-muted uppercase tracking-widest">
           Portfolio Constraints
         </h3>
 
@@ -122,7 +122,7 @@ export function ConstraintsPanel({ assets, onChange, onLongOnly, longOnly }: Pro
             aria-checked={longOnly}
             onClick={() => onLongOnly(!longOnly)}
             className={`relative inline-flex h-5 w-9 rounded-full transition-colors duration-200 ${
-              longOnly ? 'bg-[#6366f1]' : 'bg-border'
+              longOnly ? 'bg-accent' : 'bg-border'
             }`}
           >
             <span
@@ -142,7 +142,7 @@ export function ConstraintsPanel({ assets, onChange, onLongOnly, longOnly }: Pro
             key={p.label}
             type="button"
             onClick={() => addPreset(p)}
-            className="text-[11px] px-2.5 py-1 rounded-full border border-[#6366f140] text-[#6366f1] bg-[#6366f110] hover:bg-[#6366f122] transition-colors font-mono"
+            className="text-[11px] px-2.5 py-1 rounded-full border border-accent/25 text-accent bg-accent/8 hover:bg-accent/15 transition-colors font-mono"
           >
             {p.label}
           </button>
@@ -168,7 +168,7 @@ export function ConstraintsPanel({ assets, onChange, onLongOnly, longOnly }: Pro
       <button
         type="button"
         onClick={addRow}
-        className="text-xs text-[#6366f1] hover:text-[#4f46e5] flex items-center gap-1.5 transition-colors"
+        className="text-xs text-accent hover:text-accent-hover flex items-center gap-1.5 transition-colors"
       >
         <span className="text-base leading-none">+</span>
         Add Constraint
@@ -186,13 +186,13 @@ interface RowUIProps {
 }
 
 const INPUT_CLS =
-  'bg-card border border-border rounded-lg px-2 py-1.5 text-xs text-white ' +
-  'focus:outline-none focus:border-[#6366f1] appearance-none'
+  'bg-bg border border-border rounded-panel px-2 py-1.5 text-xs text-white ' +
+  'focus:outline-none focus:border-accent appearance-none'
 
 function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
   return (
     <div
-      className={`rounded-xl border p-3 space-y-2 transition-opacity ${
+      className={`rounded-panel border p-3 space-y-2 transition-opacity ${
         row.active ? 'border-border' : 'border-border/30 opacity-50'
       } bg-bg`}
     >
@@ -204,7 +204,7 @@ function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
           type="checkbox"
           checked={row.active}
           onChange={e => onChange({ active: e.target.checked })}
-          className="accent-[#6366f1] w-3.5 h-3.5 shrink-0 cursor-pointer"
+          className="accent-accent w-3.5 h-3.5 shrink-0 cursor-pointer"
         />
 
         {/* Type */}
@@ -280,7 +280,7 @@ function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
         <button
           type="button"
           onClick={() => onChange({ isRelative: !row.isRelative })}
-          className="text-[10px] text-muted hover:text-[#6366f1] flex items-center gap-1 transition-colors"
+          className="text-[10px] text-muted hover:text-accent flex items-center gap-1 transition-colors"
         >
           <span
             className="inline-block transition-transform duration-150"

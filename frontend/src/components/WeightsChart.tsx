@@ -2,10 +2,19 @@ import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
 
+// Electric-blue-anchored palette matching the new dark theme
 const PALETTE = [
-  '#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b',
-  '#ef4444', '#ec4899', '#84cc16', '#f97316', '#14b8a6',
+  '#4f8ef7', '#00d4aa', '#a78bfa', '#38bdf8', '#fb923c',
+  '#f472b6', '#84cc16', '#facc15', '#ff4d6a', '#2dd4bf',
 ]
+
+const TOOLTIP_STYLE = {
+  background: '#0d1117',
+  border: '1px solid #1e2530',
+  borderRadius: 6,
+  fontSize: 11,
+  fontFamily: '"JetBrains Mono", monospace',
+}
 
 interface Props {
   weights: Record<string, number>
@@ -18,19 +27,21 @@ export function WeightsChart({ weights }: Props) {
     .sort((a, b) => b.value - a.value)
 
   return (
-    <div className="bg-card rounded-2xl p-5 border border-border">
-      <h3 className="text-sm font-semibold text-white mb-1">Optimal Weights</h3>
-      <p className="text-xs text-muted mb-3">Portfolio allocation</p>
+    <div className="bg-card rounded-panel p-4 border border-border">
+      <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-3">
+        Optimal Weights
+      </p>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
-            innerRadius={72}
-            outerRadius={110}
+            innerRadius={70}
+            outerRadius={108}
             paddingAngle={2}
             dataKey="value"
+            strokeWidth={0}
           >
             {data.map((_, i) => (
               <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
@@ -38,19 +49,16 @@ export function WeightsChart({ weights }: Props) {
           </Pie>
           <Tooltip
             formatter={(v: number) => [`${v.toFixed(2)}%`, 'Weight']}
-            contentStyle={{
-              background: '#1a1d27',
-              border: '1px solid #2a2d3a',
-              borderRadius: 10,
-              fontSize: 12,
-            }}
-            labelStyle={{ color: '#fff' }}
+            contentStyle={TOOLTIP_STYLE}
+            labelStyle={{ color: '#e8eaf0' }}
           />
           <Legend
             iconType="circle"
-            iconSize={8}
+            iconSize={7}
             formatter={(v: string) => (
-              <span style={{ color: '#8b8fa8', fontSize: 12 }}>{v}</span>
+              <span style={{ color: '#8892a4', fontSize: 11, fontFamily: '"JetBrains Mono", monospace' }}>
+                {v}
+              </span>
             )}
           />
         </PieChart>
