@@ -74,15 +74,16 @@ class WeightConstraints(BaseModel):
 
 
 class OptimizeRequest(BaseModel):
-    tickers:       list[str]         = Field(..., min_length=2)
-    start:         str               = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
-    end:           str               = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
-    mu_method:     MuMethod          = "historical"
-    cov_method:    CovMethod         = "ledoit_wolf"
-    opt_method:    OptMethod         = "CVaR"
-    target_return: Union[float, Literal["frontier"], None] = None
-    constraints:   WeightConstraints = Field(default_factory=WeightConstraints)
-    solver:        str               = "CLARABEL"
+    tickers:        list[str]              = Field(..., min_length=2)
+    start:          str                    = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    end:            str                    = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    mu_method:      MuMethod               = "historical"
+    cov_method:     CovMethod              = "ledoit_wolf"
+    opt_method:     OptMethod              = "CVaR"
+    target_return:  Union[float, Literal["frontier"], None] = None
+    constraints:    WeightConstraints      = Field(default_factory=WeightConstraints)
+    rp_constraints: Union[list[dict], None] = None
+    solver:         str                    = "CLARABEL"
 
     model_config = {"json_schema_extra": {
         "example": {

@@ -9,9 +9,11 @@ POST /api/optimize
 from __future__ import annotations
 
 import math
+import warnings
 import numpy as np
 import pandas as pd
 import cvxpy as cp
+import riskfolio as rp
 from scipy.linalg import sqrtm as matrix_sqrt
 from fastapi import APIRouter, HTTPException
 
@@ -65,6 +67,34 @@ def _build_params(returns: pd.DataFrame, body: OptimizeRequest) -> tuple:
         )
 
 
+def _build_rp_constraints(
+    rp_constraints_list: list[dict],
+    tickers: list[str],
+) -> tuple["pd.DataFrame | None", "pd.DataFrame | None"]:
+    """Convert the API list[dict] into the DataFrame expected by rp.assets_constraints."""
+    rows = []
+    for c in rp_constraints_list:
+        w = c.get("weight", "")
+        f = c.get("factor", "")
+        rows.append({
+            "Disabled":      c.get("disabled", False),
+            "Type":          c.get("type", "Assets"),
+            "Set":           c.get("set", ""),
+            "Position":      c.get("position", ""),
+            "Sign":          c.get("sign", ">="),
+            "Weight":        float(w) if w not in ("", None) else "",
+            "Type Relative": c.get("type_relative", ""),
+            "Relative Set":  c.get("relative_set", ""),
+            "Relative":      c.get("relative", ""),
+            "Factor":        float(f) if f not in ("", None) else "",
+        })
+    if not rows:
+        return None, None
+    constraints_df    = pd.DataFrame(rows)
+    asset_classes_df  = pd.DataFrame({"Assets": tickers})
+    return constraints_df, asset_classes_df
+
+
 def _solve_single(
     method: str,
     mu_vec: np.ndarray,
@@ -74,6 +104,8 @@ def _solve_single(
     hi: float,
     target_return,
     solver: str,
+    constraints_df: "pd.DataFrame | None" = None,
+    asset_classes_df: "pd.DataFrame | None" = None,
 ) -> np.ndarray | None:
     """
     Build and solve the full CVXPY problem for the given method.
@@ -167,6 +199,14 @@ def _solve_single(
     else:
         raise ValueError(f"Unknown optimisation method: '{method}'")
 
+    # ── Optional riskfolio linear constraints (A @ x <= b) ───────────────────
+    if constraints_df is not None:
+        try:
+            A, b = rp.assets_constraints(constraints_df, asset_classes_df)
+            aux_constraints.append(A @ x <= b)
+        except Exception as exc:
+            warnings.warn(f"[optimize router] riskfolio constraints skipped: {exc}")
+
     prob = cp.Problem(
         cp.Minimize(risk),
         base_constraints + aux_constraints,
@@ -199,6 +239,12 @@ def optimize(body: OptimizeRequest):
     R  = returns.to_numpy()
     lo = body.constraints.min_weight
     hi = body.constraints.max_weight
+
+    constraints_df, asset_classes_df = (
+        _build_rp_constraints(body.rp_constraints, tickers)
+        if body.rp_constraints
+        else (None, None)
+    )
 
     # ── Efficient frontier ────────────────────────────────────────────────────
     if body.target_return == "frontier":
@@ -261,6 +307,8 @@ def optimize(body: OptimizeRequest):
             hi=hi,
             target_return=body.target_return,
             solver=body.solver,
+            constraints_df=constraints_df,
+            asset_classes_df=asset_classes_df,
         )
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Optimisation failed: {exc}")

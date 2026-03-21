@@ -36,16 +36,30 @@ export interface WeightConstraints {
   min_weight: number
 }
 
+export interface ConstraintRow {
+  disabled:      boolean
+  type:          'Assets' | 'All Assets' | 'Classes' | 'Each asset in a class'
+  set:           string
+  position:      string
+  sign:          '>=' | '<='
+  weight:        number | ''
+  type_relative: '' | 'Assets' | 'Classes'
+  relative_set:  string
+  relative:      string
+  factor:        number | ''
+}
+
 export interface OptimizeRequest {
-  tickers:       string[]
-  start:         string
-  end:           string
-  mu_method:     MuMethod
-  cov_method:    CovMethod
-  opt_method:    OptMethod
-  target_return: number | 'frontier' | null
-  constraints:   WeightConstraints
-  solver:        string
+  tickers:        string[]
+  start:          string
+  end:            string
+  mu_method:      MuMethod
+  cov_method:     CovMethod
+  opt_method:     OptMethod
+  target_return:  number | 'frontier' | null
+  constraints:    WeightConstraints
+  rp_constraints: ConstraintRow[] | null
+  solver:         string
 }
 
 export interface PortfolioMetrics {

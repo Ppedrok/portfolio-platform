@@ -59,6 +59,8 @@ class Optimizer:
         method: str = "markowitz",
         solver: str = "CLARABEL",
         target_return=None,
+        constraints_df: "pd.DataFrame | None" = None,
+        asset_classes_df: "pd.DataFrame | None" = None,
     ):
         """
         Solve the portfolio optimisation problem.
@@ -227,6 +229,19 @@ class Optimizer:
         # ── Optional return constraint ────────────────────────────────────────
         if target_return is not None and target_return != "frontier":
             constraints.append(mu_vec @ x >= float(target_return))
+
+        # ── Optional riskfolio linear constraints (A @ x <= b) ───────────────
+        if constraints_df is not None:
+            _ac = (
+                asset_classes_df
+                if asset_classes_df is not None
+                else pd.DataFrame({"Assets": self.assets})
+            )
+            try:
+                A, b = rp.assets_constraints(constraints_df, _ac)
+                constraints.append(A @ x <= b)
+            except Exception as exc:
+                warnings.warn(f"[Optimizer] riskfolio constraints skipped: {exc}")
 
         prob = cp.Problem(cp.Minimize(risk), constraints)
         prob.solve(solver=solver)

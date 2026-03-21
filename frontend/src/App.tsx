@@ -4,7 +4,7 @@ import { ConfigPanel }  from './components/ConfigPanel'
 import { ResultsPanel } from './components/ResultsPanel'
 import { useOptimize }  from './hooks/useOptimize'
 import { useBacktest }  from './hooks/useBacktest'
-import type { TickerMatch, MuMethod, CovMethod, OptMethod } from './types'
+import type { TickerMatch, MuMethod, CovMethod, OptMethod, ConstraintRow } from './types'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -23,6 +23,8 @@ export default function App() {
   const [minWeight,  setMinWeight]  = useState(0.0)
   const [estimationWindow, setEstimationWindow] = useState(252)
   const [rebalancingFreq,  setRebalancingFreq]  = useState(21)
+  const [constraints, setConstraints] = useState<ConstraintRow[]>([])
+  const [longOnly,    setLongOnly]    = useState(true)
 
   // ── Results tab ─────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'optimization' | 'backtest'>('optimization')
@@ -37,14 +39,15 @@ export default function App() {
   function handleOptimize() {
     optimize.run({
       tickers,
-      start:         startDate,
-      end:           endDate,
-      mu_method:     muMethod,
-      cov_method:    covMethod,
-      opt_method:    optMethod,
-      target_return: isFrontier ? 'frontier' : null,
-      constraints:   { max_weight: maxWeight, min_weight: minWeight },
-      solver:        'CLARABEL',
+      start:          startDate,
+      end:            endDate,
+      mu_method:      muMethod,
+      cov_method:     covMethod,
+      opt_method:     optMethod,
+      target_return:  isFrontier ? 'frontier' : null,
+      constraints:    { max_weight: maxWeight, min_weight: minWeight },
+      rp_constraints: constraints.length > 0 ? constraints : null,
+      solver:         'CLARABEL',
     })
     setActiveTab('optimization')
   }
@@ -108,6 +111,8 @@ export default function App() {
           minWeight={minWeight}
           estimationWindow={estimationWindow}
           rebalancingFreq={rebalancingFreq}
+          assets={selected}
+          longOnly={longOnly}
           onMuMethod={setMuMethod}
           onCovMethod={setCovMethod}
           onOptMethod={setOptMethod}
@@ -116,6 +121,8 @@ export default function App() {
           onMinWeight={v => { setMinWeight(v); if (v > maxWeight) setMaxWeight(v) }}
           onEstimationWindow={setEstimationWindow}
           onRebalancingFreq={setRebalancingFreq}
+          onConstraintsChange={setConstraints}
+          onLongOnly={setLongOnly}
           onOptimize={handleOptimize}
           onBacktest={handleBacktest}
           canRun={canRun}

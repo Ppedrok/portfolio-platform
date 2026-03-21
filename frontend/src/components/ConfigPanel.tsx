@@ -1,4 +1,5 @@
-import type { MuMethod, CovMethod, OptMethod } from '../types'
+import type { MuMethod, CovMethod, OptMethod, ConstraintRow, TickerMatch } from '../types'
+import { ConstraintsPanel } from './ConstraintsPanel'
 
 interface Props {
   muMethod:         MuMethod
@@ -9,17 +10,21 @@ interface Props {
   minWeight:        number     // 0–1
   estimationWindow: number
   rebalancingFreq:  number
-  onMuMethod:         (v: MuMethod) => void
-  onCovMethod:        (v: CovMethod) => void
-  onOptMethod:        (v: OptMethod) => void
-  onFrontierToggle:   (v: boolean) => void
-  onMaxWeight:        (v: number) => void
-  onMinWeight:        (v: number) => void
-  onEstimationWindow: (v: number) => void
-  onRebalancingFreq:  (v: number) => void
-  onOptimize:    () => void
-  onBacktest:    () => void
-  canRun:        boolean
+  assets:           TickerMatch[]
+  longOnly:         boolean
+  onMuMethod:             (v: MuMethod) => void
+  onCovMethod:            (v: CovMethod) => void
+  onOptMethod:            (v: OptMethod) => void
+  onFrontierToggle:       (v: boolean) => void
+  onMaxWeight:            (v: number) => void
+  onMinWeight:            (v: number) => void
+  onEstimationWindow:     (v: number) => void
+  onRebalancingFreq:      (v: number) => void
+  onConstraintsChange:    (rows: ConstraintRow[]) => void
+  onLongOnly:             (v: boolean) => void
+  onOptimize:      () => void
+  onBacktest:      () => void
+  canRun:          boolean
   optimizeLoading: boolean
   backtestLoading: boolean
 }
@@ -104,8 +109,10 @@ function Spinner() {
 export function ConfigPanel({
   muMethod, covMethod, optMethod, isFrontier,
   maxWeight, minWeight, estimationWindow, rebalancingFreq,
+  assets, longOnly,
   onMuMethod, onCovMethod, onOptMethod, onFrontierToggle,
   onMaxWeight, onMinWeight, onEstimationWindow, onRebalancingFreq,
+  onConstraintsChange, onLongOnly,
   onOptimize, onBacktest, canRun, optimizeLoading, backtestLoading,
 }: Props) {
   return (
@@ -189,6 +196,14 @@ export function ConfigPanel({
           />
         </div>
       </div>
+
+      {/* Constraints panel */}
+      <ConstraintsPanel
+        assets={assets}
+        longOnly={longOnly}
+        onChange={onConstraintsChange}
+        onLongOnly={onLongOnly}
+      />
 
       {/* Buttons */}
       <div className="flex gap-3 pt-1">
