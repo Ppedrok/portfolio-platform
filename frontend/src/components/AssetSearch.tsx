@@ -64,7 +64,7 @@ export function AssetSearch({
     <section className="bg-card rounded-panel p-5 shadow-card border border-border">
       {/* Section label */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-[10px] font-mono font-semibold text-muted uppercase tracking-widest border border-border px-2 py-0.5 rounded">
+        <span className="text-[10px] font-mono font-semibold text-accent uppercase tracking-widest border border-accent/30 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(79,142,247,0.3)]">
           01
         </span>
         <h2 className="text-sm font-semibold text-[#e8eaf0] tracking-tight">Asset Selection</h2>
@@ -150,7 +150,8 @@ export function AssetSearch({
               type="date"
               value={value}
               onChange={e => onChange(e.target.value)}
-              className="w-full bg-bg border border-border rounded-panel px-3 py-2 text-sm text-[#e8eaf0] font-mono focus:outline-none focus:border-accent transition-colors"
+              className="w-full bg-[#0d1117] border border-border rounded-panel px-3 py-2 text-sm text-[#e8eaf0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-accent/50 cursor-pointer"
+              style={{ colorScheme: 'dark' }}
             />
           </div>
         ))}

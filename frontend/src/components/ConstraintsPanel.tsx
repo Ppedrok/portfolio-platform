@@ -277,15 +277,17 @@ interface RowUIProps {
 }
 
 const INPUT_CLS =
-  'bg-bg border border-border rounded-panel px-2 py-1.5 text-xs text-white ' +
-  'focus:outline-none focus:border-accent appearance-none'
+  'bg-[#0d1117] border border-[#1e2530] rounded-panel px-2 py-1.5 text-xs text-[#e8eaf0] ' +
+  'focus:outline-none focus:border-accent appearance-none placeholder-[#8892a4]'
+
+const SELECT_STYLE = { colorScheme: 'dark' as const }
 
 function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
   return (
     <div
       className={`rounded-panel border p-3 space-y-2 transition-opacity ${
         row.active ? 'border-border' : 'border-border/30 opacity-50'
-      } bg-bg`}
+      } bg-[#0d1117]`}
     >
       {/* Main row */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -302,7 +304,7 @@ function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
         <select
           value={row.type}
           onChange={e => onChange({ type: e.target.value as RowState['type'], position: '' })}
-          className={INPUT_CLS + ' cursor-pointer'}
+          className={INPUT_CLS + ' cursor-pointer'} style={SELECT_STYLE}
         >
           <option value="Assets">Asset</option>
           <option value="All Assets">All Assets</option>
@@ -314,7 +316,7 @@ function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
           <select
             value={row.position}
             onChange={e => onChange({ position: e.target.value })}
-            className={INPUT_CLS + ' cursor-pointer min-w-[80px] flex-1'}
+            className={INPUT_CLS + ' cursor-pointer min-w-[80px] flex-1'} style={SELECT_STYLE}
           >
             <option value="">— ticker —</option>
             {tickers.map(t => <option key={t} value={t}>{t}</option>)}
@@ -334,7 +336,7 @@ function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
         <select
           value={row.sign}
           onChange={e => onChange({ sign: e.target.value as RowState['sign'] })}
-          className={INPUT_CLS + ' cursor-pointer'}
+          className={INPUT_CLS + ' cursor-pointer'} style={SELECT_STYLE}
         >
           <option value=">=">≥</option>
           <option value="<=">≤</option>
@@ -390,7 +392,7 @@ function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
             <select
               value={row.typeRelative}
               onChange={e => onChange({ typeRelative: e.target.value as RowState['typeRelative'] })}
-              className={INPUT_CLS + ' cursor-pointer'}
+              className={INPUT_CLS + ' cursor-pointer'} style={SELECT_STYLE}
             >
               <option value="">— type —</option>
               <option value="Assets">Asset</option>
@@ -402,7 +404,7 @@ function ConstraintRowUI({ row, tickers, onChange, onRemove }: RowUIProps) {
               <select
                 value={row.relative}
                 onChange={e => onChange({ relative: e.target.value })}
-                className={INPUT_CLS + ' cursor-pointer min-w-[80px]'}
+                className={INPUT_CLS + ' cursor-pointer min-w-[80px]'} style={SELECT_STYLE}
               >
                 <option value="">— ticker —</option>
                 {tickers.map(t => <option key={t} value={t}>{t}</option>)}

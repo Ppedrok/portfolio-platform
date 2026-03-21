@@ -73,9 +73,15 @@ export default function App() {
     <div className="min-h-screen bg-bg font-sans text-white">
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-header border-b border-border px-6 py-3 flex items-center gap-3">
+      <header
+        className="sticky top-0 z-40 px-6 py-3 flex items-center gap-3"
+        style={{
+          background: 'linear-gradient(180deg, #0d1420 0%, #0a0c12 100%)',
+          borderBottom: '1px solid rgba(79, 142, 247, 0.15)',
+        }}
+      >
         {/* Logo mark */}
-        <div className="w-7 h-7 rounded bg-accent flex items-center justify-center shrink-0">
+        <div className="w-7 h-7 rounded bg-accent flex items-center justify-center shrink-0 glow-accent">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <polyline points="1,12 5,6 9,9 13,3 15,5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

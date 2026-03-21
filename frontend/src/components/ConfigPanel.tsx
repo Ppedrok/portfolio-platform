@@ -71,8 +71,8 @@ const OPT_METHODS: { value: OptMethod; label: string }[] = [
 // ── Shared sub-components ─────────────────────────────────────────────────────
 
 const SELECT_CLS =
-  'w-full bg-bg border border-border rounded-panel px-3 py-2.5 text-xs text-[#e8eaf0] ' +
-  'focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer'
+  'w-full bg-[#0d1117] border border-border rounded-panel px-3 py-2.5 text-xs text-[#e8eaf0] ' +
+  'focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer hover:border-accent/50'
 
 function LabeledSelect<T extends string>({
   label,
@@ -94,6 +94,7 @@ function LabeledSelect<T extends string>({
         value={value}
         onChange={e => onChange(e.target.value as T)}
         className={SELECT_CLS}
+        style={{ colorScheme: 'dark' }}
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -153,7 +154,7 @@ export function ConfigPanel({
     <section className="bg-card rounded-panel p-5 shadow-card border border-border space-y-5">
       {/* Section label */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono font-semibold text-muted uppercase tracking-widest border border-border px-2 py-0.5 rounded">
+        <span className="text-[10px] font-mono font-semibold text-accent uppercase tracking-widest border border-accent/30 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(79,142,247,0.3)]">
           02
         </span>
         <h2 className="text-sm font-semibold text-[#e8eaf0] tracking-tight">Configuration</h2>
@@ -247,7 +248,7 @@ export function ConfigPanel({
         <button
           onClick={onOptimize}
           disabled={!canRun || optimizeLoading}
-          className="flex-1 py-2.5 rounded-panel bg-accent hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
+          className="flex-1 py-2.5 rounded-panel bg-accent disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-mono font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 glow-accent hover:brightness-110 hover:shadow-[0_0_20px_rgba(79,142,247,0.45)]"
         >
           {optimizeLoading && <Spinner />}
           Optimize Portfolio
@@ -255,7 +256,7 @@ export function ConfigPanel({
         <button
           onClick={onBacktest}
           disabled={!canRun || backtestLoading}
-          className="flex-1 py-2.5 rounded-panel border border-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed text-accent text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
+          className="flex-1 py-2.5 rounded-panel border border-accent/60 hover:border-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed text-accent text-xs font-mono font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_14px_rgba(79,142,247,0.25)]"
         >
           {backtestLoading && <Spinner />}
           Run Backtest

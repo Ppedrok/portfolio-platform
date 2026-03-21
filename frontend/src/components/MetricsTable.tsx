@@ -43,13 +43,13 @@ export function MetricsTable({ metrics }: { metrics: PortfolioMetrics }) {
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="bg-bg rounded-panel p-3 border border-border">
           <p className="text-[10px] text-muted font-mono uppercase tracking-wide mb-1">Ann. Return</p>
-          <p className={`text-xl font-mono font-semibold num ${ret != null && ret > 0 ? 'text-positive' : ret != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
+          <p className={`text-xl font-mono font-semibold num ${ret != null && ret > 0 ? 'text-positive glow-green' : ret != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
             {fmt(ret, true)}
           </p>
         </div>
         <div className="bg-bg rounded-panel p-3 border border-border">
           <p className="text-[10px] text-muted font-mono uppercase tracking-wide mb-1">Sharpe Ratio</p>
-          <p className={`text-xl font-mono font-semibold num ${sr != null && sr > 0 ? 'text-positive' : sr != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
+          <p className={`text-xl font-mono font-semibold num ${sr != null && sr > 0 ? 'text-positive glow-green' : sr != null ? 'text-negative' : 'text-[#e8eaf0]'}`}>
             {fmt(sr, false)}
           </p>
         </div>

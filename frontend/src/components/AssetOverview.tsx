@@ -146,6 +146,7 @@ function Heatmap({ tickers, matrix, title, invertColors = false, isCorrelation =
                     width={CELL - 1} height={CELL - 1}
                     fill={fill}
                     rx={1}
+                    className="heatmap-cell"
                   />
                   <text
                     x={cx + CELL / 2}
@@ -243,7 +244,7 @@ export function AssetOverview({ selected, startDate, endDate }: Props) {
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <span className="text-[10px] font-mono text-accent border border-accent/30 px-2 py-0.5 rounded">
+        <span className="text-[10px] font-mono text-accent border border-accent/30 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(79,142,247,0.3)]">
           02
         </span>
         <h2 className="text-sm font-semibold text-[#e8eaf0]">Asset Overview</h2>
@@ -252,7 +253,8 @@ export function AssetOverview({ selected, startDate, endDate }: Props) {
           <select
             value={method}
             onChange={e => setMethod(e.target.value as CodependenceMethod)}
-            className="bg-card border border-border text-[#e8eaf0] text-xs font-mono rounded px-2 py-1 focus:outline-none focus:border-accent"
+            className="bg-[#0d1117] border border-border text-[#e8eaf0] text-xs font-mono rounded px-2 py-1 focus:outline-none focus:border-accent hover:border-accent/50 cursor-pointer"
+            style={{ colorScheme: 'dark' }}
           >
             {METHOD_OPTIONS.map(o => (
               <option key={o.value} value={o.value}>{o.label}</option>
