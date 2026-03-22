@@ -18,6 +18,7 @@ from scipy.linalg import sqrtm as matrix_sqrt
 from fastapi import APIRouter, HTTPException
 
 from portfolio_engine.data       import download_prices, compute_returns
+from portfolio_engine.optimizer  import Optimizer
 from portfolio_engine.parameters import Portfolio
 from portfolio_engine.utils      import compute_metrics
 
@@ -337,6 +338,12 @@ def optimize(body: OptimizeRequest):
     port_rets = pd.Series(R @ w_arr, index=returns.index)
     m = compute_metrics(port_rets, "Portfolio")
 
+    opt = Optimizer(mu=mu_vec, covar_matrix=cov, corr=None, dist=None, R=R, assets=tickers)
+    try:
+        risk_decomp = opt.risk_decomposition(w_arr, R)
+    except Exception:
+        risk_decomp = None
+
     return OptimizeResponse(
         tickers=tickers,
         weights={t: round(float(w), 6) for t, w in zip(tickers, w_arr)},
@@ -351,4 +358,5 @@ def optimize(body: OptimizeRequest):
             cvar_95               = _safe(m["CVaR 95% (Historical)"]),
             win_rate              = _safe(m["Win Rate"]),
         ),
+        risk_decomposition=risk_decomp,
     )

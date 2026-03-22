@@ -66,9 +66,10 @@ class PortfolioMetrics(BaseModel):
 
 
 class OptimizeResponse(BaseModel):
-    tickers:   list[str]
-    weights:   dict[str, float]          = Field(description="ticker → optimal weight")
-    metrics:   PortfolioMetrics
+    tickers:            list[str]
+    weights:            dict[str, float]   = Field(description="ticker → optimal weight")
+    metrics:            PortfolioMetrics
+    risk_decomposition: dict | None        = None
 
 
 # ── /api/optimize (efficient frontier) ───────────────────────────────────────

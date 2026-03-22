@@ -21,7 +21,12 @@
       "Bash(python3 -m json.tool)",
       "Bash(head -15 curl -s -X POST http://127.0.0.1:8000/api/assets/overview -H \"Content-Type: application/json\" -d '{\"\"\"\"tickers\"\"\"\":[\"\"\"\"AAPL\"\"\"\",\"\"\"\"MSFT\"\"\"\"],\"\"\"\"start\"\"\"\":\"\"\"\"2022-01-01\"\"\"\",\"\"\"\"end\"\"\"\":\"\"\"\"2024-01-01\"\"\"\",\"\"\"\"method\"\"\"\":\"\"\"\"tail\"\"\"\"}')",
       "Read(//usr/local/**)",
-      "Bash(/dev/null -name node -type f)"
+      "Bash(/dev/null -name node -type f)",
+      "Bash(ls /Users/alessandro/Downloads/python/script/portfolio/Portfolio_platform/*.py)",
+      "Bash(curl -s -X POST http://localhost:8000/api/optimize -H \"Content-Type: application/json\" -d '{\"\"\"\"tickers\"\"\"\":[\"\"\"\"AAPL\"\"\"\",\"\"\"\"MSFT\"\"\"\",\"\"\"\"GOOGL\"\"\"\"],\"\"\"\"start\"\"\"\":\"\"\"\"2022-01-01\"\"\"\",\"\"\"\"end\"\"\"\":\"\"\"\"2024-01-01\"\"\"\",\"\"\"\"mu_method\"\"\"\":\"\"\"\"historical\"\"\"\",\"\"\"\"cov_method\"\"\"\":\"\"\"\"historical\"\"\"\",\"\"\"\"opt_method\"\"\"\":\"\"\"\"markowitz\"\"\"\",\"\"\"\"target_return\"\"\"\":null,\"\"\"\"constraints\"\"\"\":{\"\"\"\"max_weight\"\"\"\":0.6,\"\"\"\"min_weight\"\"\"\":0.05},\"\"\"\"rp_constraints\"\"\"\":null,\"\"\"\"long_only\"\"\"\":true,\"\"\"\"solver\"\"\"\":\"\"\"\"CLARABEL\"\"\"\"}')",
+      "Bash(python3 -c \":*)",
+      "Bash(lsof -ti:8000)",
+      "Bash(xargs kill:*)"
     ]
   }
 }

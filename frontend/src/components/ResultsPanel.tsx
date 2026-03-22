@@ -4,6 +4,7 @@ import { FrontierChart }         from './FrontierChart'
 import { EquityCurve }           from './EquityCurve'
 import { BacktestMetricsTable } from './MetricsTable'
 import { WeightsHeatmap }        from './WeightsHeatmap'
+import { RiskDecomposition }     from './RiskDecomposition'
 
 type Tab = 'optimization' | 'backtest'
 
@@ -92,12 +93,17 @@ export function ResultsPanel({
           {!optimizeLoading && !optimizeError && optimizeData && (
             isFrontierResponse(optimizeData) ? (
               <FrontierChart data={optimizeData} />
-            ) : (
-              <WeightsChart
-                weights={(optimizeData as OptimizeResponse).weights}
-                metrics={(optimizeData as OptimizeResponse).metrics}
-              />
-            )
+            ) : (() => {
+              const od = optimizeData as OptimizeResponse
+              return (
+                <>
+                  <WeightsChart weights={od.weights} metrics={od.metrics} />
+                  {od.risk_decomposition && (
+                    <RiskDecomposition data={od.risk_decomposition} />
+                  )}
+                </>
+              )
+            })()
           )}
         </div>
       )}

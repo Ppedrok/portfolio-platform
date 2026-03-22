@@ -248,6 +248,75 @@ class Optimizer:
         self.weights = x.value
         return self.weights
 
+    # ── Risk decomposition ────────────────────────────────────────────────────
+
+    def risk_decomposition(self, weights: np.ndarray, R: np.ndarray, alpha: float = 0.05) -> dict:
+        """
+        Compute volatility and CVaR risk decomposition for a given weight vector.
+
+        Parameters
+        ----------
+        weights : np.ndarray  Optimal weight vector (n_assets,).
+        R       : np.ndarray  Returns matrix (T × n_assets), daily.
+        alpha   : float       CVaR tail probability. Default 0.05.
+
+        Returns
+        -------
+        dict with per-asset marginal/component/percentage risk contributions,
+        individual volatilities, portfolio volatility, diversification ratio,
+        and CVaR decomposition.
+        """
+        w   = np.array(weights).flatten()
+        n   = len(w)
+        cov = np.array(self.covar_matrix)
+
+        # ── Volatility decomposition ──────────────────────────────────────────
+        port_var = float(w @ cov @ w)
+        port_vol = np.sqrt(port_var) * np.sqrt(252)
+
+        mrc = (cov @ w) / np.sqrt(port_var)   # marginal risk contribution (daily)
+        crc = w * mrc                           # component risk contribution (daily)
+        prc = crc / np.sqrt(port_var)           # percentage risk contribution (sums to 1)
+
+        ind_vols           = np.sqrt(np.diag(cov))
+        weighted_vols      = float(w @ ind_vols)
+        diversification_ratio = weighted_vols / np.sqrt(port_var)
+
+        # ── CVaR decomposition (simulation) ──────────────────────────────────
+        port_returns  = R @ w
+        var_threshold = np.percentile(port_returns, alpha * 100)
+        tail_mask     = port_returns <= var_threshold
+
+        if tail_mask.sum() > 0:
+            component_cvar = np.array([
+                float(w[i] * np.mean(R[tail_mask, i]))
+                for i in range(n)
+            ])
+            port_cvar = float(np.mean(port_returns[tail_mask]))
+            pct_cvar  = component_cvar / port_cvar if port_cvar != 0 else np.zeros(n)
+        else:
+            component_cvar = np.zeros(n)
+            pct_cvar       = np.zeros(n)
+            port_cvar      = 0.0
+
+        def _clean(arr) -> list:
+            """Replace NaN/Inf with 0.0 for safe JSON serialisation."""
+            return [0.0 if (v != v or abs(v) == float("inf")) else round(float(v), 8) for v in arr]
+
+        return {
+            "assets":                       self.assets,
+            "weights":                      _clean(w),
+            "marginal_risk_contribution":   _clean(mrc * np.sqrt(252)),
+            "component_risk_contribution":  _clean(crc * np.sqrt(252)),
+            "percentage_risk_contribution": _clean(prc),
+            "individual_volatilities":      _clean(ind_vols * np.sqrt(252)),
+            "portfolio_volatility":         round(port_vol, 8),
+            "diversification_ratio":        round(float(diversification_ratio), 8),
+            "component_cvar":               _clean(component_cvar),
+            "percentage_cvar_contribution": _clean(pct_cvar),
+            "portfolio_cvar":               round(float(port_cvar * np.sqrt(252)), 8),
+        }
+
     # ── Efficient frontier sweep ──────────────────────────────────────────────
 
     def _frontier(self, solver: str = "CLARABEL", n_points: int = 40) -> pd.DataFrame:

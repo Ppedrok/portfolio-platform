@@ -98,10 +98,25 @@ export interface PortfolioMetrics {
   win_rate:              number | null
 }
 
+export interface RiskDecompositionData {
+  assets:                       string[]
+  weights:                      number[]
+  marginal_risk_contribution:   number[]
+  component_risk_contribution:  number[]
+  percentage_risk_contribution: number[]
+  individual_volatilities:      number[]
+  portfolio_volatility:         number
+  diversification_ratio:        number
+  component_cvar:               number[]
+  percentage_cvar_contribution: number[]
+  portfolio_cvar:               number
+}
+
 export interface OptimizeResponse {
-  tickers: string[]
-  weights: Record<string, number>
-  metrics: PortfolioMetrics
+  tickers:            string[]
+  weights:            Record<string, number>
+  metrics:            PortfolioMetrics
+  risk_decomposition: RiskDecompositionData | null
 }
 
 export interface FrontierPoint {
