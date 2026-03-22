@@ -17,7 +17,11 @@ from sklearn.covariance import (
     ShrunkCovariance,
 )
 
-from portfolio_engine.factors import download_ff_factors, factor_model_params
+try:
+    from portfolio_engine.factors import download_ff_factors, factor_model_params
+    _FACTORS_AVAILABLE = True
+except ImportError:
+    _FACTORS_AVAILABLE = False
 
 
 class Portfolio:
@@ -184,6 +188,11 @@ class Portfolio:
         Download FF factors aligned with self.returns and return
         (mu_annualised, Sigma_annualised) via factor_model_params().
         """
+        if not _FACTORS_AVAILABLE:
+            raise ImportError(
+                "pandas-datareader is required for Fama-French factor models. "
+                "Install it with: pip install pandas-datareader"
+            )
         if self.date_range is None:
             start = str(self.returns.index[0].date())
             end   = str(self.returns.index[-1].date())

@@ -14,7 +14,12 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from portfolio_engine.data import download_prices, compute_returns
-from portfolio_engine.factors import download_ff_factors, compute_factor_exposure
+
+try:
+    from portfolio_engine.factors import download_ff_factors, compute_factor_exposure
+    _FACTORS_AVAILABLE = True
+except ImportError:
+    _FACTORS_AVAILABLE = False
 
 router = APIRouter(prefix="/api/factors", tags=["factors"])
 
@@ -47,6 +52,11 @@ class FactorExposureResponse(BaseModel):
 
 @router.post("/exposure", response_model=FactorExposureResponse)
 def factor_exposure(body: FactorExposureRequest):
+    if not _FACTORS_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Factor analysis unavailable: pandas-datareader not installed on this server.",
+        )
     try:
         # 1. Download prices → returns
         prices = download_prices(body.tickers, body.start, body.end)
