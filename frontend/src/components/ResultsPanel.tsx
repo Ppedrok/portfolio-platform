@@ -2,7 +2,7 @@ import type { OptimizeResponse, FrontierResponse, BacktestResponse } from '../ty
 import { WeightsChart }          from './WeightsChart'
 import { FrontierChart }         from './FrontierChart'
 import { EquityCurve }           from './EquityCurve'
-import { MetricsTable, BacktestMetricsTable } from './MetricsTable'
+import { BacktestMetricsTable } from './MetricsTable'
 import { WeightsHeatmap }        from './WeightsHeatmap'
 
 type Tab = 'optimization' | 'backtest'
@@ -93,10 +93,10 @@ export function ResultsPanel({
             isFrontierResponse(optimizeData) ? (
               <FrontierChart data={optimizeData} />
             ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <WeightsChart weights={(optimizeData as OptimizeResponse).weights} />
-                <MetricsTable metrics={(optimizeData as OptimizeResponse).metrics} />
-              </div>
+              <WeightsChart
+                weights={(optimizeData as OptimizeResponse).weights}
+                metrics={(optimizeData as OptimizeResponse).metrics}
+              />
             )
           )}
         </div>
