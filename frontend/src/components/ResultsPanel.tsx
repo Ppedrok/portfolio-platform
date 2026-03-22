@@ -5,8 +5,9 @@ import { EquityCurve }           from './EquityCurve'
 import { BacktestMetricsTable } from './MetricsTable'
 import { WeightsHeatmap }        from './WeightsHeatmap'
 import { RiskDecomposition }     from './RiskDecomposition'
+import { FactorExposure }        from './FactorExposure'
 
-type Tab = 'optimization' | 'backtest'
+type Tab = 'optimization' | 'backtest' | 'factors'
 
 interface Props {
   isFrontier:      boolean
@@ -18,6 +19,10 @@ interface Props {
   backtestLoading: boolean
   activeTab:       Tab
   onTabChange:     (t: Tab) => void
+  // For factor exposure
+  tickers:         string[]
+  startDate:       string
+  endDate:         string
 }
 
 function isFrontierResponse(d: OptimizeResponse | FrontierResponse): d is FrontierResponse {
@@ -50,11 +55,13 @@ export function ResultsPanel({
   optimizeError, backtestError,
   optimizeLoading, backtestLoading,
   activeTab, onTabChange,
+  tickers, startDate, endDate,
 }: Props) {
   const hasAny =
     optimizeData || backtestData ||
     optimizeLoading || backtestLoading ||
-    optimizeError || backtestError
+    optimizeError || backtestError ||
+    tickers.length >= 2   // always show when assets are loaded (for Factor Exposure tab)
 
   if (!hasAny) return null
 
@@ -70,17 +77,21 @@ export function ResultsPanel({
 
       {/* Tab switcher */}
       <div className="flex items-center gap-0 mb-5 border border-border rounded-panel overflow-hidden w-fit">
-        {(['optimization', 'backtest'] as Tab[]).map(tab => (
+        {([
+          { id: 'optimization', label: 'Optimization' },
+          { id: 'backtest',     label: 'Backtest' },
+          { id: 'factors',      label: 'Factor Exposure' },
+        ] as { id: Tab; label: string }[]).map(({ id, label }) => (
           <button
-            key={tab}
-            onClick={() => onTabChange(tab)}
+            key={id}
+            onClick={() => onTabChange(id)}
             className={`px-5 py-2 text-xs font-mono uppercase tracking-wider transition-colors ${
-              activeTab === tab
+              activeTab === id
                 ? 'bg-accent text-white'
                 : 'text-muted hover:text-[#e8eaf0] bg-bg'
             }`}
           >
-            {tab}
+            {label}
           </button>
         ))}
       </div>
@@ -121,6 +132,15 @@ export function ResultsPanel({
             </>
           )}
         </div>
+      )}
+
+      {/* ── Factor Exposure tab ──────────────────────────────────────────── */}
+      {activeTab === 'factors' && (
+        <FactorExposure
+          tickers={tickers}
+          startDate={startDate}
+          endDate={endDate}
+        />
       )}
     </section>
   )

@@ -58,7 +58,7 @@ def _download_returns(body: OptimizeRequest) -> pd.DataFrame:
 
 def _build_params(returns: pd.DataFrame, body: OptimizeRequest) -> tuple:
     try:
-        port = Portfolio(returns)
+        port = Portfolio(returns, date_range=(body.start, body.end))
         port.estimate_mu(method=body.mu_method)
         port.estimate_cov_matrix(method=body.cov_method)
         return np.array(port.mu).flatten(), np.array(port.cov_matrix)

@@ -29,7 +29,7 @@ export default function App() {
   const [longOnly,     setLongOnly]     = useState(true)
 
   // ── Results tab ─────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'optimization' | 'backtest'>('optimization')
+  const [activeTab, setActiveTab] = useState<'optimization' | 'backtest' | 'factors'>('optimization')
 
   // ── API hooks ───────────────────────────────────────────────────────────────
   const optimize = useOptimize()
@@ -165,6 +165,9 @@ export default function App() {
           backtestLoading={backtest.loading}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          tickers={tickers}
+          startDate={startDate}
+          endDate={endDate}
         />
 
       </main>

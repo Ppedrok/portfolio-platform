@@ -39,6 +39,8 @@ MuMethod = Literal[
     "BS_1", "BS_2", "BS_3",
     "BOP_1", "BOP_2", "BOP_3",
     "BL_standard", "BL_augmented", "BL_bayes",
+    # Fama-French / Carhart factor models
+    "FF3_mu", "FF5_mu", "Carhart4_mu",
 ]
 
 CovMethod = Literal[
@@ -52,6 +54,8 @@ CovMethod = Literal[
     "detoning",
     "graph_lasso",
     "jlogo",
+    # Fama-French / Carhart factor models
+    "FF3_cov", "FF5_cov", "Carhart4_cov",
 ]
 
 OptMethod = Literal[

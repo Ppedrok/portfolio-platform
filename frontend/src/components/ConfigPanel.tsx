@@ -32,29 +32,39 @@ interface Props {
 
 // ── Method definitions with human-readable labels ─────────────────────────────
 
-const MU_METHODS: { value: MuMethod; label: string }[] = [
-  { value: 'historical', label: 'Historical Mean' },
-  { value: 'JS_1',       label: 'James-Stein (Target: Grand Mean)' },
-  { value: 'JS_2',       label: 'James-Stein (Target: Min Variance)' },
-  { value: 'JS_3',       label: 'James-Stein (Target: Equal Weights)' },
-  { value: 'BS_1',       label: 'Bayes-Stein (Target: Grand Mean)' },
-  { value: 'BS_2',       label: 'Bayes-Stein (Target: Min Variance)' },
-  { value: 'BS_3',       label: 'Bayes-Stein (Target: Equal Weights)' },
-  { value: 'BOP_1',      label: 'BOP Shrinkage (Target: Grand Mean)' },
-  { value: 'BOP_2',      label: 'BOP Shrinkage (Target: Min Variance)' },
-  { value: 'BOP_3',      label: 'BOP Shrinkage (Target: Equal Weights)' },
-  { value: 'BL_standard', label: 'Black-Litterman (Standard)' },
+const MU_METHODS: { value: MuMethod; label: string; group?: string }[] = [
+  // ── Shrinkage / Bayesian
+  { value: 'historical',  label: 'Historical Mean',                      group: 'Classical' },
+  { value: 'JS_1',        label: 'James-Stein (Grand Mean)',              group: 'Shrinkage' },
+  { value: 'JS_2',        label: 'James-Stein (Min Variance)',            group: 'Shrinkage' },
+  { value: 'JS_3',        label: 'James-Stein (Equal Weights)',           group: 'Shrinkage' },
+  { value: 'BS_1',        label: 'Bayes-Stein (Grand Mean)',              group: 'Shrinkage' },
+  { value: 'BS_2',        label: 'Bayes-Stein (Min Variance)',            group: 'Shrinkage' },
+  { value: 'BS_3',        label: 'Bayes-Stein (Equal Weights)',           group: 'Shrinkage' },
+  { value: 'BOP_1',       label: 'BOP Shrinkage (Grand Mean)',            group: 'Shrinkage' },
+  { value: 'BOP_2',       label: 'BOP Shrinkage (Min Variance)',          group: 'Shrinkage' },
+  { value: 'BOP_3',       label: 'BOP Shrinkage (Equal Weights)',         group: 'Shrinkage' },
+  { value: 'BL_standard', label: 'Black-Litterman (Standard)',            group: 'Black-Litterman' },
+  // ── Factor models
+  { value: 'FF3_mu',      label: 'Fama-French 3-Factor (μ)',              group: 'Factor Models' },
+  { value: 'FF5_mu',      label: 'Fama-French 5-Factor (μ)',              group: 'Factor Models' },
+  { value: 'Carhart4_mu', label: 'Carhart 4-Factor (μ)',                  group: 'Factor Models' },
 ]
 
-const COV_METHODS: { value: CovMethod; label: string }[] = [
-  { value: 'historical',      label: 'Sample Covariance' },
-  { value: 'ledoit_wolf',     label: 'Ledoit-Wolf Shrinkage' },
-  { value: 'oas',             label: 'Oracle Approximating Shrinkage (OAS)' },
-  { value: 'shrunk',          label: 'Shrunk Covariance' },
-  { value: 'denoised_fixed',  label: 'RMT Denoising (Fixed)' },
-  { value: 'spectral',        label: 'RMT Denoising (Spectral)' },
-  { value: 'graph_lasso',     label: 'Graphical Lasso (CV)' },
-  { value: 'jlogo',           label: 'J-LoGo (Sparse Inverse)' },
+const COV_METHODS: { value: CovMethod; label: string; group?: string }[] = [
+  // ── Classical / shrinkage
+  { value: 'historical',      label: 'Sample Covariance',                group: 'Classical' },
+  { value: 'ledoit_wolf',     label: 'Ledoit-Wolf Shrinkage',            group: 'Shrinkage' },
+  { value: 'oas',             label: 'Oracle Approximating (OAS)',        group: 'Shrinkage' },
+  { value: 'shrunk',          label: 'Shrunk Covariance',                group: 'Shrinkage' },
+  { value: 'denoised_fixed',  label: 'RMT Denoising (Fixed)',            group: 'RMT' },
+  { value: 'spectral',        label: 'RMT Denoising (Spectral)',         group: 'RMT' },
+  { value: 'graph_lasso',     label: 'Graphical Lasso (CV)',             group: 'Sparse' },
+  { value: 'jlogo',           label: 'J-LoGo (Sparse Inverse)',          group: 'Sparse' },
+  // ── Factor models
+  { value: 'FF3_cov',         label: 'Fama-French 3-Factor (Σ)',         group: 'Factor Models' },
+  { value: 'FF5_cov',         label: 'Fama-French 5-Factor (Σ)',         group: 'Factor Models' },
+  { value: 'Carhart4_cov',    label: 'Carhart 4-Factor (Σ)',             group: 'Factor Models' },
 ]
 
 const OPT_METHODS: { value: OptMethod; label: string }[] = [

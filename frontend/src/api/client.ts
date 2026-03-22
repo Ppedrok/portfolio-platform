@@ -7,6 +7,8 @@ import type {
   FrontierResponse,
   BacktestRequest,
   BacktestResponse,
+  FactorModel,
+  FactorExposureResponse,
 } from '../types'
 
 const BASE_URL: string = 'https://portfolio-platform-j39z.onrender.com'
@@ -57,4 +59,18 @@ export async function runBacktest(body: BacktestRequest): Promise<BacktestRespon
     body: JSON.stringify(body),
   })
   return handleResponse<BacktestResponse>(res)
+}
+
+export async function getFactorExposure(
+  tickers: string[],
+  start: string,
+  end: string,
+  model: FactorModel,
+): Promise<FactorExposureResponse> {
+  const res = await fetch(`${BASE_URL}/api/factors/exposure`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tickers, start, end, model }),
+  })
+  return handleResponse<FactorExposureResponse>(res)
 }

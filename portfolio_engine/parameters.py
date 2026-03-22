@@ -17,6 +17,8 @@ from sklearn.covariance import (
     ShrunkCovariance,
 )
 
+from portfolio_engine.factors import download_ff_factors, factor_model_params
+
 
 class Portfolio:
     """
@@ -34,11 +36,12 @@ class Portfolio:
     diss        : pd.DataFrame   Dissimilarity matrix (set by dissimilarity).
     """
 
-    def __init__(self, returns: pd.DataFrame, factors=None):
-        self.returns   = returns
-        self.n_assets  = returns.shape[1]
-        self.assets    = returns.columns.to_list()
-        self.factors   = factors
+    def __init__(self, returns: pd.DataFrame, factors=None, date_range: tuple = None):
+        self.returns    = returns
+        self.n_assets   = returns.shape[1]
+        self.assets     = returns.columns.to_list()
+        self.factors    = factors
+        self.date_range = date_range   # (start_str, end_str) for FF factor downloads
 
         self.mu         = None
         self.cov_matrix = None
@@ -107,6 +110,11 @@ class Portfolio:
         elif method == "BL_bayes":
             self.estimate_black_litterman(method="bayes", **kwargs)
 
+        # Fama-French / Carhart factor models
+        elif method in ("FF3_mu", "FF5_mu", "Carhart4_mu"):
+            ff_model = method.replace("_mu", "")
+            self.mu, _ = self._factor_model_mu_cov(ff_model)
+
         else:
             raise ValueError(f"Unknown mu estimation method: '{method}'")
 
@@ -158,10 +166,33 @@ class Portfolio:
             self.cov_matrix = GraphicalLassoCV().fit(self.returns).covariance_
         elif method == "jlogo":
             self.cov_matrix = rp.covar_matrix(self.returns, method="jlogo")
+
+        # Fama-French / Carhart factor model covariance
+        elif method in ("FF3_cov", "FF5_cov", "Carhart4_cov"):
+            ff_model = method.replace("_cov", "")
+            _, self.cov_matrix = self._factor_model_mu_cov(ff_model)
+
         else:
             raise ValueError(f"Unknown covariance estimation method: '{method}'")
 
         return np.array(self.cov_matrix)
+
+    # ── Fama-French / Carhart internal helper ─────────────────────────────────
+
+    def _factor_model_mu_cov(self, ff_model: str) -> tuple:
+        """
+        Download FF factors aligned with self.returns and return
+        (mu_annualised, Sigma_annualised) via factor_model_params().
+        """
+        if self.date_range is None:
+            start = str(self.returns.index[0].date())
+            end   = str(self.returns.index[-1].date())
+        else:
+            start, end = self.date_range
+
+        factors = download_ff_factors(ff_model, start, end)
+        mu_fm, Sigma_fm = factor_model_params(self.returns, factors)
+        return mu_fm.reshape(-1, 1), Sigma_fm   # mu as (n,1) to match other methods
 
     # ── Factor model ──────────────────────────────────────────────────────────
 

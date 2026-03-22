@@ -15,7 +15,7 @@ POST /api/backtest
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import assets, optimize, backtest
+from .routers import assets, optimize, backtest, factors
 from .schemas.responses import HealthResponse
 
 app = FastAPI(
@@ -43,6 +43,7 @@ app.add_middleware(
 app.include_router(assets.router)
 app.include_router(optimize.router)
 app.include_router(backtest.router)
+app.include_router(factors.router)
 
 
 # ── Health ────────────────────────────────────────────────────────────────────

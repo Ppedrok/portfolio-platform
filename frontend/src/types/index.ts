@@ -6,10 +6,31 @@ export type MuMethod =
   | 'BS_1' | 'BS_2' | 'BS_3'
   | 'BOP_1' | 'BOP_2' | 'BOP_3'
   | 'BL_standard'
+  | 'FF3_mu' | 'FF5_mu' | 'Carhart4_mu'
 
 export type CovMethod =
   | 'historical' | 'ledoit_wolf' | 'oas' | 'shrunk'
   | 'denoised_fixed' | 'spectral' | 'graph_lasso' | 'jlogo'
+  | 'FF3_cov' | 'FF5_cov' | 'Carhart4_cov'
+
+// ── Factor exposure ───────────────────────────────────────────────────────────
+
+export type FactorModel = 'FF3' | 'FF5' | 'Carhart4'
+
+export interface AssetFactorRow {
+  ticker:   string
+  alpha:    number        // annualised
+  r2:       number
+  betas:    Record<string, number>
+  t_stats:  Record<string, number>
+  p_values: Record<string, number>
+}
+
+export interface FactorExposureResponse {
+  model:   FactorModel
+  factors: string[]
+  assets:  AssetFactorRow[]
+}
 
 export type OptMethod =
   | 'markowitz' | 'CVaR' | 'MAD' | 'SMAD' | 'SemiVariance'
