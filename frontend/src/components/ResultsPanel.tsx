@@ -6,6 +6,22 @@ import { BacktestMetricsTable } from './MetricsTable'
 import { WeightsHeatmap }        from './WeightsHeatmap'
 import { RiskDecomposition }     from './RiskDecomposition'
 import { FactorExposure }        from './FactorExposure'
+import { SkeletonLoader, ProgressSteps } from './SkeletonLoader'
+import type { ProgressStep } from './SkeletonLoader'
+
+const OPTIMIZE_STEPS: ProgressStep[] = [
+  { label: 'Downloading price data…',          delay: 1000  },
+  { label: 'Estimating parameters (μ, Σ)…',    delay: 2000  },
+  { label: 'Solving optimization problem…',     delay: 3500  },
+  { label: 'Computing risk decomposition…',     delay: 4500  },
+]
+
+const BACKTEST_STEPS: ProgressStep[] = [
+  { label: 'Downloading price data…',           delay: 1000  },
+  { label: 'Initialising walk-forward folds…',  delay: 2500  },
+  { label: 'Running rebalancing steps…',        delay: 5000  },
+  { label: 'Aggregating equity curve…',         delay: 7000  },
+]
 
 type Tab = 'optimization' | 'backtest' | 'factors'
 
@@ -27,18 +43,6 @@ interface Props {
 
 function isFrontierResponse(d: OptimizeResponse | FrontierResponse): d is FrontierResponse {
   return 'portfolios' in d
-}
-
-function Spinner({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 gap-4">
-      <svg className="animate-spin h-8 w-8 text-accent" viewBox="0 0 24 24" fill="none">
-        <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-        <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-      </svg>
-      <span className="text-muted text-xs font-mono uppercase tracking-widest">{message}</span>
-    </div>
-  )
 }
 
 function ErrorBanner({ msg }: { msg: string }) {
@@ -99,7 +103,12 @@ export function ResultsPanel({
       {/* ── Optimization tab ─────────────────────────────────────────────── */}
       {activeTab === 'optimization' && (
         <div>
-          {optimizeLoading && <Spinner message="Optimising…" />}
+          {optimizeLoading && (
+            <>
+              <ProgressSteps loading={optimizeLoading} steps={OPTIMIZE_STEPS} />
+              <SkeletonLoader variant="weights" />
+            </>
+          )}
           {!optimizeLoading && optimizeError && <ErrorBanner msg={optimizeError} />}
           {!optimizeLoading && !optimizeError && optimizeData && (
             isFrontierResponse(optimizeData) ? (
@@ -108,7 +117,7 @@ export function ResultsPanel({
               const od = optimizeData as OptimizeResponse
               return (
                 <>
-                  <WeightsChart weights={od.weights} metrics={od.metrics} />
+                  <WeightsChart weights={od.weights} metrics={od.metrics} risk_decomposition={od.risk_decomposition ?? undefined} />
                   {od.risk_decomposition && (
                     <RiskDecomposition data={od.risk_decomposition} />
                   )}
@@ -122,7 +131,12 @@ export function ResultsPanel({
       {/* ── Backtest tab ─────────────────────────────────────────────────── */}
       {activeTab === 'backtest' && (
         <div className="space-y-4">
-          {backtestLoading && <Spinner message="Running walk-forward backtest…" />}
+          {backtestLoading && (
+            <>
+              <ProgressSteps loading={backtestLoading} steps={BACKTEST_STEPS} />
+              <SkeletonLoader variant="backtest" />
+            </>
+          )}
           {!backtestLoading && backtestError && <ErrorBanner msg={backtestError} />}
           {!backtestLoading && !backtestError && backtestData && (
             <>

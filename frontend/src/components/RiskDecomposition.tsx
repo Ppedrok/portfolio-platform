@@ -11,29 +11,55 @@ function fmtPct(v: number): string { return `${(v * 100).toFixed(1)}%` }
 
 // ── Custom tooltip ────────────────────────────────────────────────────────────
 
+interface BarRow {
+  asset:     string
+  weight:    number
+  mrc:       number
+  crc:       number
+  indiv_vol: number
+  risk?:     number
+  cvar_pct?: number
+}
+
+const TOOLTIP_ROW: React.CSSProperties = {
+  display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 3,
+}
+
 function CustomTooltip({ active, payload, label }: {
-  active?: boolean
-  payload?: { name: string; value: number; color: string }[]
-  label?: string
+  active?:  boolean
+  payload?: { name: string; value: number; color: string; payload: BarRow }[]
+  label?:   string
 }) {
   if (!active || !payload?.length) return null
+  const row = payload[0].payload
   return (
     <div style={{
       background: '#0d1117',
-      border: '1px solid rgba(79,142,247,0.4)',
-      borderRadius: 6,
-      padding: '8px 12px',
+      border: '1px solid #1e2530',
+      borderRadius: 8,
+      padding: '10px 14px',
       fontFamily: '"JetBrains Mono", monospace',
       fontSize: 11,
+      minWidth: 180,
+      boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#8892a4', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-        {label}
+      <div style={{ color: '#4f8ef7', fontWeight: 700, fontSize: 12, marginBottom: 8 }}>{label}</div>
+      <div style={TOOLTIP_ROW}>
+        <span style={{ color: '#8892a4' }}>Weight</span>
+        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{fmtPct(row.weight)}</span>
       </div>
-      {payload.map(p => (
-        <div key={p.name} style={{ color: p.color ?? '#e8eaf0', fontWeight: 600, marginTop: 2 }}>
-          {p.name}: {fmtPct(p.value)}
-        </div>
-      ))}
+      <div style={TOOLTIP_ROW}>
+        <span style={{ color: '#8892a4' }}>MRC</span>
+        <span style={{ color: '#f59e0b', fontWeight: 700 }}>{row.mrc.toFixed(4)}</span>
+      </div>
+      <div style={TOOLTIP_ROW}>
+        <span style={{ color: '#8892a4' }}>CRC %</span>
+        <span style={{ color: '#f43f5e', fontWeight: 700 }}>{fmtPct(row.crc)}</span>
+      </div>
+      <div style={{ ...TOOLTIP_ROW, marginBottom: 0 }}>
+        <span style={{ color: '#8892a4' }}>Indiv. Vol</span>
+        <span style={{ color: '#a78bfa', fontWeight: 700 }}>{fmtPct(row.indiv_vol)}</span>
+      </div>
     </div>
   )
 }
@@ -66,18 +92,24 @@ export function RiskDecomposition({ data }: Props) {
     portfolio_cvar,
   } = data
 
-  // Dual bar chart data: weight vs % risk
-  const barData = assets.map((a, i) => ({
-    asset: a,
-    weight: weights[i],
-    risk:   prc[i],
+  // Dual bar chart data: weight vs % risk (enriched for tooltip)
+  const barData: BarRow[] = assets.map((a, i) => ({
+    asset:     a,
+    weight:    weights[i],
+    risk:      prc[i],
+    mrc:       data.marginal_risk_contribution[i],
+    crc:       data.component_risk_contribution[i],
+    indiv_vol: individual_volatilities[i],
   }))
 
-  // CVaR bar chart data
-  const cvarData = assets.map((a, i) => ({
-    asset: a,
-    weight:   weights[i],
-    cvar_pct: pcvar[i],
+  // CVaR bar chart data (enriched for tooltip)
+  const cvarData: BarRow[] = assets.map((a, i) => ({
+    asset:     a,
+    weight:    weights[i],
+    cvar_pct:  pcvar[i],
+    mrc:       data.marginal_risk_contribution[i],
+    crc:       data.component_risk_contribution[i],
+    indiv_vol: individual_volatilities[i],
   }))
 
   // Risk efficiency table: sorted by |prc - weight|

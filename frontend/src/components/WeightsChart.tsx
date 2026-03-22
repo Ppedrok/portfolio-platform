@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
-import type { PortfolioMetrics } from '../types'
+import type { PortfolioMetrics, RiskDecompositionData } from '../types'
 
 const COLORS = [
   '#4f8ef7', '#00d4aa', '#f59e0b', '#f43f5e', '#a78bfa',
@@ -7,9 +8,12 @@ const COLORS = [
 ]
 
 interface Props {
-  weights: Record<string, number>
-  metrics?: PortfolioMetrics
+  weights:           Record<string, number>
+  metrics?:          PortfolioMetrics
+  risk_decomposition?: RiskDecompositionData
 }
+
+type RiskLookup = Record<string, { mrc: number; prc: number; crc: number }>
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 
@@ -26,25 +30,48 @@ function metricColor(v: number | null | undefined, invert = false): string {
 
 // ── Custom tooltip ────────────────────────────────────────────────────────────
 
-function CustomTooltip({ active, payload }: { active?: boolean; payload?: { payload: { name: string; value: number } }[] }) {
+const ROW: React.CSSProperties = {
+  display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 3,
+}
+
+function WeightsTooltip({
+  active, payload, riskLookup,
+}: {
+  active?:     boolean
+  payload?:    { payload: { name: string; value: number } }[]
+  riskLookup:  RiskLookup | null
+}) {
   if (!active || !payload?.length) return null
   const { name, value } = payload[0].payload
+  const risk = riskLookup?.[name] ?? null
   return (
     <div style={{
       background: '#0d1117',
-      border: '1px solid rgba(79, 142, 247, 0.45)',
-      borderRadius: 6,
-      padding: '8px 12px',
+      border: '1px solid rgba(79,142,247,0.45)',
+      borderRadius: 8,
+      padding: '10px 14px',
       fontFamily: '"JetBrains Mono", monospace',
       fontSize: 11,
+      minWidth: 170,
+      boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#8892a4', fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
-        Optimal Weight
+      <div style={{ color: '#4f8ef7', fontWeight: 700, fontSize: 13, marginBottom: 6 }}>{name}</div>
+      <div style={ROW}>
+        <span style={{ color: '#8892a4' }}>Weight</span>
+        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{value.toFixed(2)}%</span>
       </div>
-      <div style={{ color: '#e8eaf0', fontWeight: 700 }}>{name}</div>
-      <div style={{ color: '#4f8ef7', marginTop: 3, fontWeight: 600, fontSize: 13 }}>
-        {value.toFixed(2)}%
-      </div>
+      {risk && (
+        <>
+          <div style={ROW}>
+            <span style={{ color: '#8892a4' }}>MRC</span>
+            <span style={{ color: '#f59e0b', fontWeight: 700 }}>{risk.mrc.toFixed(4)}</span>
+          </div>
+          <div style={ROW}>
+            <span style={{ color: '#8892a4' }}>CRC %</span>
+            <span style={{ color: '#f43f5e', fontWeight: 700 }}>{(risk.prc * 100).toFixed(2)}%</span>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -67,13 +94,27 @@ const METRIC_DEFS: {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function WeightsChart({ weights, metrics }: Props) {
+export function WeightsChart({ weights, metrics, risk_decomposition }: Props) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+
   const data = Object.entries(weights)
     .filter(([, v]) => v > 0.001)
     .map(([name, value]) => ({ name, value: Math.round(value * 10000) / 100 }))
     .sort((a, b) => b.value - a.value)
 
   const maxValue = data[0]?.value ?? 100
+
+  const riskLookup: RiskLookup | null = risk_decomposition
+    ? Object.fromEntries(
+        risk_decomposition.assets.map((a, i) => [a, {
+          mrc: risk_decomposition.marginal_risk_contribution[i],
+          prc: risk_decomposition.percentage_risk_contribution[i],
+          crc: risk_decomposition.component_risk_contribution[i],
+        }])
+      )
+    : null
+
+  const activeItem = activeIndex !== null ? data[activeIndex] : null
 
   return (
     <div className="bg-card rounded-panel p-4 border border-border">
@@ -84,8 +125,8 @@ export function WeightsChart({ weights, metrics }: Props) {
       {/* ── Two-column layout: pie chart + legend ── */}
       <div className="flex gap-6 items-center">
 
-        {/* Left: pie chart (60%) */}
-        <div style={{ flex: '0 0 58%' }}>
+        {/* Left: pie chart (60%) — with center label overlay */}
+        <div style={{ flex: '0 0 58%', position: 'relative' }}>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
@@ -98,14 +139,44 @@ export function WeightsChart({ weights, metrics }: Props) {
                 dataKey="value"
                 strokeWidth={0}
                 isAnimationActive={false}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
               >
                 {data.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={(props) => (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                <WeightsTooltip {...(props as any)} riskLookup={riskLookup} />
+              )} />
             </PieChart>
           </ResponsiveContainer>
+
+          {/* Center label */}
+          <div style={{
+            position: 'absolute',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'none',
+            textAlign: 'center',
+            fontFamily: '"JetBrains Mono", monospace',
+          }}>
+            {activeItem ? (
+              <>
+                <div style={{ color: '#4f8ef7', fontWeight: 700, fontSize: 11, letterSpacing: '0.03em' }}>
+                  {activeItem.name}
+                </div>
+                <div style={{ color: '#e8eaf0', fontWeight: 700, fontSize: 15, marginTop: 2 }}>
+                  {activeItem.value.toFixed(1)}%
+                </div>
+              </>
+            ) : (
+              <div style={{ color: '#8892a4', fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                Weights
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right: legend table (40%) */}

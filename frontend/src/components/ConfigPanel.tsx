@@ -262,16 +262,18 @@ export function ConfigPanel({
           disabled={!canRun || optimizeLoading}
           className="flex-1 py-2.5 rounded-panel bg-accent disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-mono font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 glow-accent hover:brightness-110 hover:shadow-[0_0_20px_rgba(79,142,247,0.45)]"
         >
-          {optimizeLoading && <Spinner />}
-          Optimize Portfolio
+          {optimizeLoading ? (
+            <><Spinner /> Optimising…</>
+          ) : 'Optimize Portfolio'}
         </button>
         <button
           onClick={onBacktest}
           disabled={!canRun || backtestLoading}
           className="flex-1 py-2.5 rounded-panel border border-accent/60 hover:border-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed text-accent text-xs font-mono font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_14px_rgba(79,142,247,0.25)]"
         >
-          {backtestLoading && <Spinner />}
-          Run Backtest
+          {backtestLoading ? (
+            <><Spinner /> Backtesting…</>
+          ) : 'Run Backtest'}
         </button>
       </div>
     </section>

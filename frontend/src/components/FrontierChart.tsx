@@ -20,10 +20,14 @@ const SELECTED_C   = '#f59e0b'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface ChartPoint { x: number; y: number; id: number; idx: number }
+interface ChartPoint { x: number; y: number; id: number; idx: number; weights: Record<string, number> }
 interface Props { data: FrontierResponse }
 
 // ── Custom tooltips ───────────────────────────────────────────────────────────
+
+const TOOLTIP_ROW: React.CSSProperties = {
+  display: 'flex', justifyContent: 'space-between', gap: 20, marginBottom: 3,
+}
 
 function ScatterTooltip({
   active,
@@ -33,29 +37,45 @@ function ScatterTooltip({
   payload?: { payload: ChartPoint }[]
 }) {
   if (!active || !payload?.length) return null
-  const { x, y } = payload[0].payload
-  const sharpe = x > 0 ? (y / x).toFixed(3) : '—'
+  const pt = payload[0].payload
+  const sharpe = pt.x > 0 ? (pt.y / pt.x) : 0
+
+  const top3 = Object.entries(pt.weights)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3)
+    .map(([ticker, w]) => `${ticker} ${(w * 100).toFixed(0)}%`)
+    .join(' · ')
+
   return (
     <div style={{
       background: '#0d1117',
-      border: '1px solid #1e2530',
-      borderRadius: 6,
-      padding: '8px 12px',
+      border: '1px solid rgba(56,189,248,0.3)',
+      borderRadius: 8,
+      padding: '10px 14px',
       fontFamily: '"JetBrains Mono", monospace',
       fontSize: 11,
+      minWidth: 200,
+      boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#8892a4', fontSize: 9, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-        Click to inspect
+      <div style={{ color: '#8892a4', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+        Portfolio #{pt.id}
       </div>
-      <div style={{ color: '#e8eaf0' }}>
-        Return: <span style={{ color: '#00d4aa', fontWeight: 700 }}>{y.toFixed(2)}%</span>
+      <div style={TOOLTIP_ROW}>
+        <span style={{ color: '#8892a4' }}>Expected Return</span>
+        <span style={{ color: '#00d4aa', fontWeight: 700 }}>{pt.y.toFixed(2)}%</span>
       </div>
-      <div style={{ color: '#e8eaf0' }}>
-        Volatility: <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{x.toFixed(2)}%</span>
+      <div style={TOOLTIP_ROW}>
+        <span style={{ color: '#8892a4' }}>Volatility</span>
+        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{pt.x.toFixed(2)}%</span>
       </div>
-      <div style={{ color: '#e8eaf0' }}>
-        Sharpe: <span style={{ color: '#f59e0b', fontWeight: 700 }}>{sharpe}</span>
+      <div style={{ ...TOOLTIP_ROW, marginBottom: 6 }}>
+        <span style={{ color: '#8892a4' }}>Sharpe Ratio</span>
+        <span style={{ color: '#f59e0b', fontWeight: 700 }}>{sharpe.toFixed(3)}</span>
       </div>
+      <div style={{ borderTop: '1px solid #1e2530', paddingTop: 6, color: '#8892a4', fontSize: 9, lineHeight: 1.6 }}>
+        {top3}
+      </div>
+      <div style={{ color: '#8892a4', fontSize: 8, marginTop: 4, opacity: 0.6 }}>click to inspect composition</div>
     </div>
   )
 }
@@ -167,10 +187,11 @@ export function FrontierChart({ data }: Props) {
     .sort((a, b) => a.expected_volatility! - b.expected_volatility!)
 
   const points: ChartPoint[] = sorted.map((p, i) => ({
-    x:   +((p.expected_volatility ?? 0) * 100).toFixed(3),
-    y:   +((p.expected_return    ?? 0) * 100).toFixed(3),
-    id:  p.portfolio_id,
-    idx: i,
+    x:       +((p.expected_volatility ?? 0) * 100).toFixed(3),
+    y:       +((p.expected_return    ?? 0) * 100).toFixed(3),
+    id:      p.portfolio_id,
+    idx:     i,
+    weights: p.weights,
   }))
 
   // Max Sharpe point
