@@ -88,6 +88,7 @@ class OptimizeRequest(BaseModel):
     target_return:  Union[float, Literal["frontier"], None] = None
     constraints:    WeightConstraints      = Field(default_factory=WeightConstraints)
     rp_constraints: Union[list[dict], None] = None
+    asset_groups:   Union[list[dict], None] = None
     long_only:      bool                   = True
     solver:         str                    = "CLARABEL"
 

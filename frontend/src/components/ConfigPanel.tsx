@@ -1,4 +1,4 @@
-import type { MuMethod, CovMethod, OptMethod, ConstraintRow, TickerMatch } from '../types'
+import type { MuMethod, CovMethod, OptMethod, ConstraintRow, TickerMatch, AssetGroup } from '../types'
 import { ConstraintsPanel } from './ConstraintsPanel'
 
 interface Props {
@@ -21,6 +21,7 @@ interface Props {
   onEstimationWindow:     (v: number) => void
   onRebalancingFreq:      (v: number) => void
   onConstraintsChange:    (rows: ConstraintRow[]) => void
+  onGroupsChange:         (groups: AssetGroup[]) => void
   onLongOnly:             (v: boolean) => void
   onOptimize:      () => void
   onBacktest:      () => void
@@ -147,7 +148,7 @@ export function ConfigPanel({
   assets, longOnly,
   onMuMethod, onCovMethod, onOptMethod, onFrontierToggle,
   onMaxWeight, onMinWeight, onEstimationWindow, onRebalancingFreq,
-  onConstraintsChange, onLongOnly,
+  onConstraintsChange, onGroupsChange, onLongOnly,
   onOptimize, onBacktest, canRun, optimizeLoading, backtestLoading,
 }: Props) {
   return (
@@ -240,6 +241,7 @@ export function ConfigPanel({
         assets={assets}
         longOnly={longOnly}
         onChange={onConstraintsChange}
+        onGroupsChange={onGroupsChange}
         onLongOnly={onLongOnly}
       />
 

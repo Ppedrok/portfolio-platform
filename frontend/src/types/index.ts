@@ -54,6 +54,11 @@ export interface OverviewResponse {
 
 // ── Optimize ──────────────────────────────────────────────────────────────────
 
+export interface AssetGroup {
+  name:    string
+  tickers: string[]
+}
+
 export interface WeightConstraints {
   max_weight: number
   min_weight: number
@@ -82,6 +87,7 @@ export interface OptimizeRequest {
   target_return:  number | 'frontier' | null
   constraints:    WeightConstraints
   rp_constraints: ConstraintRow[] | null
+  asset_groups:   AssetGroup[] | null
   long_only:      boolean
   solver:         string
 }

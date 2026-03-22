@@ -71,6 +71,7 @@ def _build_params(returns: pd.DataFrame, body: OptimizeRequest) -> tuple:
 def _build_rp_constraints(
     rp_constraints_list: list[dict],
     tickers: list[str],
+    asset_groups: "list[dict] | None" = None,
 ) -> tuple["pd.DataFrame | None", "pd.DataFrame | None"]:
     """Convert the API list[dict] into the DataFrame expected by rp.assets_constraints."""
     rows = []
@@ -102,7 +103,16 @@ def _build_rp_constraints(
             status_code=422,
             detail="Constraint error: 'Assets' type requires a valid ticker in Position.",
         )
-    asset_classes_df = pd.DataFrame({"Assets": tickers})
+    if asset_groups:
+        asset_classes_df = pd.DataFrame({
+            "Assets": tickers,
+            "Group": [
+                next((g["name"] for g in asset_groups if t in g["tickers"]), "Other")
+                for t in tickers
+            ],
+        })
+    else:
+        asset_classes_df = pd.DataFrame({"Assets": tickers})
     return constraints_df, asset_classes_df
 
 
@@ -251,7 +261,7 @@ def optimize(body: OptimizeRequest):
     hi = body.constraints.max_weight
 
     constraints_df, asset_classes_df = (
-        _build_rp_constraints(body.rp_constraints, tickers)
+        _build_rp_constraints(body.rp_constraints, tickers, body.asset_groups)
         if body.rp_constraints
         else (None, None)
     )

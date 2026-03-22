@@ -5,7 +5,7 @@ import { ConfigPanel }    from './components/ConfigPanel'
 import { ResultsPanel }   from './components/ResultsPanel'
 import { useOptimize }  from './hooks/useOptimize'
 import { useBacktest }  from './hooks/useBacktest'
-import type { TickerMatch, MuMethod, CovMethod, OptMethod, ConstraintRow } from './types'
+import type { TickerMatch, MuMethod, CovMethod, OptMethod, ConstraintRow, AssetGroup } from './types'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -24,8 +24,9 @@ export default function App() {
   const [minWeight,  setMinWeight]  = useState(0.0)
   const [estimationWindow, setEstimationWindow] = useState(252)
   const [rebalancingFreq,  setRebalancingFreq]  = useState(21)
-  const [constraints, setConstraints] = useState<ConstraintRow[]>([])
-  const [longOnly,    setLongOnly]    = useState(true)
+  const [constraints,  setConstraints]  = useState<ConstraintRow[]>([])
+  const [assetGroups,  setAssetGroups]  = useState<AssetGroup[]>([])
+  const [longOnly,     setLongOnly]     = useState(true)
 
   // ── Results tab ─────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'optimization' | 'backtest'>('optimization')
@@ -48,6 +49,7 @@ export default function App() {
       target_return:  isFrontier ? 'frontier' : null,
       constraints:    { max_weight: maxWeight, min_weight: minWeight },
       rp_constraints: constraints.length > 0 ? constraints : null,
+      asset_groups:   assetGroups.length > 0 ? assetGroups : null,
       long_only:      longOnly,
       solver:         'CLARABEL',
     })
@@ -144,6 +146,7 @@ export default function App() {
           onEstimationWindow={setEstimationWindow}
           onRebalancingFreq={setRebalancingFreq}
           onConstraintsChange={setConstraints}
+          onGroupsChange={setAssetGroups}
           onLongOnly={setLongOnly}
           onOptimize={handleOptimize}
           onBacktest={handleBacktest}
