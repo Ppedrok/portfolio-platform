@@ -82,8 +82,8 @@ const OPT_METHODS: { value: OptMethod; label: string }[] = [
 // ── Shared sub-components ─────────────────────────────────────────────────────
 
 const SELECT_CLS =
-  'w-full bg-[#0d1117] border border-border rounded-panel px-3 py-2.5 text-xs text-[#e8eaf0] ' +
-  'focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer hover:border-accent/50'
+  'w-full bg-[#07090f] border border-border rounded-panel px-3 py-2.5 text-xs text-[#c8d0e0] ' +
+  'focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer hover:border-border-bright'
 
 function LabeledSelect<T extends string>({
   label,
@@ -162,13 +162,13 @@ export function ConfigPanel({
   onOptimize, onBacktest, canRun, optimizeLoading, backtestLoading,
 }: Props) {
   return (
-    <section className="bg-card rounded-panel p-5 shadow-card border border-border space-y-5">
+    <section className="bg-card card-top-accent rounded-panel p-5 border border-border space-y-5">
       {/* Section label */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono font-semibold text-accent uppercase tracking-widest border border-accent/30 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(79,142,247,0.3)]">
+        <span className="terminal-label border border-accent/40 text-accent bg-accent/5 px-2 py-0.5 rounded">
           02
         </span>
-        <h2 className="text-sm font-semibold text-[#e8eaf0] tracking-tight">Configuration</h2>
+        <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Configuration</h2>
       </div>
 
       {/* Method selects */}
@@ -260,7 +260,12 @@ export function ConfigPanel({
         <button
           onClick={onOptimize}
           disabled={!canRun || optimizeLoading}
-          className="flex-1 py-2.5 rounded-panel bg-accent disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-mono font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 glow-accent hover:brightness-110 hover:shadow-[0_0_20px_rgba(79,142,247,0.45)]"
+          className="flex-1 py-2.5 rounded-panel disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+          style={{
+            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+            border: '1px solid rgba(59,130,246,0.25)',
+            boxShadow: '0 0 20px rgba(37,99,235,0.21), 0 2px 8px rgba(0,0,0,0.4)',
+          }}
         >
           {optimizeLoading ? (
             <><Spinner /> Optimising…</>
@@ -269,7 +274,8 @@ export function ConfigPanel({
         <button
           onClick={onBacktest}
           disabled={!canRun || backtestLoading}
-          className="flex-1 py-2.5 rounded-panel border border-accent/60 hover:border-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed text-accent text-xs font-mono font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_14px_rgba(79,142,247,0.25)]"
+          className="flex-1 py-2.5 rounded-panel disabled:opacity-35 disabled:cursor-not-allowed text-muted-bright text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 hover:border-accent hover:text-[#e8eaf0]"
+          style={{ background: 'transparent', border: '1px solid #253050' }}
         >
           {backtestLoading ? (
             <><Spinner /> Backtesting…</>

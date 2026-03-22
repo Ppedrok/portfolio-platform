@@ -70,17 +70,17 @@ export function ResultsPanel({
   if (!hasAny) return null
 
   return (
-    <section className="bg-card rounded-panel p-5 shadow-card border border-border">
+    <section className="bg-card card-top-accent rounded-panel p-5 border border-border">
       {/* Section label */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-[10px] font-mono font-semibold text-muted uppercase tracking-widest border border-border px-2 py-0.5 rounded">
+        <span className="terminal-label border border-accent/40 text-accent bg-accent/5 px-2 py-0.5 rounded">
           03
         </span>
-        <h2 className="text-sm font-semibold text-[#e8eaf0] tracking-tight">Results Dashboard</h2>
+        <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Results Dashboard</h2>
       </div>
 
-      {/* Tab switcher */}
-      <div className="flex items-center gap-0 mb-5 border border-border rounded-panel overflow-hidden w-fit">
+      {/* Tab switcher — underline style */}
+      <div className="flex border-b border-border mb-5">
         {([
           { id: 'optimization', label: 'Optimization' },
           { id: 'backtest',     label: 'Backtest' },
@@ -89,10 +89,10 @@ export function ResultsPanel({
           <button
             key={id}
             onClick={() => onTabChange(id)}
-            className={`px-5 py-2 text-xs font-mono uppercase tracking-wider transition-colors ${
+            className={`px-5 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2 -mb-px ${
               activeTab === id
-                ? 'bg-accent text-white'
-                : 'text-muted hover:text-[#e8eaf0] bg-bg'
+                ? 'border-accent text-[#e8eaf0] bg-accent/5'
+                : 'border-transparent text-muted hover:text-muted-bright'
             }`}
           >
             {label}

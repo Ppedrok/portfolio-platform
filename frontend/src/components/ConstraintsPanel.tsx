@@ -4,8 +4,8 @@ import type { ConstraintRow, TickerMatch, AssetGroup } from '../types'
 // ── Palette (shared with WeightsChart) ────────────────────────────────────────
 
 const PALETTE = [
-  '#4f8ef7', '#00d4aa', '#f59e0b', '#f43f5e', '#a78bfa',
-  '#34d399', '#fb923c', '#38bdf8', '#e879f9', '#facc15',
+  '#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444',
+  '#a78bfa', '#34d399', '#fb923c', '#e879f9', '#facc15',
 ]
 
 // ── Internal types ────────────────────────────────────────────────────────────
@@ -81,8 +81,8 @@ function buildConstraintRows(
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
 const INP =
-  'bg-[#0d1117] border border-[#1e2530] rounded px-2 py-1 text-xs text-[#e8eaf0] ' +
-  'focus:outline-none focus:border-accent appearance-none placeholder-[#8892a4]'
+  'bg-[#07090f] border border-[#1a2035] rounded px-2 py-1 text-xs text-[#c8d0e0] ' +
+  'focus:outline-none focus:border-accent appearance-none placeholder-[#5a6a85]'
 const SS = { colorScheme: 'dark' as const }
 
 function Toggle({ val, onChange, label }: { val: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -91,7 +91,7 @@ function Toggle({ val, onChange, label }: { val: boolean; onChange: (v: boolean)
       <button
         type="button" role="switch" aria-checked={val}
         onClick={() => onChange(!val)}
-        className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${val ? 'bg-accent' : 'bg-[#1e2530]'}`}
+        className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${val ? 'bg-accent' : 'bg-[#1a2035]'}`}
       >
         <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform mt-[3px] ${val ? 'translate-x-4' : 'translate-x-1'}`} />
       </button>
@@ -233,9 +233,9 @@ export function ConstraintsPanel({ assets, longOnly, onChange, onGroupsChange, o
   const sumMins = assets.reduce((s, a) => s + (limitMap[a.ticker]?.min ?? 0), 0)
 
   const TABS: { id: Tab; label: string; n: number }[] = [
-    { id: 'limits',   label: '📊 Asset Limits',        n: c1 },
-    { id: 'groups',   label: '🏷️ Groups & Sectors',    n: c2 },
-    { id: 'advanced', label: '⚙️ Relative & Advanced',  n: c3 },
+    { id: 'limits',   label: 'Asset Limits',       n: c1 },
+    { id: 'groups',   label: 'Groups & Sectors',   n: c2 },
+    { id: 'advanced', label: 'Relative & Advanced', n: c3 },
   ]
 
   return (
@@ -845,7 +845,7 @@ function SummaryPills({ assets, limitMap, groupCons, relCons, globalRules }: {
           </span>
         ))}
         {extras > 0 && (
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1e2530] text-muted">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1a2035] text-muted">
             +{extras} more
           </span>
         )}

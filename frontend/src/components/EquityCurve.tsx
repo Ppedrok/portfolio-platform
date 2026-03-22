@@ -4,9 +4,9 @@ import {
 } from 'recharts'
 import type { BacktestResponse } from '../types'
 
-const GRID_COLOR  = '#1e2530'
-const AXIS_COLOR  = '#8892a4'
-const PORT_COLOR  = '#4f8ef7'
+const GRID_COLOR  = '#1a2035'
+const AXIS_COLOR  = '#5a6a85'
+const PORT_COLOR  = '#2563eb'
 const BM_COLOR    = '#fb923c'
 
 const TOOLTIP_ROW: React.CSSProperties = {
@@ -100,10 +100,8 @@ export function EquityCurve({ data }: Props) {
   const tickInterval = Math.max(1, Math.floor(chartData.length / 14))
 
   return (
-    <div className="bg-card rounded-panel p-4 border border-border">
-      <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-1">
-        Equity Curve
-      </p>
+    <div className="bg-card card-top-accent rounded-panel p-4 border border-border">
+      <p className="terminal-label mb-1">Equity Curve</p>
       <p className="text-xs text-muted font-mono mb-4">
         <span className="text-[#e8eaf0]">{data.oos_start}</span>
         <span className="text-muted mx-1">→</span>

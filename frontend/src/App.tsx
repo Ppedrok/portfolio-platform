@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AssetSearch }    from './components/AssetSearch'
 import { AssetOverview }  from './components/AssetOverview'
 import { ConfigPanel }    from './components/ConfigPanel'
@@ -8,6 +8,19 @@ import { useBacktest }  from './hooks/useBacktest'
 import type { TickerMatch, MuMethod, CovMethod, OptMethod, ConstraintRow, AssetGroup } from './types'
 
 const TODAY = new Date().toISOString().slice(0, 10)
+
+function LiveClock() {
+  const [time, setTime] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <span className="font-mono text-[11px] text-muted-bright tabular-nums">
+      {time.toUTCString().slice(17, 25)} UTC
+    </span>
+  )
+}
 
 export default function App() {
   // ── Asset selection ─────────────────────────────────────────────────────────
@@ -75,30 +88,54 @@ export default function App() {
     <div className="min-h-screen bg-bg font-sans text-white">
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header
-        className="sticky top-0 z-40 px-6 py-3 flex items-center gap-3"
-        style={{
-          background: 'linear-gradient(180deg, #0d1420 0%, #0a0c12 100%)',
-          borderBottom: '1px solid rgba(79, 142, 247, 0.15)',
-        }}
-      >
-        {/* Logo mark */}
-        <div className="w-7 h-7 rounded bg-accent flex items-center justify-center shrink-0 glow-accent">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <polyline points="1,12 5,6 9,9 13,3 15,5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+      <header className="header-surface sticky top-0 z-50 px-6 py-0 flex items-stretch gap-0">
+        {/* Logo block */}
+        <div className="flex items-center gap-3 pr-6 border-r border-border py-3">
+          <div className="w-7 h-7 rounded bg-accent flex items-center justify-center shrink-0 glow-accent">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M1 10 L4 6 L7 8 L10 3 L13 5" stroke="white" strokeWidth="1.8"
+                    strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-[#e8eaf0] tracking-widest uppercase font-mono">
+              PortfolioOS
+            </div>
+            <div className="terminal-label tracking-wider">
+              QUANT PLATFORM
+            </div>
+          </div>
         </div>
-        <span className="font-semibold text-[#e8eaf0] tracking-tight">Portfolio Optimizer</span>
 
-        <div className="ml-auto flex items-center gap-3">
+        {/* Universe chips */}
+        <div className="flex items-center gap-3 px-6 border-r border-border py-3">
           {tickers.length > 0 && (
-            <span className="font-mono text-xs bg-accent/10 border border-accent/20 text-accent px-2.5 py-1 rounded">
-              {tickers.length} asset{tickers.length !== 1 ? 's' : ''}
-            </span>
+            <>
+              <span className="terminal-label">Universe</span>
+              <div className="flex gap-1 flex-wrap">
+                {tickers.slice(0, 6).map(t => (
+                  <span key={t} className="text-[10px] font-mono text-teal bg-teal/10 border border-teal/20 px-1.5 py-0.5 rounded">
+                    {t}
+                  </span>
+                ))}
+                {tickers.length > 6 && (
+                  <span className="text-[10px] font-mono text-muted">+{tickers.length - 6}</span>
+                )}
+              </div>
+            </>
           )}
-          <span className="hidden sm:inline text-xs text-muted border border-border px-2.5 py-1 rounded font-mono">
-            Powered by CVXPY + Riskfolio
+        </div>
+
+        {/* Right side */}
+        <div className="ml-auto flex items-center gap-4 py-3">
+          <LiveClock />
+          <span className="terminal-label border border-border px-2 py-1 rounded hidden sm:inline">
+            CVXPY · RISKFOLIO-LIB
           </span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-positive animate-pulse" />
+            <span className="terminal-label text-positive">LIVE</span>
+          </div>
         </div>
       </header>
 
@@ -173,12 +210,9 @@ export default function App() {
       </main>
 
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-border mt-12 px-6 py-3 flex items-center justify-center gap-4 text-[10px] text-muted font-mono">
-        <span>Portfolio Optimizer</span>
-        <span className="text-border">|</span>
-        <span>React + Vite + Recharts</span>
-        <span className="text-border">|</span>
-        <span>FastAPI · CVXPY · Riskfolio-lib</span>
+      <footer className="border-t border-border mt-16 px-6 py-3 flex items-center justify-between bg-header text-[9px] font-mono text-muted tracking-wider uppercase">
+        <span>© 2025 PORTFOLIOOS — INSTITUTIONAL GRADE PORTFOLIO ANALYSIS</span>
+        <span>REACT + FASTAPI + CVXPY + RISKFOLIO-LIB + FAMA-FRENCH</span>
       </footer>
     </div>
   )

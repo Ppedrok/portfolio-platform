@@ -9,13 +9,13 @@ import type { FrontierResponse } from '../types'
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const COLORS = [
-  '#4f8ef7', '#00d4aa', '#f59e0b', '#f43f5e', '#a78bfa',
-  '#34d399', '#fb923c', '#38bdf8', '#e879f9', '#facc15',
+  '#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444',
+  '#a78bfa', '#34d399', '#fb923c', '#e879f9', '#facc15',
 ]
-const GRID_COLOR   = '#1e2530'
-const AXIS_COLOR   = '#8892a4'
-const ACCENT       = '#4f8ef7'
-const MAX_SHARPE_C = '#00d4aa'
+const GRID_COLOR   = '#1a2035'
+const AXIS_COLOR   = '#5a6a85'
+const ACCENT       = '#2563eb'
+const MAX_SHARPE_C = '#10b981'
 const SELECTED_C   = '#f59e0b'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -237,7 +237,7 @@ export function FrontierChart({ data }: Props) {
   const selPortfolio = selectedIdx !== null ? sorted[selectedIdx] : null
 
   return (
-    <div className="bg-card rounded-panel p-4 border border-border space-y-6">
+    <div className="bg-card card-top-accent rounded-panel p-4 border border-border space-y-6">
 
       {/* ── Scatter: Efficient Frontier ── */}
       <div>

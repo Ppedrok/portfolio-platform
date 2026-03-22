@@ -35,7 +35,7 @@ function CustomTooltip({ active, payload, label }: {
   return (
     <div style={{
       background: '#0d1117',
-      border: '1px solid #1e2530',
+      border: '1px solid #1a2035',
       borderRadius: 8,
       padding: '10px 14px',
       fontFamily: '"JetBrains Mono", monospace',
@@ -68,7 +68,7 @@ function CustomTooltip({ active, payload, label }: {
 
 function MetricCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-[#080a0f] border border-[#1e2530] rounded-lg p-3 hover:border-accent/30 transition-colors">
+    <div className="bg-[#07090f] border border-border rounded-lg p-3 hover:border-accent/30 transition-colors">
       <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-1.5 leading-none">{label}</p>
       <p className="font-mono font-bold text-base leading-none text-[#e8eaf0]">{value}</p>
       {sub && <p className="text-[10px] text-muted font-mono mt-1">{sub}</p>}
@@ -147,9 +147,7 @@ export function RiskDecomposition({ data }: Props) {
 
   return (
     <div className="space-y-4 mt-4 pt-4 border-t border-border">
-      <p className="text-[10px] text-muted font-mono uppercase tracking-widest">
-        Risk Contribution &amp; Decomposition
-      </p>
+      <p className="terminal-label">Risk Contribution &amp; Decomposition</p>
 
       {/* ── Metric cards ── */}
       <div className="grid grid-cols-3 gap-2">
@@ -171,7 +169,7 @@ export function RiskDecomposition({ data }: Props) {
       </div>
 
       {/* ── Dual bar chart: Weight vs Risk % ── */}
-      <div className="bg-[#080a0f] border border-[#1e2530] rounded-lg p-3">
+      <div className="bg-[#07090f] border border-border rounded-lg p-3">
         <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-3">
           Weight vs Risk Contribution
         </p>
@@ -186,7 +184,7 @@ export function RiskDecomposition({ data }: Props) {
             <XAxis
               type="number"
               tickFormatter={v => `${(v * 100).toFixed(0)}%`}
-              tick={{ fill: '#8892a4', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
@@ -194,14 +192,14 @@ export function RiskDecomposition({ data }: Props) {
               type="category"
               dataKey="asset"
               width={52}
-              tick={{ fill: '#8892a4', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(79,142,247,0.04)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(37,99,235,0.04)' }} />
             <ReferenceLine x={0} stroke="#1e2530" />
-            <Bar dataKey="weight" name="Weight" fill="#4f8ef7" radius={[0, 2, 2, 0]} />
-            <Bar dataKey="risk"   name="Risk %"  fill="#f43f5e" radius={[0, 2, 2, 0]} />
+            <Bar dataKey="weight" name="Weight" fill="#2563eb" radius={[0, 2, 2, 0]} />
+            <Bar dataKey="risk"   name="Risk %"  fill="#ef4444" radius={[0, 2, 2, 0]} />
           </BarChart>
         </ResponsiveContainer>
         {/* Legend */}
@@ -216,7 +214,7 @@ export function RiskDecomposition({ data }: Props) {
       </div>
 
       {/* ── CVaR bar chart ── */}
-      <div className="bg-[#080a0f] border border-[#1e2530] rounded-lg p-3">
+      <div className="bg-[#07090f] border border-border rounded-lg p-3">
         <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-3">
           Weight vs CVaR Contribution
         </p>
@@ -231,7 +229,7 @@ export function RiskDecomposition({ data }: Props) {
             <XAxis
               type="number"
               tickFormatter={v => `${(v * 100).toFixed(0)}%`}
-              tick={{ fill: '#8892a4', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
@@ -239,13 +237,13 @@ export function RiskDecomposition({ data }: Props) {
               type="category"
               dataKey="asset"
               width={52}
-              tick={{ fill: '#8892a4', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(79,142,247,0.04)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(37,99,235,0.04)' }} />
             <ReferenceLine x={0} stroke="#1e2530" />
-            <Bar dataKey="weight"   name="Weight"   fill="#4f8ef7" radius={[0, 2, 2, 0]} />
+            <Bar dataKey="weight"   name="Weight"   fill="#2563eb" radius={[0, 2, 2, 0]} />
             <Bar dataKey="cvar_pct" name="CVaR %"   fill="#f59e0b" radius={[0, 2, 2, 0]}>
               {cvarData.map((_, i) => (
                 <Cell key={i} fill={pcvar[i] < 0 ? '#00d4aa' : '#f59e0b'} />
@@ -264,7 +262,7 @@ export function RiskDecomposition({ data }: Props) {
       </div>
 
       {/* ── Risk efficiency table ── */}
-      <div className="bg-[#080a0f] border border-[#1e2530] rounded-lg p-3">
+      <div className="bg-[#07090f] border border-border rounded-lg p-3">
         <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-3">
           Risk Efficiency (sorted by imbalance)
         </p>

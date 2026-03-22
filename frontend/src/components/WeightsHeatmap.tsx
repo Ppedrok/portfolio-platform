@@ -4,21 +4,21 @@ interface Props { data: BacktestResponse }
 
 /** Teal → blue → indigo based on weight magnitude */
 function weightToColor(w: number): string {
-  if (w < 0.001) return '#0d1117'
+  if (w < 0.001) return '#0b0f1a'
   const t = Math.min(1, w * 2.5)   // 40%+ → full colour
   if (t <= 0.5) {
-    // teal (#00d4aa) → blue (#4f8ef7)
+    // teal (#0ea5e9) → blue (#2563eb)
     const s = t * 2
-    const r = Math.round(0   + (79  - 0)   * s)
-    const g = Math.round(212 + (142 - 212) * s)
-    const b = Math.round(170 + (247 - 170) * s)
+    const r = Math.round(14  + (37  - 14)  * s)
+    const g = Math.round(165 + (99  - 165) * s)
+    const b = Math.round(233 + (235 - 233) * s)
     return `rgb(${r},${g},${b})`
   } else {
-    // blue (#4f8ef7) → indigo/violet (#818cf8)
+    // blue (#2563eb) → indigo (#6366f1)
     const s = (t - 0.5) * 2
-    const r = Math.round(79  + (129 - 79)  * s)
-    const g = Math.round(142 + (140 - 142) * s)
-    const b = Math.round(247 + (248 - 247) * s)
+    const r = Math.round(37  + (99  - 37)  * s)
+    const g = Math.round(99  + (102 - 99)  * s)
+    const b = Math.round(235 + (241 - 235) * s)
     return `rgb(${r},${g},${b})`
   }
 }
@@ -32,7 +32,7 @@ export function WeightsHeatmap({ data }: Props) {
   const history = weights_history.filter((_, i) => i % step === 0)
 
   return (
-    <div className="bg-card rounded-panel p-4 border border-border overflow-x-auto">
+    <div className="bg-card card-top-accent rounded-panel p-4 border border-border overflow-x-auto">
       <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-1">
         Weights Over Time
       </p>
@@ -53,7 +53,7 @@ export function WeightsHeatmap({ data }: Props) {
                   writingMode: 'vertical-rl',
                   transform: 'rotate(180deg)',
                   fontSize: 8,
-                  color: '#8892a4',
+                  color: '#5a6a85',
                   height: 44,
                   textAlign: 'left',
                   fontFamily: '"JetBrains Mono", monospace',
@@ -95,7 +95,7 @@ export function WeightsHeatmap({ data }: Props) {
           <span className="text-[10px] text-muted font-mono">0%</span>
           <div
             className="h-1.5 flex-1 rounded-full"
-            style={{ background: 'linear-gradient(to right, #00d4aa, #4f8ef7, #818cf8)' }}
+            style={{ background: 'linear-gradient(to right, #0ea5e9, #2563eb, #6366f1)' }}
           />
           <span className="text-[10px] text-muted font-mono">40%+</span>
         </div>

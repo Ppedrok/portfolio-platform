@@ -61,13 +61,13 @@ export function AssetSearch({
   }
 
   return (
-    <section className="bg-card rounded-panel p-5 shadow-card border border-border">
+    <section className="bg-card card-top-accent rounded-panel p-5 border border-border">
       {/* Section label */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-[10px] font-mono font-semibold text-accent uppercase tracking-widest border border-accent/30 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(79,142,247,0.3)]">
+        <span className="terminal-label border border-accent/40 text-accent bg-accent/5 px-2 py-0.5 rounded">
           01
         </span>
-        <h2 className="text-sm font-semibold text-[#e8eaf0] tracking-tight">Asset Selection</h2>
+        <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Asset Selection</h2>
       </div>
 
       {/* Search input */}
@@ -81,7 +81,7 @@ export function AssetSearch({
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search ticker or company name…"
-            className="w-full bg-bg border border-border rounded-panel pl-9 pr-4 py-2.5 text-sm text-[#e8eaf0] placeholder-muted focus:outline-none focus:border-accent transition-colors font-mono"
+            className="w-full bg-[#07090f] border border-border rounded-panel pl-9 pr-4 py-2.5 text-sm text-[#c8d0e0] placeholder-muted focus:outline-none focus:border-accent transition-colors font-mono hover:border-border-bright"
           />
           {busy && (
             <span className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -108,8 +108,8 @@ export function AssetSearch({
                 }`}
               >
                 <span className="flex items-center gap-3">
-                  <span className="font-mono font-semibold text-accent text-xs w-[72px] shrink-0">{r.ticker}</span>
-                  <span className="text-[#e8eaf0] text-xs">{r.name}</span>
+                  <span className="font-mono font-bold text-teal text-xs w-[72px] shrink-0">{r.ticker}</span>
+                  <span className="text-[#c8d0e0] text-xs">{r.name}</span>
                 </span>
                 <span className="text-muted text-[10px] shrink-0 font-mono">{r.exchange} · {r.asset_type}</span>
               </button>
@@ -131,7 +131,7 @@ export function AssetSearch({
           ))}
         </div>
       ) : (
-        <p className="text-muted text-xs mb-4 font-mono">
+        <p className="terminal-label mb-4">
           Select at least 2 assets to proceed.
         </p>
       )}
@@ -143,14 +143,14 @@ export function AssetSearch({
           ['End Date',   endDate,   onEndDate],
         ] as const).map(([label, value, onChange]) => (
           <div key={label}>
-            <label className="block text-[10px] text-muted mb-1 font-mono uppercase tracking-widest">
+            <label className="block terminal-label mb-1.5">
               {label}
             </label>
             <input
               type="date"
               value={value}
               onChange={e => onChange(e.target.value)}
-              className="w-full bg-[#0d1117] border border-border rounded-panel px-3 py-2 text-sm text-[#e8eaf0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-accent/50 cursor-pointer"
+              className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2 text-sm text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright cursor-pointer"
               style={{ colorScheme: 'dark' }}
             />
           </div>

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 function Shimmer({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <div
-      className={`animate-pulse bg-[#1e2530] rounded ${className ?? ''}`}
+      className={`animate-pulse bg-[#1a2035] rounded ${className ?? ''}`}
       style={style}
     />
   )
@@ -44,7 +44,7 @@ function WeightsSkeleton() {
         <Shimmer className="h-2.5 w-32 mb-3" />
         <div className="grid grid-cols-3 gap-2">
           {Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="bg-[#080a0f] border border-[#1e2530] rounded-lg p-3 space-y-2">
+            <div key={i} className="bg-[#07090f] border border-border rounded-lg p-3 space-y-2">
               <Shimmer className="h-2 w-16 rounded" />
               <Shimmer className="h-5 w-20 rounded" />
             </div>
@@ -155,16 +155,16 @@ export function ProgressSteps({
                   />
                 </svg>
               ) : active ? (
-                <span className="w-2.5 h-2.5 rounded-full bg-[#38bdf8] animate-pulse inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0ea5e9] animate-pulse inline-block" />
               ) : (
-                <span className="w-2 h-2 rounded-full bg-[#1e2530] inline-block" />
+                <span className="w-2 h-2 rounded-full bg-[#1a2035] inline-block" />
               )}
             </span>
             {/* Label */}
             <span
               className={`text-xs font-mono transition-colors duration-300 ${
                 done   ? 'text-emerald-400/70' :
-                active ? 'text-[#38bdf8]'      :
+                active ? 'text-[#0ea5e9]'      :
                          'text-muted/40'
               }`}
             >

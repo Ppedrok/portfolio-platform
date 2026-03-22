@@ -40,15 +40,15 @@ function heatColor(t: number, invertColors = false): string {
   const v = invertColors ? 1 - Math.max(0, Math.min(1, t)) : Math.max(0, Math.min(1, t))
   if (v <= 0.5) {
     const s = v * 2
-    const r = Math.round(10  + (79  - 10)  * s)
-    const g = Math.round(22  + (142 - 22)  * s)
-    const b = Math.round(40  + (247 - 40)  * s)
+    const r = Math.round(5   + (37  - 5)   * s)
+    const g = Math.round(7   + (99  - 7)   * s)
+    const b = Math.round(13  + (235 - 13)  * s)
     return `rgb(${r},${g},${b})`
   }
   const s = (v - 0.5) * 2
-  const r = Math.round(79  + (232 - 79)  * s)
-  const g = Math.round(142 + (234 - 142) * s)
-  const b = Math.round(247 + (240 - 247) * s)
+  const r = Math.round(37  + (232 - 37)  * s)
+  const g = Math.round(99  + (234 - 99)  * s)
+  const b = Math.round(235 + (240 - 235) * s)
   return `rgb(${r},${g},${b})`
 }
 
@@ -102,7 +102,7 @@ function Heatmap({ tickers, matrix, title, invertColors = false, isCorrelation =
               y={LABEL_H - 4}
               textAnchor="start"
               transform={`rotate(-42, ${LABEL_W + ci * CELL + CELL / 2}, ${LABEL_H - 4})`}
-              fill="#8892a4"
+              fill="#5a6a85"
               fontSize={9}
               fontFamily='"JetBrains Mono", monospace'
             >
@@ -117,7 +117,7 @@ function Heatmap({ tickers, matrix, title, invertColors = false, isCorrelation =
               x={LABEL_W - 6}
               y={LABEL_H + ri * CELL + CELL / 2 + 4}
               textAnchor="end"
-              fill="#8892a4"
+              fill="#5a6a85"
               fontSize={9}
               fontFamily='"JetBrains Mono", monospace'
             >
@@ -171,8 +171,8 @@ function Heatmap({ tickers, matrix, title, invertColors = false, isCorrelation =
                 y={tooltip.svgY - 22}
                 width={112}
                 height={18}
-                fill="#0d1117"
-                stroke="#1e2530"
+                fill="#0b0f1a"
+                stroke="#1a2035"
                 strokeWidth={1}
                 rx={3}
               />
@@ -198,8 +198,8 @@ function Heatmap({ tickers, matrix, title, invertColors = false, isCorrelation =
           className="h-1.5 flex-1 rounded-full"
           style={{
             background: invertColors
-              ? 'linear-gradient(to right, #e8eaf0, #4f8ef7, #0a1628)'
-              : 'linear-gradient(to right, #0a1628, #4f8ef7, #e8eaf0)',
+              ? 'linear-gradient(to right, #e8eaf0, #2563eb, #05070d)'
+              : 'linear-gradient(to right, #05070d, #2563eb, #e8eaf0)',
           }}
         />
         <span className="text-[9px] text-muted font-mono">1</span>
@@ -244,16 +244,16 @@ export function AssetOverview({ selected, startDate, endDate }: Props) {
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <span className="text-[10px] font-mono text-accent border border-accent/30 px-2 py-0.5 rounded shadow-[0_0_8px_rgba(79,142,247,0.3)]">
+        <span className="terminal-label border border-accent/40 text-accent bg-accent/5 px-2 py-0.5 rounded">
           02
         </span>
-        <h2 className="text-sm font-semibold text-[#e8eaf0]">Asset Overview</h2>
+        <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Asset Overview</h2>
 
         <div className="ml-auto">
           <select
             value={method}
             onChange={e => setMethod(e.target.value as CodependenceMethod)}
-            className="bg-[#0d1117] border border-border text-[#e8eaf0] text-xs font-mono rounded px-2 py-1 focus:outline-none focus:border-accent hover:border-accent/50 cursor-pointer"
+            className="bg-[#07090f] border border-border text-[#c8d0e0] text-xs font-mono rounded px-2 py-1 focus:outline-none focus:border-accent hover:border-border-bright cursor-pointer"
             style={{ colorScheme: 'dark' }}
           >
             {METHOD_OPTIONS.map(o => (
@@ -274,12 +274,12 @@ export function AssetOverview({ selected, startDate, endDate }: Props) {
             return (
               <div
                 key={t}
-                className="bg-card border border-border rounded px-3 py-2 flex items-center gap-3"
+                className="bg-[#07090f] border border-border rounded px-3 py-2 flex items-center gap-3"
               >
-                <span className="text-xs font-mono font-semibold text-[#e8eaf0]">{t}</span>
+                <span className="text-xs font-mono font-bold text-teal">{t}</span>
                 <span
                   className="text-[10px] font-mono"
-                  style={{ color: pos ? '#00d4aa' : '#ff4d6a' }}
+                  style={{ color: pos ? '#10b981' : '#ef4444' }}
                 >
                   {ret != null
                     ? `${ret >= 0 ? '+' : ''}${(ret * 100).toFixed(1)}%`
@@ -315,7 +315,7 @@ export function AssetOverview({ selected, startDate, endDate }: Props) {
 
       {/* Heatmaps */}
       {data && !loading && (
-        <div className="bg-card border border-border rounded-panel p-4 space-y-6">
+        <div className="bg-card card-top-accent border border-border rounded-panel p-4 space-y-6">
 
           <Heatmap
             tickers={data.tickers}

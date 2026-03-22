@@ -3,8 +3,8 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import type { PortfolioMetrics, RiskDecompositionData } from '../types'
 
 const COLORS = [
-  '#4f8ef7', '#00d4aa', '#f59e0b', '#f43f5e', '#a78bfa',
-  '#34d399', '#fb923c', '#38bdf8', '#e879f9', '#facc15',
+  '#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444',
+  '#a78bfa', '#34d399', '#fb923c', '#e879f9', '#facc15',
 ]
 
 interface Props {
@@ -117,10 +117,8 @@ export function WeightsChart({ weights, metrics, risk_decomposition }: Props) {
   const activeItem = activeIndex !== null ? data[activeIndex] : null
 
   return (
-    <div className="bg-card rounded-panel p-4 border border-border">
-      <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-4">
-        Optimal Weights
-      </p>
+    <div className="bg-card card-top-accent rounded-panel p-4 border border-border">
+      <p className="terminal-label mb-4">Optimal Weights</p>
 
       {/* ── Two-column layout: pie chart + legend ── */}
       <div className="flex gap-6 items-center">
@@ -222,9 +220,7 @@ export function WeightsChart({ weights, metrics, risk_decomposition }: Props) {
       {/* ── Metrics grid ── */}
       {metrics && (
         <div className="mt-5 pt-4 border-t border-border">
-          <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-3">
-            Performance Metrics
-          </p>
+          <p className="terminal-label mb-3">Performance Metrics</p>
           <div className="grid grid-cols-3 gap-2">
             {METRIC_DEFS.map(({ key, label, pct, invert }) => {
               const v     = metrics[key]
@@ -232,7 +228,7 @@ export function WeightsChart({ weights, metrics, risk_decomposition }: Props) {
               return (
                 <div
                   key={key}
-                  className="bg-[#080a0f] border border-[#1e2530] rounded-lg p-3 hover:border-accent/30 transition-colors cursor-default"
+                  className="bg-[#07090f] border border-border rounded-lg p-3 hover:border-border-bright transition-colors cursor-default"
                 >
                   <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-1.5 leading-none">
                     {label}
