@@ -103,16 +103,48 @@ def _build_rp_constraints(
             status_code=422,
             detail="Constraint error: 'Assets' type requires a valid ticker in Position.",
         )
-    if asset_groups:
-        asset_classes_df = pd.DataFrame({
-            "Assets": tickers,
-            "Group": [
-                next((g["name"] for g in asset_groups if t in g["tickers"]), "Other")
-                for t in tickers
-            ],
-        })
-    else:
-        asset_classes_df = pd.DataFrame({"Assets": tickers})
+
+    # Collect all unique Set values used in 'Classes' constraints
+    class_sets = set(
+        constraints_df.loc[constraints_df["Type"] == "Classes", "Set"].dropna().unique()
+    )
+
+    # Build asset_classes_df: always start with Assets column
+    asset_classes_df = pd.DataFrame({"Assets": tickers})
+
+    # Add a 'Group' column whenever it's referenced OR when asset_groups are provided
+    groups_provided = asset_groups and len(asset_groups) > 0
+    if groups_provided or "Group" in class_sets:
+        asset_classes_df["Group"] = [
+            next(
+                (g["name"] for g in (asset_groups or []) if t in g.get("tickers", [])),
+                "Other"
+            )
+            for t in tickers
+        ]
+
+    # Validate: every Class constraint Set must exist as a column
+    missing_cols = class_sets - set(asset_classes_df.columns)
+    if missing_cols:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Constraint error: group column(s) {missing_cols} not found in asset_classes. "
+                   "Make sure you have defined asset groups for every class constraint.",
+        )
+
+    # Validate: every Class constraint Position must match a value in the referenced column
+    for _, row in constraints_df[constraints_df["Type"] == "Classes"].iterrows():
+        col = row["Set"]
+        pos = row["Position"]
+        if col and col in asset_classes_df.columns:
+            valid_values = set(asset_classes_df[col].unique())
+            if pos not in valid_values:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Constraint error: group '{pos}' not found in column '{col}'. "
+                           f"Available values: {sorted(valid_values)}",
+                )
+
     return constraints_df, asset_classes_df
 
 
