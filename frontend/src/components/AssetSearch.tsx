@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { searchAssets } from '../api/client'
 import type { TickerMatch } from '../types'
 import { AssetChip } from './AssetChip'
+import { enrichWithSector } from '../utils/sectors'
 
 interface Props {
   selected:    TickerMatch[]
@@ -55,7 +56,7 @@ export function AssetSearch({
   }, [])
 
   function handleSelect(t: TickerMatch) {
-    if (!selectedTickers.has(t.ticker)) onAdd(t)
+    if (!selectedTickers.has(t.ticker)) onAdd(enrichWithSector(t))
     setQuery('')
     setOpen(false)
   }
@@ -96,24 +97,35 @@ export function AssetSearch({
         {/* Dropdown */}
         {open && results.length > 0 && (
           <div className="absolute z-50 top-full mt-1 w-full bg-card border border-border rounded-panel shadow-card overflow-hidden">
-            {results.map(r => (
-              <button
-                key={r.ticker}
-                onClick={() => handleSelect(r)}
-                disabled={selectedTickers.has(r.ticker)}
-                className={`w-full text-left px-3 py-2.5 flex items-center justify-between text-sm border-b border-border/50 last:border-0 transition-colors ${
-                  selectedTickers.has(r.ticker)
-                    ? 'opacity-30 cursor-default'
-                    : 'hover:bg-accent/5 cursor-pointer'
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <span className="font-mono font-bold text-teal text-xs w-[72px] shrink-0">{r.ticker}</span>
-                  <span className="text-[#c8d0e0] text-xs">{r.name}</span>
-                </span>
-                <span className="text-muted text-[10px] shrink-0 font-mono">{r.exchange} · {r.asset_type}</span>
-              </button>
-            ))}
+            {results.map(r => {
+              const enriched = enrichWithSector(r)
+              return (
+                <button
+                  key={r.ticker}
+                  onClick={() => handleSelect(enriched)}
+                  disabled={selectedTickers.has(r.ticker)}
+                  className={`w-full text-left px-3 py-2.5 flex items-center justify-between text-sm border-b border-border/50 last:border-0 transition-colors ${
+                    selectedTickers.has(r.ticker)
+                      ? 'opacity-30 cursor-default'
+                      : 'hover:bg-accent/5 cursor-pointer'
+                  }`}
+                >
+                  <span className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono font-bold text-teal text-xs w-[72px] shrink-0">{r.ticker}</span>
+                    <span className="text-[#c8d0e0] text-xs truncate">{r.name}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {enriched.sector && (
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                        style={{ background: '#2563eb18', color: '#6366f1', border: '1px solid #6366f130' }}>
+                        {enriched.sector}
+                      </span>
+                    )}
+                    <span className="text-muted text-[10px] font-mono">{r.exchange}</span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
         )}
         {open && results.length === 0 && !busy && query.length > 0 && (
