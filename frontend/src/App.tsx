@@ -273,6 +273,7 @@ export default function App() {
               activeTab={activeTab}
               onTabChange={handleTabChange}
               tickers={tickers}
+              assets={selected}
               startDate={startDate}
               endDate={endDate}
               muMethod={muMethod}

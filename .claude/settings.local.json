@@ -26,7 +26,9 @@
       "Bash(curl -s -X POST http://localhost:8000/api/optimize -H \"Content-Type: application/json\" -d '{\"\"\"\"tickers\"\"\"\":[\"\"\"\"AAPL\"\"\"\",\"\"\"\"MSFT\"\"\"\",\"\"\"\"GOOGL\"\"\"\"],\"\"\"\"start\"\"\"\":\"\"\"\"2022-01-01\"\"\"\",\"\"\"\"end\"\"\"\":\"\"\"\"2024-01-01\"\"\"\",\"\"\"\"mu_method\"\"\"\":\"\"\"\"historical\"\"\"\",\"\"\"\"cov_method\"\"\"\":\"\"\"\"historical\"\"\"\",\"\"\"\"opt_method\"\"\"\":\"\"\"\"markowitz\"\"\"\",\"\"\"\"target_return\"\"\"\":null,\"\"\"\"constraints\"\"\"\":{\"\"\"\"max_weight\"\"\"\":0.6,\"\"\"\"min_weight\"\"\"\":0.05},\"\"\"\"rp_constraints\"\"\"\":null,\"\"\"\"long_only\"\"\"\":true,\"\"\"\"solver\"\"\"\":\"\"\"\"CLARABEL\"\"\"\"}')",
       "Bash(python3 -c \":*)",
       "Bash(lsof -ti:8000)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(/usr/local/bin/npm run:*)",
+      "Bash(ls /usr/local/bin/node*)"
     ]
   }
 }

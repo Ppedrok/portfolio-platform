@@ -1,4 +1,4 @@
-import type { OptimizeResponse, FrontierResponse, BacktestResponse } from '../types'
+import type { OptimizeResponse, FrontierResponse, BacktestResponse, TickerMatch } from '../types'
 import { WeightsChart }          from './WeightsChart'
 import { FrontierChart }         from './FrontierChart'
 import { EquityCurve }           from './EquityCurve'
@@ -38,6 +38,7 @@ interface Props {
   onTabChange:     (t: Tab) => void
   // For factor exposure & frontier comparison
   tickers:         string[]
+  assets:          TickerMatch[]
   startDate:       string
   endDate:         string
   muMethod:        string
@@ -66,7 +67,7 @@ export function ResultsPanel({
   optimizeError, backtestError,
   optimizeLoading, backtestLoading,
   activeTab, onTabChange,
-  tickers, startDate, endDate,
+  tickers, assets, startDate, endDate,
   muMethod, covMethod,
   maxWeight, minWeight, longOnly,
   onCompareLoading,
@@ -133,7 +134,7 @@ export function ResultsPanel({
                       {od.warning}
                     </div>
                   )}
-                  <WeightsChart weights={od.weights} metrics={od.metrics} risk_decomposition={od.risk_decomposition ?? undefined} />
+                  <WeightsChart weights={od.weights} metrics={od.metrics} risk_decomposition={od.risk_decomposition ?? undefined} assets={assets} />
                   {od.risk_decomposition && (
                     <RiskDecomposition data={od.risk_decomposition} />
                   )}

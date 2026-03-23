@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { ConstraintRow, TickerMatch, AssetGroup } from '../types'
 
 // ── Palette (shared with WeightsChart) ────────────────────────────────────────
@@ -128,6 +128,21 @@ export function ConstraintsPanel({ assets, longOnly, onChange, onGroupsChange, o
 
   const tickers = assets.map(a => a.ticker)
 
+  // ── Auto-derive sector groups from asset metadata ──────────────────────────
+  const sectorGroupsAuto = useMemo<Group[]>(() => {
+    const map: Record<string, string[]> = {}
+    for (const a of assets) {
+      const sec = a.sector?.trim()
+      if (sec) {
+        if (!map[sec]) map[sec] = []
+        map[sec].push(a.ticker)
+      }
+    }
+    return Object.entries(map)
+      .filter(([, tks]) => tks.length > 0)
+      .map(([sector, tks]) => ({ id: `__sector__${sector}`, name: sector, tickers: tks }))
+  }, [assets])
+
   function emit(
     lm = limitMap, gc = groupCons, rc = relCons,
     gr = globalRules, rr = rawRows,
@@ -136,8 +151,14 @@ export function ConstraintsPanel({ assets, longOnly, onChange, onGroupsChange, o
   }
 
   // Re-emit when asset list changes (drops removed assets from output automatically)
+  // Also re-emit groups (sector groups change as assets change)
   useEffect(() => {
     emit()
+    const allGroups = [
+      ...sectorGroupsAuto.map(g => ({ name: g.name, tickers: g.tickers })),
+      ...groups.map(g => ({ name: g.name, tickers: g.tickers })),
+    ]
+    onGroupsChange(allGroups)
   }, [assets]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Tab 1 ─────────────────────────────────────────────────────────────────
@@ -158,7 +179,12 @@ export function ConstraintsPanel({ assets, longOnly, onChange, onGroupsChange, o
 
   function setAndEmitGroups(next: Group[]) {
     setGroups(next)
-    onGroupsChange(next.map(g => ({ name: g.name, tickers: g.tickers })))
+    // Always include auto sector groups alongside custom groups
+    const allGroups: AssetGroup[] = [
+      ...sectorGroupsAuto.map(g => ({ name: g.name, tickers: g.tickers })),
+      ...next.map(g => ({ name: g.name, tickers: g.tickers })),
+    ]
+    onGroupsChange(allGroups)
   }
 
   function addGroup() { setAndEmitGroups([...groups, { id: uid(), name: '', tickers: [] }]) }
@@ -284,7 +310,8 @@ export function ConstraintsPanel({ assets, longOnly, onChange, onGroupsChange, o
         )}
         {tab === 'groups' && (
           <Tab2
-            tickers={tickers}
+            assets={assets}
+            sectorGroups={sectorGroupsAuto}
             groups={groups}
             groupCons={groupCons}
             onAddGroup={addGroup}
@@ -457,8 +484,37 @@ function Tab1({ assets, limitMap, lockOpen, lockInput, sumMins, setLim, toggleLo
 
 // ── TAB 2: Groups & Sectors ───────────────────────────────────────────────────
 
+// Colour palette for sectors (12 distinct hues)
+const SECTOR_COLORS: Record<string, string> = {
+  'Technology':              '#2563eb',
+  'Healthcare':              '#10b981',
+  'Financials':              '#f59e0b',
+  'Consumer Discretionary':  '#ef4444',
+  'Consumer Staples':        '#a78bfa',
+  'Energy':                  '#fb923c',
+  'Industrials':             '#0ea5e9',
+  'Materials':               '#34d399',
+  'Utilities':               '#e879f9',
+  'Real Estate':             '#facc15',
+  'Communication Services':  '#f43f5e',
+  'Aerospace & Defense':     '#64748b',
+  'Broad Market':            '#94a3b8',
+  'International Equity':    '#6366f1',
+  'Factor ETF':              '#ec4899',
+  'Government Bonds':        '#14b8a6',
+  'Corporate Bonds':         '#f97316',
+  'Aggregate Bonds':         '#8b5cf6',
+  'Emerging Market Bonds':   '#22d3ee',
+  'Commodities':             '#d97706',
+  'Cryptocurrency':          '#84cc16',
+}
+function sectorColor(sec: string, fallbackIdx: number): string {
+  return SECTOR_COLORS[sec] ?? PALETTE[fallbackIdx % PALETTE.length]
+}
+
 interface Tab2Props {
-  tickers:       string[]
+  assets:        TickerMatch[]
+  sectorGroups:  Group[]
   groups:        Group[]
   groupCons:     GroupCon[]
   onAddGroup:    () => void
@@ -469,24 +525,111 @@ interface Tab2Props {
   onRemoveGC:    (id: string) => void
 }
 
-function Tab2({ tickers, groups, groupCons, onAddGroup, onUpdateGroup, onRemoveGroup, onAddGC, onUpdateGC, onRemoveGC }: Tab2Props) {
-  const assignedSet = new Set(groups.flatMap(g => g.tickers))
+function Tab2({ assets, sectorGroups, groups, groupCons, onAddGroup, onUpdateGroup, onRemoveGroup, onAddGC, onUpdateGC, onRemoveGC }: Tab2Props) {
+  const tickers       = assets.map(a => a.ticker)
+  const assignedSet   = new Set(groups.flatMap(g => g.tickers))
+  const allGroups     = [...sectorGroups, ...groups]
+
+  // GIS colour index: sectors first, then custom
+  const colorForGroup = (g: Group, idx: number) =>
+    g.id.startsWith('__sector__') ? sectorColor(g.name, idx) : PALETTE[(sectorGroups.length + idx) % PALETTE.length]
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
 
-      {/* Define Groups */}
+      {/* ── Auto Sectors ────────────────────────────────────────────────── */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] font-mono text-muted uppercase tracking-widest">Auto-Detected Sectors</span>
+          <span className="text-[9px] font-mono text-accent/60 bg-accent/5 border border-accent/20 px-1.5 py-0.5 rounded">
+            from asset metadata
+          </span>
+        </div>
+
+        {sectorGroups.length === 0 ? (
+          <p className="text-[10px] text-muted font-mono py-3 text-center border border-dashed border-[#1e2530] rounded">
+            Add assets with known sectors to see auto-grouping.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {sectorGroups.map((g, gi) => {
+              const color = sectorColor(g.name, gi)
+              const conForSector = groupCons.filter(gc => gc.group === g.name)
+              return (
+                <div key={g.id} className="bg-[#080a0f] border rounded-lg p-3"
+                  style={{ borderColor: color + '30' }}>
+                  {/* Header */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded"
+                      style={{ background: color + '22', color, border: `1px solid ${color}44` }}>
+                      {g.name}
+                    </span>
+                    <span className="text-[10px] text-muted font-mono">
+                      {g.tickers.length} asset{g.tickers.length !== 1 ? 's' : ''}
+                    </span>
+                    <button type="button" onClick={() => onAddGC(g.name)}
+                      className="ml-auto text-[10px] font-mono border px-2 py-0.5 rounded hover:bg-accent/10 transition-colors"
+                      style={{ color, borderColor: color + '44' }}>
+                      + Add Constraint
+                    </button>
+                  </div>
+
+                  {/* Tickers (read-only chips) */}
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {g.tickers.map(t => {
+                      const asset = assets.find(a => a.ticker === t)
+                      return (
+                        <span key={t} title={asset?.name}
+                          className="text-[10px] font-mono px-2 py-0.5 rounded border cursor-default"
+                          style={{ borderColor: color + '55', background: color + '18', color: color + 'dd' }}>
+                          {t}
+                        </span>
+                      )
+                    })}
+                  </div>
+
+                  {/* Inline constraints for this sector */}
+                  {conForSector.length > 0 && (
+                    <div className="space-y-1 pt-1 border-t" style={{ borderColor: color + '20' }}>
+                      {conForSector.map(gc => (
+                        <div key={gc.id} className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted font-mono w-14">Sector</span>
+                          <select value={gc.sign} onChange={e => onUpdateGC(gc.id, { sign: e.target.value as GroupCon['sign'] })}
+                            className={INP + ' cursor-pointer w-14'} style={SS}>
+                            <option value=">=">≥</option>
+                            <option value="<=">≤</option>
+                          </select>
+                          <div className="flex items-center gap-0.5">
+                            <input type="number" min={0} max={100} step={1} placeholder="0"
+                              value={gc.weight} onChange={e => onUpdateGC(gc.id, { weight: e.target.value })}
+                              className={INP + ' w-14 text-right'} />
+                            <span className="text-[10px] text-muted font-mono">%</span>
+                          </div>
+                          <button type="button" onClick={() => onRemoveGC(gc.id)}
+                            className="text-muted hover:text-negative transition-colors leading-none">×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Custom Groups ───────────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-mono text-muted uppercase tracking-widest">Define Groups</span>
+          <span className="text-[10px] font-mono text-muted uppercase tracking-widest">Custom Groups</span>
           <button type="button" onClick={onAddGroup}
             className="text-[10px] font-mono text-accent border border-accent/30 px-2 py-0.5 rounded hover:bg-accent/10 transition-colors flex items-center gap-1"
           >+ New Group</button>
         </div>
 
         {groups.length === 0 ? (
-          <p className="text-[10px] text-muted font-mono py-4 text-center border border-dashed border-[#1e2530] rounded">
-            Create groups to apply sector-level constraints.
+          <p className="text-[10px] text-muted font-mono py-3 text-center border border-dashed border-[#1e2530] rounded">
+            Create custom cross-sector groups for additional constraints.
           </p>
         ) : (
           <div className="space-y-2">
@@ -496,7 +639,7 @@ function Tab2({ tickers, groups, groupCons, onAddGroup, onUpdateGroup, onRemoveG
                 <div key={g.id} className="bg-[#080a0f] border border-[#1e2530] rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <input
-                      type="text" placeholder="Group name (e.g. Tech)"
+                      type="text" placeholder="Group name (e.g. Value plays)"
                       value={g.name}
                       onChange={e => onUpdateGroup(g.id, { name: e.target.value })}
                       className={INP + ' flex-1 text-[11px]'}
@@ -535,10 +678,9 @@ function Tab2({ tickers, groups, groupCons, onAddGroup, onUpdateGroup, onRemoveG
                   {/* Quick-add constraint for this group */}
                   {g.name && (
                     <div className="mt-2 pt-2 border-t border-[#1e2530] flex items-center gap-2">
-                      <span className="text-[10px] text-muted font-mono">Constraint:</span>
                       <button type="button" onClick={() => onAddGC(g.name)}
                         className="text-[10px] font-mono text-accent border border-accent/30 px-2 py-0.5 rounded hover:bg-accent/10 transition-colors">
-                        + Rule for "{g.name}"
+                        + Constraint for "{g.name}"
                       </button>
                     </div>
                   )}
@@ -549,36 +691,38 @@ function Tab2({ tickers, groups, groupCons, onAddGroup, onUpdateGroup, onRemoveG
         )}
       </div>
 
-      {/* Group Constraints */}
-      {groupCons.length > 0 && (
+      {/* ── All Group Constraints Summary ───────────────────────────────── */}
+      {groupCons.filter(gc => !allGroups.some(g => g.name === gc.group && g.id.startsWith('__sector__'))).length > 0 && (
         <div>
-          <span className="text-[10px] font-mono text-muted uppercase tracking-widest block mb-2">Group Constraints</span>
+          <span className="text-[10px] font-mono text-muted uppercase tracking-widest block mb-2">Custom Group Constraints</span>
           <div className="space-y-1.5">
-            {groupCons.map(gc => {
-              const gi    = groups.findIndex(g => g.name === gc.group)
-              const color = gi >= 0 ? PALETTE[gi % PALETTE.length] : '#8892a4'
-              return (
-                <div key={gc.id} className="flex items-center gap-2 bg-[#080a0f] border border-[#1e2530] rounded-lg px-3 py-2">
-                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded shrink-0"
-                    style={{ background: color + '22', color, border: `1px solid ${color}44` }}>
-                    {gc.group || '—'}
-                  </span>
-                  <select value={gc.sign} onChange={e => onUpdateGC(gc.id, { sign: e.target.value as GroupCon['sign'] })}
-                    className={INP + ' cursor-pointer w-16'} style={SS}>
-                    <option value=">=">≥</option>
-                    <option value="<=">≤</option>
-                  </select>
-                  <div className="flex items-center gap-0.5">
-                    <input type="number" min={0} max={100} step={1} placeholder="0"
-                      value={gc.weight} onChange={e => onUpdateGC(gc.id, { weight: e.target.value })}
-                      className={INP + ' w-16 text-right'} />
-                    <span className="text-[10px] text-muted font-mono">%</span>
+            {groupCons
+              .filter(gc => !sectorGroups.some(g => g.name === gc.group))
+              .map(gc => {
+                const gi    = groups.findIndex(g => g.name === gc.group)
+                const color = gi >= 0 ? PALETTE[gi % PALETTE.length] : '#8892a4'
+                return (
+                  <div key={gc.id} className="flex items-center gap-2 bg-[#080a0f] border border-[#1e2530] rounded-lg px-3 py-2">
+                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded shrink-0"
+                      style={{ background: color + '22', color, border: `1px solid ${color}44` }}>
+                      {gc.group || '—'}
+                    </span>
+                    <select value={gc.sign} onChange={e => onUpdateGC(gc.id, { sign: e.target.value as GroupCon['sign'] })}
+                      className={INP + ' cursor-pointer w-16'} style={SS}>
+                      <option value=">=">≥</option>
+                      <option value="<=">≤</option>
+                    </select>
+                    <div className="flex items-center gap-0.5">
+                      <input type="number" min={0} max={100} step={1} placeholder="0"
+                        value={gc.weight} onChange={e => onUpdateGC(gc.id, { weight: e.target.value })}
+                        className={INP + ' w-16 text-right'} />
+                      <span className="text-[10px] text-muted font-mono">%</span>
+                    </div>
+                    <button type="button" onClick={() => onRemoveGC(gc.id)}
+                      className="ml-auto text-muted hover:text-negative transition-colors leading-none">×</button>
                   </div>
-                  <button type="button" onClick={() => onRemoveGC(gc.id)}
-                    className="ml-auto text-muted hover:text-negative transition-colors leading-none">×</button>
-                </div>
-              )
-            })}
+                )
+              })}
           </div>
         </div>
       )}

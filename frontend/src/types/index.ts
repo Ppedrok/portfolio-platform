@@ -47,6 +47,7 @@ export interface TickerMatch {
   name:       string
   exchange:   string
   asset_type: string
+  sector:     string
 }
 
 export interface SearchResponse {

@@ -24,6 +24,7 @@ class TickerMatch(BaseModel):
     name:        str        = ""
     exchange:    str        = ""
     asset_type:  str        = ""
+    sector:      str        = ""
 
 
 class SearchResponse(BaseModel):
