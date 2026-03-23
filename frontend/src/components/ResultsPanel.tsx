@@ -6,6 +6,7 @@ import { BacktestMetricsTable } from './MetricsTable'
 import { WeightsHeatmap }        from './WeightsHeatmap'
 import { RiskDecomposition }     from './RiskDecomposition'
 import { FactorExposure }        from './FactorExposure'
+import { FrontierComparison }    from './FrontierComparison'
 import { SkeletonLoader, ProgressSteps } from './SkeletonLoader'
 import type { ProgressStep } from './SkeletonLoader'
 
@@ -23,7 +24,7 @@ const BACKTEST_STEPS: ProgressStep[] = [
   { label: 'Aggregating equity curve…',         delay: 7000  },
 ]
 
-type Tab = 'optimization' | 'backtest' | 'factors'
+type Tab = 'optimization' | 'backtest' | 'factors' | 'compare'
 
 interface Props {
   isFrontier:      boolean
@@ -35,10 +36,15 @@ interface Props {
   backtestLoading: boolean
   activeTab:       Tab
   onTabChange:     (t: Tab) => void
-  // For factor exposure
+  // For factor exposure & frontier comparison
   tickers:         string[]
   startDate:       string
   endDate:         string
+  muMethod:        string
+  covMethod:       string
+  maxWeight:       number
+  minWeight:       number
+  longOnly:        boolean
 }
 
 function isFrontierResponse(d: OptimizeResponse | FrontierResponse): d is FrontierResponse {
@@ -60,6 +66,8 @@ export function ResultsPanel({
   optimizeLoading, backtestLoading,
   activeTab, onTabChange,
   tickers, startDate, endDate,
+  muMethod, covMethod,
+  maxWeight, minWeight, longOnly,
 }: Props) {
   const hasAny =
     optimizeData || backtestData ||
@@ -80,16 +88,17 @@ export function ResultsPanel({
       </div>
 
       {/* Tab switcher — underline style */}
-      <div className="flex border-b border-border mb-5">
+      <div className="flex border-b border-border mb-5 overflow-x-auto">
         {([
           { id: 'optimization', label: 'Optimization' },
           { id: 'backtest',     label: 'Backtest' },
           { id: 'factors',      label: 'Factor Exposure' },
+          { id: 'compare',      label: 'Compare Frontiers' },
         ] as { id: Tab; label: string }[]).map(({ id, label }) => (
           <button
             key={id}
             onClick={() => onTabChange(id)}
-            className={`px-5 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2 -mb-px ${
+            className={`px-5 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2 -mb-px whitespace-nowrap ${
               activeTab === id
                 ? 'border-accent text-[#e8eaf0] bg-accent/5'
                 : 'border-transparent text-muted hover:text-muted-bright'
@@ -159,6 +168,20 @@ export function ResultsPanel({
           tickers={tickers}
           startDate={startDate}
           endDate={endDate}
+        />
+      )}
+
+      {/* ── Compare Frontiers tab ─────────────────────────────────────────── */}
+      {activeTab === 'compare' && (
+        <FrontierComparison
+          tickers={tickers}
+          startDate={startDate}
+          endDate={endDate}
+          muMethod={muMethod}
+          covMethod={covMethod}
+          maxWeight={maxWeight}
+          minWeight={minWeight}
+          longOnly={longOnly}
         />
       )}
     </section>

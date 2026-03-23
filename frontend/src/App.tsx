@@ -43,7 +43,7 @@ export default function App() {
   const [longOnly,     setLongOnly]     = useState(true)
 
   // ── Results tab ─────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'optimization' | 'backtest' | 'factors'>('optimization')
+  const [activeTab, setActiveTab] = useState<'optimization' | 'backtest' | 'factors' | 'compare'>('optimization')
 
   // ── API hooks ───────────────────────────────────────────────────────────────
   const optimize = useOptimize()
@@ -209,6 +209,11 @@ export default function App() {
           tickers={tickers}
           startDate={startDate}
           endDate={endDate}
+          muMethod={muMethod}
+          covMethod={covMethod}
+          maxWeight={maxWeight}
+          minWeight={minWeight}
+          longOnly={longOnly}
         />
 
       </main>
