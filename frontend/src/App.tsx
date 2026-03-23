@@ -59,6 +59,7 @@ export default function App() {
   const [covMethod, setCovMethod] = useState<CovMethod>('ledoit_wolf')
   const [optMethod, setOptMethod] = useState<OptMethod>('CVaR')
   const [isFrontier,       setIsFrontier]       = useState(false)
+  const [targetReturn,     setTargetReturn]     = useState<number | null>(null)
   const [maxWeight,        setMaxWeight]        = useState(1.0)
   const [minWeight,        setMinWeight]        = useState(0.0)
   const [estimationWindow, setEstimationWindow] = useState(252)
@@ -90,7 +91,7 @@ export default function App() {
       mu_method:      muMethod,
       cov_method:     covMethod,
       opt_method:     optMethod,
-      target_return:  isFrontier ? 'frontier' : null,
+      target_return:  isFrontier ? 'frontier' : targetReturn,
       constraints:    { max_weight: maxWeight, min_weight: minWeight },
       rp_constraints: constraints.length > 0 ? constraints : null,
       asset_groups:   assetGroups.length > 0 ? assetGroups : null,
@@ -233,6 +234,7 @@ export default function App() {
               covMethod={covMethod}
               optMethod={optMethod}
               isFrontier={isFrontier}
+              targetReturn={targetReturn}
               maxWeight={maxWeight}
               minWeight={minWeight}
               estimationWindow={estimationWindow}
@@ -242,7 +244,8 @@ export default function App() {
               onMuMethod={setMuMethod}
               onCovMethod={setCovMethod}
               onOptMethod={setOptMethod}
-              onFrontierToggle={setIsFrontier}
+              onFrontierToggle={v => { setIsFrontier(v); if (v) setTargetReturn(null) }}
+              onTargetReturn={setTargetReturn}
               onMaxWeight={v => { setMaxWeight(v); if (v < minWeight) setMinWeight(v) }}
               onMinWeight={v => { setMinWeight(v); if (v > maxWeight) setMaxWeight(v) }}
               onEstimationWindow={setEstimationWindow}

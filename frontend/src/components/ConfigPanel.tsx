@@ -7,6 +7,7 @@ interface Props {
   covMethod:        CovMethod
   optMethod:        OptMethod
   isFrontier:       boolean
+  targetReturn:     number | null
   maxWeight:        number
   minWeight:        number
   estimationWindow: number
@@ -18,6 +19,7 @@ interface Props {
   onCovMethod:            (v: CovMethod) => void
   onOptMethod:            (v: OptMethod) => void
   onFrontierToggle:       (v: boolean) => void
+  onTargetReturn:         (v: number | null) => void
   onMaxWeight:            (v: number) => void
   onMinWeight:            (v: number) => void
   onEstimationWindow:     (v: number) => void
@@ -157,10 +159,10 @@ function Spinner() {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function ConfigPanel({
-  muMethod, covMethod, optMethod, isFrontier,
+  muMethod, covMethod, optMethod, isFrontier, targetReturn,
   maxWeight, minWeight, estimationWindow, rebalancingFreq,
   assets, longOnly, blViews,
-  onMuMethod, onCovMethod, onOptMethod, onFrontierToggle,
+  onMuMethod, onCovMethod, onOptMethod, onFrontierToggle, onTargetReturn,
   onMaxWeight, onMinWeight, onEstimationWindow, onRebalancingFreq,
   onConstraintsChange, onGroupsChange, onLongOnly, onBlViewsChange,
   onOptimize, onBacktest, canRun, optimizeLoading, backtestLoading,
@@ -207,6 +209,56 @@ export function ConfigPanel({
           })}
         </div>
       </div>
+
+      {/* Target return — only in Single Portfolio mode */}
+      {!isFrontier && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] text-muted font-mono uppercase tracking-widest">
+              Minimum Return Constraint
+            </span>
+            {targetReturn !== null && (
+              <button
+                type="button"
+                onClick={() => onTargetReturn(null)}
+                className="text-[9px] font-mono text-muted hover:text-negative transition-colors border border-border rounded px-1.5 py-0.5"
+              >
+                clear
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="number"
+                min={-100} max={200} step={0.5}
+                placeholder="No constraint"
+                value={targetReturn !== null ? (targetReturn * 100 * 252).toFixed(1) : ''}
+                onChange={e => {
+                  const v = e.target.value
+                  if (v === '' || v === '-') { onTargetReturn(null); return }
+                  const pct = parseFloat(v)
+                  if (!isNaN(pct)) onTargetReturn(pct / 100 / 252)
+                }}
+                className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2 text-xs text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#5a6a85]"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-muted pointer-events-none">
+                % / yr
+              </span>
+            </div>
+            {targetReturn !== null && (
+              <span className="text-[10px] font-mono text-accent shrink-0">
+                μᵀx ≥ {(targetReturn * 100 * 252).toFixed(1)}%
+              </span>
+            )}
+          </div>
+          <p className="text-[9px] font-mono text-muted mt-1.5 italic">
+            {targetReturn !== null
+              ? `Forces the portfolio to achieve at least ${(targetReturn * 100 * 252).toFixed(1)}% annualized expected return.`
+              : 'Leave empty to minimize risk with no return floor (pure risk minimization).'}
+          </p>
+        </div>
+      )}
 
       {/* Weight constraints */}
       <div className="grid grid-cols-2 gap-5">
