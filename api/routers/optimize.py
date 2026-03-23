@@ -8,7 +8,6 @@ POST /api/optimize
 
 from __future__ import annotations
 
-import concurrent.futures
 import math
 import warnings
 import numpy as np
@@ -302,14 +301,16 @@ def _solve_single(
         base_constraints + aux_constraints,
     )
 
-    def _run_solve():
-        prob.solve(solver=solver, max_iters=2000, eps_abs=1e-5, eps_rel=1e-5)
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
-        future = ex.submit(_run_solve)
-        try:
-            future.result(timeout=_SOLVER_TIMEOUT_S)
-        except concurrent.futures.TimeoutError:
+    # CLARABEL accepts time_limit (seconds) and max_iter natively
+    prob.solve(
+        solver=solver,
+        time_limit=float(_SOLVER_TIMEOUT_S),
+        max_iter=2000,
+        eps_abs=1e-5,
+        eps_rel=1e-5,
+    )
+    if prob.status in ("infeasible", "unbounded", "time_limit"):
+        if prob.status == "time_limit":
             raise HTTPException(
                 status_code=408,
                 detail=(
