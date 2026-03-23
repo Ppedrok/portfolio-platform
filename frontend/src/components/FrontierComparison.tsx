@@ -15,10 +15,11 @@
 import { useState, useCallback } from 'react'
 import {
   ScatterChart, Scatter,
+  BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from 'recharts'
-import type { OptMethod, FrontierResponse } from '../types'
+import type { OptMethod, FrontierResponse, FrontierPoint } from '../types'
 import { optimizePortfolio } from '../api/client'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -140,6 +141,19 @@ function CompareTooltip({
 }
 
 // ── Summary stats ──────────────────────────────────────────────────────────────
+
+/** Return the frontier point with the highest Sharpe ratio */
+function maxSharpePortfolio(fr: FrontierResponse): FrontierPoint | null {
+  const pts = fr.portfolios.filter(
+    p => p.expected_return != null && p.expected_volatility != null && p.expected_volatility! > 0
+  )
+  if (!pts.length) return null
+  return pts.reduce((best, p) => {
+    const s  = p.expected_return!  / p.expected_volatility!
+    const bs = best.expected_return! / best.expected_volatility!
+    return s > bs ? p : best
+  })
+}
 
 function computeStats(fr: FrontierResponse) {
   const pts = fr.portfolios.filter(
@@ -564,6 +578,171 @@ export function FrontierComparison({
           </table>
         </div>
       )}
+
+      {/* ── Max-Sharpe allocation comparison ─────────────────────────────── */}
+      {hasAnyResults && doneEntries.length >= 1 && (() => {
+        // Collect max-Sharpe weights per method
+        const sharpePortfolios = doneEntries
+          .map(([method, state]) => ({
+            method,
+            label: ALL_METHODS.find(m => m.id === method)?.label ?? method,
+            color: METHOD_COLORS[method] ?? '#8892a4',
+            pt:    maxSharpePortfolio(state.data!),
+          }))
+          .filter(x => x.pt !== null)
+
+        if (!sharpePortfolios.length) return null
+
+        // Union of all tickers
+        const tickerSet = new Set<string>()
+        sharpePortfolios.forEach(({ pt }) =>
+          Object.keys(pt!.weights).forEach(t => tickerSet.add(t))
+        )
+        const tickers = Array.from(tickerSet).sort()
+
+        // Build grouped bar data: one row per ticker
+        const barData = tickers.map(ticker => {
+          const row: Record<string, number | string> = { ticker }
+          sharpePortfolios.forEach(({ method, pt }) => {
+            row[method] = +((( pt!.weights[ticker] ?? 0) * 100).toFixed(2))
+          })
+          return row
+        })
+
+        // Weight table: rows = methods, cols = tickers
+        return (
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="bg-card rounded-panel border border-border overflow-hidden">
+              <div className="px-4 pt-3 pb-2 border-b border-border flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-muted font-mono uppercase tracking-widest">
+                    Max-Sharpe Portfolio — Allocation Comparison
+                  </p>
+                  <p className="text-[10px] text-muted font-mono mt-0.5 opacity-70">
+                    Even when frontiers overlap, risk measures disagree on <em>which</em> portfolio is optimal
+                  </p>
+                </div>
+              </div>
+
+              {/* Grouped bar chart */}
+              <div className="px-4 pb-4 pt-2">
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart
+                    data={barData}
+                    margin={{ top: 8, right: 16, bottom: 24, left: 0 }}
+                    barCategoryGap="25%"
+                    barGap={2}
+                  >
+                    <CartesianGrid strokeDasharray="2 4" stroke={GRID_COLOR} vertical={false} />
+                    <XAxis
+                      dataKey="ticker"
+                      tick={{ fill: AXIS_COLOR, fontSize: 10, fontFamily: '"JetBrains Mono", monospace' }}
+                      axisLine={{ stroke: GRID_COLOR }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      unit="%"
+                      tick={{ fill: AXIS_COLOR, fontSize: 10, fontFamily: '"JetBrains Mono", monospace' }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={36}
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                      contentStyle={{
+                        background: '#0d1117',
+                        border: '1px solid rgba(56,189,248,0.2)',
+                        borderRadius: 8,
+                        fontFamily: '"JetBrains Mono", monospace',
+                        fontSize: 11,
+                      }}
+                      formatter={(value: number, name: string) => {
+                        const def = ALL_METHODS.find(m => m.id === name)
+                        return [`${value.toFixed(2)}%`, def?.label ?? name]
+                      }}
+                    />
+                    {sharpePortfolios.map(({ method, color }) => (
+                      <Bar key={method} dataKey={method} fill={color} opacity={0.85} radius={[2,2,0,0]} />
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
+
+                {/* Mini legend */}
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 justify-center">
+                  {sharpePortfolios.map(({ method, label, color }) => (
+                    <div key={method} className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
+                      <span className="font-mono text-[10px] text-muted-bright">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Weight table — rows = methods, cols = tickers */}
+            <div className="bg-card rounded-panel border border-border overflow-x-auto">
+              <div className="px-4 pt-3 pb-2 border-b border-border">
+                <p className="text-[10px] text-muted font-mono uppercase tracking-widest">
+                  Weight Table — Max-Sharpe Portfolio per Method
+                </p>
+              </div>
+              <table className="w-full text-xs font-mono">
+                <thead>
+                  <tr className="bg-[#0b0f1a] text-muted border-b border-[#1a2035]">
+                    <th className="px-4 py-2 text-left sticky left-0 bg-[#0b0f1a]">Method</th>
+                    {tickers.map(t => (
+                      <th key={t} className="px-3 py-2 text-right text-teal">{t}</th>
+                    ))}
+                    <th className="px-3 py-2 text-right text-[#10b981]">Sharpe</th>
+                    <th className="px-3 py-2 text-right">Ret</th>
+                    <th className="px-3 py-2 text-right text-[#4f8ef7]">Vol</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sharpePortfolios.map(({ method, label, color, pt }, i) => {
+                    const sharpe = pt!.expected_volatility! > 0
+                      ? (pt!.expected_return! / pt!.expected_volatility!).toFixed(3)
+                      : '—'
+                    return (
+                      <tr key={method} className={`border-b border-[#1a2035] ${i % 2 === 0 ? 'bg-[#0b0f1a]/40' : ''}`}>
+                        <td className="px-4 py-2 sticky left-0 bg-inherit">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+                            <span className="text-[#c8d0e0] font-semibold">{label}</span>
+                          </div>
+                        </td>
+                        {tickers.map(t => {
+                          const w = (pt!.weights[t] ?? 0) * 100
+                          // Heatmap intensity: 0% = dark, 100% = bright
+                          const intensity = Math.min(w / 50, 1)   // saturate at 50%
+                          const bg = `rgba(37,99,235,${(intensity * 0.35).toFixed(2)})`
+                          return (
+                            <td
+                              key={t}
+                              className="px-3 py-2 text-right"
+                              style={{ background: bg, color: w > 5 ? '#e8eaf0' : '#5a6a85' }}
+                            >
+                              {w > 0.05 ? `${w.toFixed(1)}%` : '—'}
+                            </td>
+                          )
+                        })}
+                        <td className="px-3 py-2 text-right font-bold text-[#10b981]">{sharpe}</td>
+                        <td className="px-3 py-2 text-right text-[#00d4aa]">
+                          {((pt!.expected_return! ?? 0) * 100).toFixed(2)}%
+                        </td>
+                        <td className="px-3 py-2 text-right text-[#4f8ef7]">
+                          {((pt!.expected_volatility! ?? 0) * 100).toFixed(2)}%
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Empty state */}
       {!hasAnyResults && !running && results.size === 0 && (
