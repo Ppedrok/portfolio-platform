@@ -12,7 +12,7 @@
  *   - Summary stats table: Min-Vol, Max-Return, Max-Sharpe per frontier
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   ScatterChart, Scatter,
   BarChart, Bar, Cell,
@@ -186,14 +186,15 @@ function computeStats(fr: FrontierResponse) {
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
-  tickers:   string[]
-  startDate: string
-  endDate:   string
-  muMethod:  string
-  covMethod: string
-  maxWeight: number
-  minWeight: number
-  longOnly:  boolean
+  tickers:          string[]
+  startDate:        string
+  endDate:          string
+  muMethod:         string
+  covMethod:        string
+  maxWeight:        number
+  minWeight:        number
+  longOnly:         boolean
+  onLoadingChange?: (loading: boolean) => void
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -202,10 +203,14 @@ export function FrontierComparison({
   tickers, startDate, endDate,
   muMethod, covMethod,
   maxWeight, minWeight, longOnly,
+  onLoadingChange,
 }: Props) {
   const [selected, setSelected]   = useState<Set<OptMethod>>(new Set(['CVaR', 'markowitz']))
   const [results,  setResults]    = useState<Map<string, MethodState>>(new Map())
   const [running,  setRunning]    = useState(false)
+
+  // Notify parent whenever running changes
+  useEffect(() => { onLoadingChange?.(running) }, [running, onLoadingChange])
 
   const toggle = (id: OptMethod) => {
     setSelected(prev => {

@@ -45,6 +45,7 @@ interface Props {
   maxWeight:       number
   minWeight:       number
   longOnly:        boolean
+  onCompareLoading?: (loading: boolean) => void
 }
 
 function isFrontierResponse(d: OptimizeResponse | FrontierResponse): d is FrontierResponse {
@@ -68,6 +69,7 @@ export function ResultsPanel({
   tickers, startDate, endDate,
   muMethod, covMethod,
   maxWeight, minWeight, longOnly,
+  onCompareLoading,
 }: Props) {
   const hasAny =
     optimizeData || backtestData ||
@@ -182,6 +184,7 @@ export function ResultsPanel({
           maxWeight={maxWeight}
           minWeight={minWeight}
           longOnly={longOnly}
+          onLoadingChange={onCompareLoading}
         />
       )}
     </section>

@@ -76,7 +76,8 @@ export default function App() {
   const optimize = useOptimize()
   const backtest = useBacktest()
 
-  const anyLoading = optimize.loading || backtest.loading
+  const [compareLoading, setCompareLoading] = useState(false)
+  const anyLoading = optimize.loading || backtest.loading || compareLoading
   const tickers    = selected.map(t => t.ticker)
   const canRun     = tickers.length >= 2 && startDate < endDate
 
@@ -279,6 +280,7 @@ export default function App() {
               maxWeight={maxWeight}
               minWeight={minWeight}
               longOnly={longOnly}
+              onCompareLoading={setCompareLoading}
             />
           </div>
 
