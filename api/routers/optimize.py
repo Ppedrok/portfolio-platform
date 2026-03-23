@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import cvxpy as cp
 import riskfolio as rp
-from scipy.linalg import sqrtm as matrix_sqrt
 from fastapi import APIRouter, HTTPException
 
 from portfolio_engine.data       import download_prices, compute_returns
@@ -174,6 +173,82 @@ _HEAVY_METHOD_MAX_T: dict[str, int] = {
 _SOLVER_TIMEOUT_S = 25
 
 
+def _build_risk_expr(
+    method: str,
+    x: "cp.Variable",
+    R: np.ndarray,
+    cov: np.ndarray,
+) -> tuple["cp.Expression", list]:
+    """
+    Return (risk_expression, aux_constraints) for the given method.
+    `x` is the (n,1) CVXPY weight variable.
+    `R` is the (T,n) returns matrix (already capped if needed).
+    """
+    T, n = R.shape
+
+    if method == "markowitz":
+        return cp.quad_form(x, cov), []
+
+    elif method == "GMD":
+        D = np.empty((0, n))
+        for j in range(T - 1):
+            D = np.vstack([D, R[j + 1:] - R[j, :]])
+        d    = cp.Variable((int(T * (T - 1) / 2), 1))
+        return cp.sum(d) / ((T - 1) * T), [d >= D @ x, d >= -(D @ x)]
+
+    elif method == "MAD":
+        C_T  = np.eye(T) - np.ones((T, T)) / T
+        d    = cp.Variable((T, 1))
+        return cp.sum(d) / T, [d >= C_T @ R @ x, d >= -(C_T @ R @ x), d >= 0]
+
+    elif method == "SMAD":
+        C_T  = np.eye(T) - np.ones((T, T)) / T
+        d    = cp.Variable((T, 1))
+        return cp.sum(d) / T, [d >= -(C_T @ R @ x), d >= 0]
+
+    elif method == "Brownian":
+        ones = np.ones((T, 1))
+        D    = cp.Variable((T, T), symmetric=True)
+        y    = R @ x
+        risk = cp.sum_squares(D) / T ** 2 + cp.sum(D) ** 2 / T ** 4
+        return risk, [D >= y @ ones.T - ones @ y.T, D >= -(y @ ones.T - ones @ y.T)]
+
+    elif method == "SemiVariance":
+        C_T  = np.eye(T) - np.ones((T, T)) / T
+        d    = cp.Variable((T, 1))
+        return cp.sum_squares(d) / T, [d >= -(C_T @ R @ x), d >= 0]
+
+    elif method == "LowerPartialMoments":
+        tau  = 0.03 / 252
+        d    = cp.Variable((T, 1))
+        return cp.sum(d) / T, [d >= tau - R @ x, d >= 0]
+
+    elif method == "CVaR":
+        alpha = 0.05
+        t     = cp.Variable()
+        u     = cp.Variable((T, 1))
+        return t + 1 / (alpha * T) * cp.sum(u), [u >= -R @ x - t, u >= 0]
+
+    elif method == "EVaR":
+        alpha = 0.05
+        ones  = np.ones((T, 1))
+        t     = cp.Variable((1, 1))
+        z     = cp.Variable((1, 1), nonneg=True)
+        u     = cp.Variable((T, 1))
+        return t + z * np.log(1 / (alpha * T)), [cp.sum(u) <= z, cp.ExpCone(-R @ x - t, ones @ z, u)]
+
+    elif method == "Ulcer":
+        d    = cp.Variable((T + 1, 1))
+        return cp.norm(d[1:]) / T ** 0.5, [
+            d[1:] >= d[:-1] - R @ x,
+            d[1:] >= 0,
+            d[0]  == 0,
+        ]
+
+    else:
+        raise ValueError(f"Unknown optimisation method: '{method}'")
+
+
 def _solve_single(
     method: str,
     mu_vec: np.ndarray,
@@ -206,88 +281,15 @@ def _solve_single(
             "For full-sample results, run the platform locally."
         )
 
-    # ── Define the decision variable ─────────────────────────────────────────
+    # ── Decision variable + base constraints ─────────────────────────────────
     x = cp.Variable((n, 1))
     base_constraints = [cp.sum(x) == 1, x >= lo, x <= hi]
 
     if target_return is not None and target_return != "frontier":
         base_constraints.append(mu_vec @ x >= float(target_return))
 
-    # ── Risk expression + auxiliary variables per method ─────────────────────
-    aux_constraints: list = []
-
-    if method == "markowitz":
-        risk = cp.quad_form(x, cov)
-
-    elif method == "GMD":
-        D = np.empty((0, n))
-        for j in range(T - 1):
-            D = np.vstack([D, R[j + 1:] - R[j, :]])
-        d    = cp.Variable((int(T * (T - 1) / 2), 1))
-        risk = cp.sum(d) / ((T - 1) * T)
-        aux_constraints = [d >= D @ x, d >= -(D @ x)]
-
-    elif method == "MAD":
-        C_T  = np.eye(T) - np.ones((T, T)) / T
-        d    = cp.Variable((T, 1))
-        risk = cp.sum(d) / T
-        aux_constraints = [d >= C_T @ R @ x, d >= -(C_T @ R @ x), d >= 0]
-
-    elif method == "SMAD":
-        C_T  = np.eye(T) - np.ones((T, T)) / T
-        d    = cp.Variable((T, 1))
-        risk = cp.sum(d) / T
-        aux_constraints = [d >= -(C_T @ R @ x), d >= 0]
-
-    elif method == "Brownian":
-        ones = np.ones((T, 1))
-        D    = cp.Variable((T, T), symmetric=True)
-        y    = R @ x
-        risk = cp.sum_squares(D) / T ** 2 + cp.sum(D) ** 2 / T ** 4
-        aux_constraints = [
-            D >= y @ ones.T - ones @ y.T,
-            D >= -(y @ ones.T - ones @ y.T),
-        ]
-
-    elif method == "SemiVariance":
-        C_T  = np.eye(T) - np.ones((T, T)) / T
-        d    = cp.Variable((T, 1))
-        risk = cp.sum_squares(d) / T
-        aux_constraints = [d >= -(C_T @ R @ x), d >= 0]
-
-    elif method == "LowerPartialMoments":
-        tau  = 0.03 / 252
-        d    = cp.Variable((T, 1))
-        risk = cp.sum(d) / T
-        aux_constraints = [d >= tau - R @ x, d >= 0]
-
-    elif method == "CVaR":
-        alpha = 0.05
-        t     = cp.Variable()
-        u     = cp.Variable((T, 1))
-        risk  = t + 1 / (alpha * T) * cp.sum(u)
-        aux_constraints = [u >= -R @ x - t, u >= 0]
-
-    elif method == "EVaR":
-        alpha = 0.05
-        ones  = np.ones((T, 1))
-        t     = cp.Variable((1, 1))
-        z     = cp.Variable((1, 1), nonneg=True)
-        u     = cp.Variable((T, 1))
-        risk  = t + z * np.log(1 / (alpha * T))
-        aux_constraints = [cp.sum(u) <= z, cp.ExpCone(-R @ x - t, ones @ z, u)]
-
-    elif method == "Ulcer":
-        d    = cp.Variable((T + 1, 1))
-        risk = cp.norm(d[1:]) / T ** 0.5
-        aux_constraints = [
-            d[1:] >= d[:-1] - R @ x,
-            d[1:] >= 0,
-            d[0]  == 0,
-        ]
-
-    else:
-        raise ValueError(f"Unknown optimisation method: '{method}'")
+    # ── Risk expression ───────────────────────────────────────────────────────
+    risk, aux_constraints = _build_risk_expr(method, x, R, cov)
 
     # ── Optional riskfolio linear constraints (A @ x <= b) ───────────────────
     if constraints_df is not None:
@@ -352,28 +354,40 @@ def optimize(body: OptimizeRequest):
 
     # ── Efficient frontier ────────────────────────────────────────────────────
     if body.target_return == "frontier":
-        Sigma_sqrt = matrix_sqrt(cov)
-        x      = cp.Variable((len(tickers), 1))
-        g      = cp.Variable(nonneg=True)
-        mu_bar = cp.Parameter()
+        method = body.opt_method
 
-        constraints = [
-            cp.SOC(g, Sigma_sqrt @ x),
-            mu_vec @ x >= mu_bar,
-            cp.sum(x) == 1,
-            x >= lo,
-            x <= hi,
-        ]
-        prob = cp.Problem(cp.Minimize(g), constraints)
+        # Cap T for heavy methods and choose number of frontier points
+        T_full = R.shape[0]
+        max_t  = _HEAVY_METHOD_MAX_T.get(method)
+        R_fr   = R[-max_t:] if max_t and T_full > max_t else R
+        # Fewer points for heavy methods to stay within Render's timeout budget
+        n_pts  = 20 if method in _HEAVY_METHOD_MAX_T else 40
+        # Per-point timeout: total budget ~50 s shared across all points
+        pt_timeout = max(3.0, min(8.0, 50.0 / n_pts))
+
+        T_fr, n_assets = R_fr.shape
 
         portfolios: list[FrontierPoint] = []
         for idx, target in enumerate(
-            np.linspace(float(mu_vec.min()), float(mu_vec.max()), 40)
+            np.linspace(float(mu_vec.min()), float(mu_vec.max()), n_pts)
         ):
-            mu_bar.value = target
             try:
-                prob.solve(solver=body.solver)
-                w_col = x.value
+                x_var = cp.Variable((n_assets, 1))
+                base_cons = [
+                    cp.sum(x_var) == 1,
+                    x_var >= lo,
+                    x_var <= hi,
+                    mu_vec @ x_var >= target,
+                ]
+                risk, aux = _build_risk_expr(method, x_var, R_fr, cov)
+
+                if constraints_df is not None:
+                    A_c, b_c = rp.assets_constraints(constraints_df, asset_classes_df)
+                    aux.append(np.array(A_c) @ x_var <= np.array(b_c))
+
+                prob = cp.Problem(cp.Minimize(risk), base_cons + aux)
+                prob.solve(solver=body.solver, time_limit=float(pt_timeout))
+                w_col = x_var.value
             except Exception:
                 w_col = None
 
