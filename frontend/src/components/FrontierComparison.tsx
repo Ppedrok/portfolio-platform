@@ -36,6 +36,34 @@ const METHOD_COLORS: Record<string, string> = {
   Brownian:             '#06b6d4',   // cyan
 }
 
+// Distinct dash patterns so overlapping lines remain distinguishable
+const METHOD_DASH: Record<string, string | undefined> = {
+  markowitz:            undefined,        // solid
+  CVaR:                 '6 3',            // medium dash
+  MAD:                  '2 3',            // dots
+  SMAD:                 '10 3 2 3',       // long-dot
+  SemiVariance:         '12 4',           // long dash
+  LowerPartialMoments:  '4 2 4 2',        // equal dash
+  EVaR:                 '1 4',            // sparse dots
+  Ulcer:                '8 2 2 2',        // dash-dot-dash
+  GMD:                  '16 4',           // very long dash
+  Brownian:             '3 3 8 3',        // short-long
+}
+
+// Stroke widths: vary so overlapping lines have slightly different visual weight
+const METHOD_WIDTH: Record<string, number> = {
+  markowitz:            2.5,
+  CVaR:                 2.0,
+  MAD:                  2.0,
+  SMAD:                 1.8,
+  SemiVariance:         1.8,
+  LowerPartialMoments:  1.8,
+  EVaR:                 2.0,
+  Ulcer:                2.0,
+  GMD:                  2.0,
+  Brownian:             2.0,
+}
+
 interface MethodDef { id: OptMethod; label: string; heavy?: boolean }
 
 const ALL_METHODS: MethodDef[] = [
@@ -361,10 +389,21 @@ export function FrontierComparison({
           <div className="flex flex-wrap gap-x-5 gap-y-1.5 mb-4">
             {doneEntries.map(([method]) => {
               const color = METHOD_COLORS[method] ?? '#8892a4'
+              const dash  = METHOD_DASH[method]
+              const w     = METHOD_WIDTH[method] ?? 2
               const def   = ALL_METHODS.find(m => m.id === method)
               return (
-                <div key={method} className="flex items-center gap-1.5">
-                  <div className="w-6 h-0 border-t-2 rounded" style={{ borderColor: color }} />
+                <div key={method} className="flex items-center gap-2">
+                  {/* SVG line swatch showing actual dash pattern */}
+                  <svg width="28" height="10" style={{ overflow: 'visible' }}>
+                    <line
+                      x1="0" y1="5" x2="28" y2="5"
+                      stroke={color}
+                      strokeWidth={w}
+                      strokeDasharray={dash ?? undefined}
+                      strokeLinecap="round"
+                    />
+                  </svg>
                   <span className="font-mono text-[10px] text-muted-bright">
                     {def?.label ?? method}
                   </span>
@@ -372,6 +411,25 @@ export function FrontierComparison({
               )
             })}
           </div>
+
+          {/* Overlap notice */}
+          {doneEntries.length > 1 && (() => {
+            const allStats = doneEntries.map(([m, s]) => computeStats(s.data!))
+            const first = allStats[0]
+            const allSame = first && allStats.every(s =>
+              s && Math.abs(s.maxSharpe.sharpe - first.maxSharpe.sharpe) < 0.001 &&
+              Math.abs(s.minVol.vol - first.minVol.vol) < 0.01
+            )
+            if (!allSame) return null
+            return (
+              <div className="mb-3 px-3 py-2 rounded border border-amber-500/20 bg-amber-500/5 text-[10px] font-mono text-amber-400 leading-relaxed">
+                ⚠ Frontiers overlap — with <span className="text-[#e8eaf0]">historical μ / ledoit-wolf Σ</span> and elliptically distributed returns,
+                different risk measures produce nearly identical (σ, μ) loci.
+                Try switching to <span className="text-[#e8eaf0]">FF3/FF5 mu+cov</span> or a non-parametric covariance for visible divergence.
+                Dash patterns still distinguish each series.
+              </div>
+            )
+          })()}
 
           <ResponsiveContainer width="100%" height={440}>
             <ScatterChart margin={{ top: 10, right: 24, bottom: 36, left: 8 }}>
@@ -398,6 +456,8 @@ export function FrontierComparison({
               />
               {doneEntries.map(([method, state]) => {
                 const color  = METHOD_COLORS[method] ?? '#8892a4'
+                const dash   = METHOD_DASH[method]
+                const lw     = METHOD_WIDTH[method] ?? 2
                 const def    = ALL_METHODS.find(m => m.id === method)
                 const points: ChartPoint[] = state.data!.portfolios
                   .filter(p => p.expected_return != null && p.expected_volatility != null)
@@ -412,7 +472,7 @@ export function FrontierComparison({
                     name={def?.label ?? method}
                     data={points}
                     fill={color}
-                    line={{ stroke: color, strokeWidth: 2, opacity: 0.9 }}
+                    line={{ stroke: color, strokeWidth: lw, opacity: 0.95, strokeDasharray: dash }}
                     lineType="joint"
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     shape={(props: any) => (
@@ -420,9 +480,9 @@ export function FrontierComparison({
                         key={props.index}
                         cx={props.cx}
                         cy={props.cy}
-                        r={2.5}
+                        r={1.5}
                         fill={color}
-                        opacity={0.6}
+                        opacity={0.5}
                         style={{ cursor: 'default' }}
                       />
                     )}
