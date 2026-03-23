@@ -10,7 +10,7 @@ import { useOptimize }    from './hooks/useOptimize'
 import { useBacktest }    from './hooks/useBacktest'
 import type {
   TickerMatch, MuMethod, CovMethod, OptMethod,
-  ConstraintRow, AssetGroup, BLView,
+  ConstraintRow, AssetGroup, BLView, PortfolioSnapshot,
 } from './types'
 import type { SideSection } from './components/Sidebar'
 
@@ -37,7 +37,7 @@ function scrollToSection(id: string) {
 }
 
 // ── Tab type (kept in sync with ResultsPanel) ─────────────────────────────────
-type ResultTab = 'optimization' | 'backtest' | 'factors' | 'compare'
+type ResultTab = 'optimization' | 'backtest' | 'factors' | 'compare' | 'snapshots'
 
 // ── Sidebar section → ResultsPanel tab mapping ────────────────────────────────
 const SECTION_TO_TAB: Partial<Record<SideSection, ResultTab>> = {
@@ -76,6 +76,30 @@ export default function App() {
   // ── API hooks ────────────────────────────────────────────────────────────────
   const optimize = useOptimize()
   const backtest = useBacktest()
+
+  // ── Snapshots (multi-portfolio comparison) ───────────────────────────────────
+  const [snapshots, setSnapshots] = useState<PortfolioSnapshot[]>([])
+
+  function handleSaveSnapshot() {
+    if (!backtest.data) return
+    const data = backtest.data
+    const last  = data.weights_history[data.weights_history.length - 1]
+    const snap: PortfolioSnapshot = {
+      id:           Date.now().toString(),
+      label:        `${optMethod} — ${data.oos_start}`,
+      savedAt:      new Date().toISOString(),
+      optMethod,
+      tickers:      data.tickers,
+      oos_start:    data.oos_start,
+      oos_end:      data.oos_end,
+      equity_curve: data.equity_curve,
+      metrics:      data.metrics,
+      finalWeights: last?.weights ?? {},
+    }
+    setSnapshots(prev => [...prev, snap])
+    setActiveTab('snapshots')
+    setSideSection('backtest')
+  }
 
   const [compareLoading, setCompareLoading] = useState(false)
   const anyLoading = optimize.loading || backtest.loading || compareLoading
@@ -140,6 +164,7 @@ export default function App() {
       backtest:     'backtest',
       factors:      'analysis',
       compare:      'analysis',
+      snapshots:    'backtest',
     }
     if (map[t]) setSideSection(map[t]!)
   }, [])
@@ -281,10 +306,15 @@ export default function App() {
               endDate={endDate}
               muMethod={muMethod}
               covMethod={covMethod}
+              optMethod={optMethod}
               maxWeight={maxWeight}
               minWeight={minWeight}
               longOnly={longOnly}
               onCompareLoading={setCompareLoading}
+              snapshots={snapshots}
+              onSaveSnapshot={handleSaveSnapshot}
+              onDeleteSnapshot={id => setSnapshots(prev => prev.filter(s => s.id !== id))}
+              onClearSnapshots={() => setSnapshots([])}
             />
           </div>
 

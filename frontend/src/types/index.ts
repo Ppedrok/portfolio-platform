@@ -167,6 +167,21 @@ export interface FrontierResponse {
   portfolios: FrontierPoint[]
 }
 
+// ── Portfolio Snapshot (for multi-strategy comparison) ────────────────────────
+
+export interface PortfolioSnapshot {
+  id:           string
+  label:        string
+  savedAt:      string                          // ISO date
+  optMethod:    string
+  tickers:      string[]
+  oos_start:    string
+  oos_end:      string
+  equity_curve: EquityCurvePoint[]
+  metrics:      Record<string, Record<string, number | null>>
+  finalWeights: Record<string, number>
+}
+
 // ── Backtest ──────────────────────────────────────────────────────────────────
 
 export interface BacktestRequest {
