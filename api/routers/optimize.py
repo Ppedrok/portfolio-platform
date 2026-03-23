@@ -301,23 +301,20 @@ def _solve_single(
         base_constraints + aux_constraints,
     )
 
-    # CLARABEL accepts time_limit (seconds) and max_iter natively
-    prob.solve(
-        solver=solver,
-        time_limit=float(_SOLVER_TIMEOUT_S),
-        max_iter=2000,
-        eps_abs=1e-5,
-        eps_rel=1e-5,
-    )
-    if prob.status in ("infeasible", "unbounded", "time_limit"):
-        if prob.status == "time_limit":
-            raise HTTPException(
-                status_code=408,
-                detail=(
-                    f"Optimisation timed out (>{_SOLVER_TIMEOUT_S}s). "
-                    "Try a shorter date range or a lighter method such as CVaR."
-                ),
-            )
+    # Solve — pass time_limit only (universally supported by CLARABEL)
+    try:
+        prob.solve(solver=solver, time_limit=float(_SOLVER_TIMEOUT_S))
+    except Exception as solve_exc:
+        raise HTTPException(status_code=422, detail=f"Solver error: {solve_exc}")
+
+    if prob.status == "time_limit":
+        raise HTTPException(
+            status_code=408,
+            detail=(
+                f"Optimisation timed out (>{_SOLVER_TIMEOUT_S}s). "
+                "Try a shorter date range or a lighter method such as CVaR."
+            ),
+        )
 
     return x.value, solve_warning
 
