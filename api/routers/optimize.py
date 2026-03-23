@@ -8,6 +8,7 @@ POST /api/optimize
 
 from __future__ import annotations
 
+import concurrent.futures
 import math
 import warnings
 import numpy as np
@@ -59,7 +60,26 @@ def _download_returns(body: OptimizeRequest) -> pd.DataFrame:
 def _build_params(returns: pd.DataFrame, body: OptimizeRequest) -> tuple:
     try:
         port = Portfolio(returns, date_range=(body.start, body.end))
-        port.estimate_mu(method=body.mu_method)
+
+        # Build P/Q matrices from bl_views when a BL mu method is selected
+        mu_kwargs: dict = {}
+        if body.mu_method.startswith("BL") and body.bl_views:
+            tickers_list = returns.columns.to_list()
+            n = len(tickers_list)
+            valid_views = [v for v in body.bl_views if v.get("asset", "") in tickers_list]
+            if valid_views:
+                k = len(valid_views)
+                P = np.zeros((k, n))
+                Q = np.zeros((k, 1))
+                for i, view in enumerate(valid_views):
+                    j = tickers_list.index(view["asset"])
+                    # Convert annual % to daily return
+                    daily_ret = float(view.get("value", 0)) / 100.0 / 252.0
+                    P[i, j] = 1.0
+                    Q[i, 0] = daily_ret
+                mu_kwargs = {"P": P, "Q": Q}
+
+        port.estimate_mu(method=body.mu_method, **mu_kwargs)
         port.estimate_cov_matrix(method=body.cov_method)
         return np.array(port.mu).flatten(), np.array(port.cov_matrix)
     except Exception as exc:
@@ -148,6 +168,13 @@ def _build_rp_constraints(
     return constraints_df, asset_classes_df
 
 
+_HEAVY_METHOD_MAX_T: dict[str, int] = {
+    "GMD":      63,
+    "Brownian": 63,
+}
+_SOLVER_TIMEOUT_S = 25
+
+
 def _solve_single(
     method: str,
     mu_vec: np.ndarray,
@@ -159,15 +186,26 @@ def _solve_single(
     solver: str,
     constraints_df: "pd.DataFrame | None" = None,
     asset_classes_df: "pd.DataFrame | None" = None,
-) -> np.ndarray | None:
+) -> tuple[np.ndarray | None, str | None]:
     """
     Build and solve the full CVXPY problem for the given method.
     Box constraints [lo, hi] and an optional return floor are added to every
     problem uniformly.
 
-    Returns the weight array or None if infeasible.
+    Returns (weights, warning) where warning is set if T was capped.
     """
     T, n = R.shape
+
+    # ── Cap sample size for compute-heavy methods ─────────────────────────────
+    solve_warning: str | None = None
+    max_t = _HEAVY_METHOD_MAX_T.get(method)
+    if max_t and T > max_t:
+        R = R[-max_t:]
+        T = max_t
+        solve_warning = (
+            f"{method} was run on the last {max_t} observations to limit compute time. "
+            "For full-sample results, run the platform locally."
+        )
 
     # ── Define the decision variable ─────────────────────────────────────────
     x = cp.Variable((n, 1))
@@ -263,8 +301,24 @@ def _solve_single(
         cp.Minimize(risk),
         base_constraints + aux_constraints,
     )
-    prob.solve(solver=solver)
-    return x.value
+
+    def _run_solve():
+        prob.solve(solver=solver, max_iters=2000, eps_abs=1e-5, eps_rel=1e-5)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+        future = ex.submit(_run_solve)
+        try:
+            future.result(timeout=_SOLVER_TIMEOUT_S)
+        except concurrent.futures.TimeoutError:
+            raise HTTPException(
+                status_code=408,
+                detail=(
+                    f"Optimisation timed out (>{_SOLVER_TIMEOUT_S}s). "
+                    "Try a shorter date range or a lighter method such as CVaR."
+                ),
+            )
+
+    return x.value, solve_warning
 
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────
@@ -350,7 +404,7 @@ def optimize(body: OptimizeRequest):
 
     # ── Single portfolio ──────────────────────────────────────────────────────
     try:
-        w_raw = _solve_single(
+        w_raw, solve_warning = _solve_single(
             method=body.opt_method,
             mu_vec=mu_vec,
             cov=cov,
@@ -362,6 +416,8 @@ def optimize(body: OptimizeRequest):
             constraints_df=constraints_df,
             asset_classes_df=asset_classes_df,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Optimisation failed: {exc}")
 
@@ -401,4 +457,5 @@ def optimize(body: OptimizeRequest):
             win_rate              = _safe(m["Win Rate"]),
         ),
         risk_decomposition=risk_decomp,
+        warning=solve_warning,
     )

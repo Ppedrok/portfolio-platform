@@ -1,5 +1,6 @@
-import type { MuMethod, CovMethod, OptMethod, ConstraintRow, TickerMatch, AssetGroup } from '../types'
+import type { MuMethod, CovMethod, OptMethod, ConstraintRow, TickerMatch, AssetGroup, BLView } from '../types'
 import { ConstraintsPanel } from './ConstraintsPanel'
+import { BLViewsPanel }    from './BLViewsPanel'
 
 interface Props {
   muMethod:         MuMethod
@@ -12,6 +13,7 @@ interface Props {
   rebalancingFreq:  number
   assets:           TickerMatch[]
   longOnly:         boolean
+  blViews:          BLView[]
   onMuMethod:             (v: MuMethod) => void
   onCovMethod:            (v: CovMethod) => void
   onOptMethod:            (v: OptMethod) => void
@@ -23,6 +25,7 @@ interface Props {
   onConstraintsChange:    (rows: ConstraintRow[]) => void
   onGroupsChange:         (groups: AssetGroup[]) => void
   onLongOnly:             (v: boolean) => void
+  onBlViewsChange:        (views: BLView[]) => void
   onOptimize:      () => void
   onBacktest:      () => void
   canRun:          boolean
@@ -76,7 +79,8 @@ const OPT_METHODS: { value: OptMethod; label: string }[] = [
   { value: 'LowerPartialMoments', label: 'Lower Partial Moments' },
   { value: 'EVaR',                label: 'EVaR — Entropic Value at Risk' },
   { value: 'Ulcer',               label: 'Ulcer Index' },
-  { value: 'GMD',                 label: 'GMD — Gini Mean Difference' },
+  { value: 'GMD',                 label: 'GMD — Gini Mean Difference (slow)' },
+  { value: 'Brownian',            label: 'Brownian Motion Distance (slow)' },
 ]
 
 // ── Shared sub-components ─────────────────────────────────────────────────────
@@ -155,12 +159,13 @@ function Spinner() {
 export function ConfigPanel({
   muMethod, covMethod, optMethod, isFrontier,
   maxWeight, minWeight, estimationWindow, rebalancingFreq,
-  assets, longOnly,
+  assets, longOnly, blViews,
   onMuMethod, onCovMethod, onOptMethod, onFrontierToggle,
   onMaxWeight, onMinWeight, onEstimationWindow, onRebalancingFreq,
-  onConstraintsChange, onGroupsChange, onLongOnly,
+  onConstraintsChange, onGroupsChange, onLongOnly, onBlViewsChange,
   onOptimize, onBacktest, canRun, optimizeLoading, backtestLoading,
 }: Props) {
+  const isBL = muMethod.startsWith('BL')
   return (
     <section className="bg-card card-top-accent rounded-panel p-5 border border-border space-y-5">
       {/* Section label */}
@@ -245,6 +250,17 @@ export function ConfigPanel({
           />
         </div>
       </div>
+
+      {/* BL views panel — only shown when a BL mu method is active */}
+      {isBL && (
+        <div className="border-t border-border pt-4">
+          <BLViewsPanel
+            assets={assets.map(a => a.ticker)}
+            views={blViews}
+            onChange={onBlViewsChange}
+          />
+        </div>
+      )}
 
       {/* Constraints panel */}
       <ConstraintsPanel

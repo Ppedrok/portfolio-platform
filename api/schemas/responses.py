@@ -70,6 +70,7 @@ class OptimizeResponse(BaseModel):
     weights:            dict[str, float]   = Field(description="ticker → optimal weight")
     metrics:            PortfolioMetrics
     risk_decomposition: dict | None        = None
+    warning:            str | None         = None
 
 
 # ── /api/optimize (efficient frontier) ───────────────────────────────────────

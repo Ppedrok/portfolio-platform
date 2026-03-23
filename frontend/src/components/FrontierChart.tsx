@@ -2,15 +2,28 @@ import { useState } from 'react'
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ReferenceDot, ResponsiveContainer,
-  AreaChart, Area, Legend,
+  AreaChart, Area,
 } from 'recharts'
 import type { FrontierResponse } from '../types'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const COLORS = [
-  '#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444',
-  '#a78bfa', '#34d399', '#fb923c', '#e879f9', '#facc15',
+  '#f97316',  // orange
+  '#22d3ee',  // cyan
+  '#a3e635',  // lime
+  '#e879f9',  // fuchsia
+  '#facc15',  // yellow
+  '#818cf8',  // indigo
+  '#34d399',  // emerald
+  '#fb7185',  // rose
+  '#38bdf8',  // sky
+  '#fbbf24',  // amber
+  '#4ade80',  // green
+  '#c084fc',  // purple
+  '#67e8f9',  // light cyan
+  '#fca5a5',  // light red
+  '#86efac',  // light green
 ]
 const GRID_COLOR   = '#1a2035'
 const AXIS_COLOR   = '#5a6a85'
@@ -254,7 +267,7 @@ export function FrontierChart({ data }: Props) {
           <span className="text-[#8892a4]">click a point to inspect</span>
         </p>
 
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="100%" height={400}>
           <ScatterChart margin={{ top: 10, right: 24, bottom: 36, left: 8 }}>
             <CartesianGrid strokeDasharray="2 4" stroke={GRID_COLOR} />
             <XAxis
@@ -346,7 +359,7 @@ export function FrontierChart({ data }: Props) {
         <p className="text-[10px] text-muted font-mono mb-4">
           How asset weights evolve from minimum risk to maximum return
         </p>
-        <ResponsiveContainer width="100%" height={280}>
+        <ResponsiveContainer width="100%" height={360}>
           <AreaChart
             data={areaData}
             margin={{ top: 8, right: 24, bottom: 36, left: 8 }}
@@ -364,16 +377,6 @@ export function FrontierChart({ data }: Props) {
               tick={{ fill: AXIS_COLOR, fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
             />
             <Tooltip content={<AreaTooltip />} />
-            <Legend
-              wrapperStyle={{
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 9,
-                paddingTop: 8,
-              }}
-              formatter={value => (
-                <span style={{ color: '#8892a4' }}>{value}</span>
-              )}
-            />
             {tickers.map((ticker, i) => (
               <Area
                 key={ticker}
@@ -382,12 +385,26 @@ export function FrontierChart({ data }: Props) {
                 stackId="1"
                 stroke={COLORS[i % COLORS.length]}
                 fill={COLORS[i % COLORS.length]}
-                fillOpacity={0.75}
+                fillOpacity={i % 2 === 0 ? 0.85 : 0.70}
+                strokeWidth={1.5}
                 isAnimationActive={false}
               />
             ))}
           </AreaChart>
         </ResponsiveContainer>
+
+        {/* Custom color legend */}
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 px-1">
+          {tickers.map((ticker, i) => (
+            <div key={ticker} className="flex items-center gap-1.5">
+              <div
+                className="w-3 h-3 rounded-sm"
+                style={{ backgroundColor: COLORS[i % COLORS.length] }}
+              />
+              <span className="font-mono text-[10px] text-muted-bright">{ticker}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
     </div>

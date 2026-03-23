@@ -117,6 +117,11 @@ export function ResultsPanel({
               const od = optimizeData as OptimizeResponse
               return (
                 <>
+                  {od.warning && (
+                    <div className="mb-4 bg-warning/10 border border-warning/30 rounded px-3 py-2 text-xs font-mono text-warning leading-relaxed">
+                      {od.warning}
+                    </div>
+                  )}
                   <WeightsChart weights={od.weights} metrics={od.metrics} risk_decomposition={od.risk_decomposition ?? undefined} />
                   {od.risk_decomposition && (
                     <RiskDecomposition data={od.risk_decomposition} />

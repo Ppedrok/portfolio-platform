@@ -34,7 +34,7 @@ export interface FactorExposureResponse {
 
 export type OptMethod =
   | 'markowitz' | 'CVaR' | 'MAD' | 'SMAD' | 'SemiVariance'
-  | 'LowerPartialMoments' | 'EVaR' | 'Ulcer' | 'GMD'
+  | 'LowerPartialMoments' | 'EVaR' | 'Ulcer' | 'GMD' | 'Brownian'
 
 export type CodependenceMethod =
   | 'pearson' | 'spearman' | 'kendall' | 'gerber2'
@@ -98,6 +98,12 @@ export interface ConstraintRow {
   factor:        number | ''
 }
 
+export interface BLView {
+  asset: string
+  sign:  '>=' | '<='
+  value: number   // annual %, e.g. 10 = 10%/yr
+}
+
 export interface OptimizeRequest {
   tickers:        string[]
   start:          string
@@ -109,6 +115,7 @@ export interface OptimizeRequest {
   constraints:    WeightConstraints
   rp_constraints: ConstraintRow[] | null
   asset_groups:   AssetGroup[] | null
+  bl_views:       BLView[] | null
   long_only:      boolean
   solver:         string
 }
@@ -144,6 +151,7 @@ export interface OptimizeResponse {
   weights:            Record<string, number>
   metrics:            PortfolioMetrics
   risk_decomposition: RiskDecompositionData | null
+  warning:            string | null
 }
 
 export interface FrontierPoint {

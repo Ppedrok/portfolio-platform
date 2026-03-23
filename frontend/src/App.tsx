@@ -5,7 +5,7 @@ import { ConfigPanel }    from './components/ConfigPanel'
 import { ResultsPanel }   from './components/ResultsPanel'
 import { useOptimize }  from './hooks/useOptimize'
 import { useBacktest }  from './hooks/useBacktest'
-import type { TickerMatch, MuMethod, CovMethod, OptMethod, ConstraintRow, AssetGroup } from './types'
+import type { TickerMatch, MuMethod, CovMethod, OptMethod, ConstraintRow, AssetGroup, BLView } from './types'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -39,6 +39,7 @@ export default function App() {
   const [rebalancingFreq,  setRebalancingFreq]  = useState(21)
   const [constraints,  setConstraints]  = useState<ConstraintRow[]>([])
   const [assetGroups,  setAssetGroups]  = useState<AssetGroup[]>([])
+  const [blViews,      setBlViews]      = useState<BLView[]>([])
   const [longOnly,     setLongOnly]     = useState(true)
 
   // ── Results tab ─────────────────────────────────────────────────────────────
@@ -63,6 +64,7 @@ export default function App() {
       constraints:    { max_weight: maxWeight, min_weight: minWeight },
       rp_constraints: constraints.length > 0 ? constraints : null,
       asset_groups:   assetGroups.length > 0 ? assetGroups : null,
+      bl_views:       muMethod.startsWith('BL') && blViews.length > 0 ? blViews : null,
       long_only:      longOnly,
       solver:         'CLARABEL',
     })
@@ -184,6 +186,8 @@ export default function App() {
           onRebalancingFreq={setRebalancingFreq}
           onConstraintsChange={setConstraints}
           onGroupsChange={setAssetGroups}
+          blViews={blViews}
+          onBlViewsChange={setBlViews}
           onLongOnly={setLongOnly}
           onOptimize={handleOptimize}
           onBacktest={handleBacktest}

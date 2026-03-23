@@ -301,6 +301,14 @@ class Portfolio:
             )
 
         if method == "standard":
+            if P is None or Q is None:
+                # Pure equilibrium prior — no views
+                Sigma = np.cov(self.returns, rowvar=False)
+                w_eq  = np.ones((self.n_assets, 1)) / self.n_assets
+                pi    = delta * Sigma @ w_eq
+                self.mu         = pd.DataFrame(pi.T, columns=self.assets)
+                self.cov_matrix = pd.DataFrame(Sigma, index=self.assets, columns=self.assets)
+                return self.mu, self.cov_matrix
             mu_bl, Sigma_bl, _ = rp.black_litterman(
                 self.returns, w, P, Q, delta=delta, rf=0, eq=True
             )
