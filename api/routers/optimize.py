@@ -69,15 +69,15 @@ def _build_params(returns: pd.DataFrame, body: OptimizeRequest) -> tuple:
             valid_views = [v for v in body.bl_views if v.get("asset", "") in tickers_list]
             if valid_views:
                 k = len(valid_views)
-                P = np.zeros((k, n))
-                Q = np.zeros((k, 1))
+                P = np.zeros((k, n))   # (k, n) — one row per view
+                Q = np.zeros((k, 1))   # (k, 1) — one value per view
                 for i, view in enumerate(valid_views):
                     j = tickers_list.index(view["asset"])
                     # Convert annual % to daily return
                     daily_ret = float(view.get("value", 0)) / 100.0 / 252.0
-                    P[i, j] = 1.0
-                    Q[i, 0] = daily_ret
-                mu_kwargs = {"P": P, "Q": Q}
+                    P[i, j] = 1.0 if view.get("sign", ">=") == ">=" else -1.0
+                    Q[i, 0] = abs(daily_ret)
+                mu_kwargs = {"P": P, "Q": Q}  # shapes guaranteed correct
 
         port.estimate_mu(method=body.mu_method, **mu_kwargs)
         port.estimate_cov_matrix(method=body.cov_method)

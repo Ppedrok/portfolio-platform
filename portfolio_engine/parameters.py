@@ -302,13 +302,15 @@ class Portfolio:
 
         if method == "standard":
             if P is None or Q is None:
-                # Pure equilibrium prior — no views
-                Sigma = np.cov(self.returns, rowvar=False)
-                w_eq  = np.ones((self.n_assets, 1)) / self.n_assets
-                pi    = delta * Sigma @ w_eq
-                self.mu         = pd.DataFrame(pi.T, columns=self.assets)
-                self.cov_matrix = pd.DataFrame(Sigma, index=self.assets, columns=self.assets)
+                # Pure equilibrium prior — no views (CAPM implied returns)
+                Sigma = np.cov(self.returns.values, rowvar=False)   # (n, n)
+                w_eq  = np.full(self.n_assets, 1.0 / self.n_assets)  # (n,)
+                pi    = delta * (Sigma @ w_eq)                       # (n,)
+                self.mu         = pi.reshape(-1, 1)                  # (n, 1)
+                self.cov_matrix = Sigma                              # (n, n)
                 return self.mu, self.cov_matrix
+            # Ensure Q is (k, 1)
+            Q = np.array(Q).reshape(-1, 1)
             mu_bl, Sigma_bl, _ = rp.black_litterman(
                 self.returns, w, P, Q, delta=delta, rf=0, eq=True
             )
