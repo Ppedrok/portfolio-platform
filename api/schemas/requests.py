@@ -101,13 +101,14 @@ class OptimizeRequest(BaseModel):
     max_tracking_error:  Union[float, None]      = None
     long_only:           bool                    = True
 
+    solver:         str                    = "CLARABEL"
+
     @field_validator("max_tracking_error")
     @classmethod
     def te_in_range(cls, v: float | None) -> float | None:
         if v is not None and not (0.0 < v <= 1.0):
             raise ValueError("max_tracking_error must be in (0, 1]")
         return v
-    solver:         str                    = "CLARABEL"
 
     model_config = {"json_schema_extra": {
         "example": {
@@ -146,6 +147,10 @@ class BacktestRequest(BaseModel):
     estimation_window:    Annotated[int, Field(ge=30, le=1260)] = 252
     rebalancing_freq:  Annotated[int, Field(ge=1,  le=252)]  = 21
     solver:            str        = "CLARABEL"
+    constraints:       WeightConstraints      = Field(default_factory=WeightConstraints)
+    rp_constraints:    Union[list[dict], None] = None
+    asset_groups:      Union[list[dict], None] = None
+    long_only:         bool                    = True
 
     model_config = {"json_schema_extra": {
         "example": {

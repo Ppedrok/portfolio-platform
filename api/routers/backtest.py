@@ -17,6 +17,7 @@ from portfolio_engine.data       import download_prices, compute_returns
 from portfolio_engine.backtest   import Backtest
 
 from ..schemas.requests  import BacktestRequest
+from .optimize           import _build_rp_constraints
 from ..schemas.responses import (
     BacktestResponse,
     EquityCurvePoint,
@@ -74,17 +75,32 @@ def run_backtest(body: BacktestRequest):
     # ── Optional external benchmark for TE constraint ─────────────────────────
     benchmark_external = None
     max_te_daily: float | None = None
-    if body.benchmark_ticker and body.max_tracking_error:
+    if body.benchmark_ticker:
         try:
             bm_ticker = body.benchmark_ticker.upper().strip()
             bm_prices  = download_prices([bm_ticker], body.start, body.end)
             bm_returns = compute_returns(bm_prices)[bm_ticker]
             benchmark_external = bm_returns.reindex(returns.index).fillna(0)
-            max_te_daily = float(body.max_tracking_error) / np.sqrt(252)
+            if body.max_tracking_error:
+                max_te_daily = float(body.max_tracking_error) / np.sqrt(252)
         except Exception as exc:
             raise HTTPException(
                 status_code=422,
                 detail=f"Benchmark download failed for '{body.benchmark_ticker}': {exc}",
+            )
+
+    # ── Build rp / group constraints ──────────────────────────────────────────
+    constraints_df   = None
+    asset_classes_df = None
+    if body.rp_constraints:
+        try:
+            constraints_df, asset_classes_df = _build_rp_constraints(
+                body.rp_constraints, tickers, body.asset_groups
+            )
+        except Exception as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Invalid rp_constraints: {exc}",
             )
 
     # ── Run backtest ───────────────────────────────────────────────────────────
@@ -102,6 +118,11 @@ def run_backtest(body: BacktestRequest):
             solver=body.solver,
             benchmark_external=benchmark_external,
             max_te_daily=max_te_daily,
+            long_only=body.long_only,
+            min_weight=body.constraints.min_weight,
+            max_weight=body.constraints.max_weight,
+            constraints_df=constraints_df,
+            asset_classes_df=asset_classes_df,
         )
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Backtest failed: {exc}")

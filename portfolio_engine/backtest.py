@@ -64,6 +64,11 @@ class Backtest:
         solver:             str = "CLARABEL",
         benchmark_external: "pd.Series | None" = None,
         max_te_daily:       "float | None" = None,
+        long_only:          bool = True,
+        min_weight:         float = 0.0,
+        max_weight:         float = 1.0,
+        constraints_df=None,
+        asset_classes_df=None,
     ) -> dict:
         """
         Execute the walk-forward backtest.
@@ -132,20 +137,26 @@ class Backtest:
 
                 # Build R_b window slice if external benchmark provided
                 R_b_window: "np.ndarray | None" = None
-                if benchmark_external is not None and max_te_daily is not None:
+                if benchmark_external is not None:
                     bm_window = benchmark_external.reindex(window.index).fillna(0)
                     R_b_window = bm_window.to_numpy().reshape(-1, 1)
 
                 w_raw = opt.optimize(
                     method=opt_method, solver=solver,
                     R_b=R_b_window, max_te_daily=max_te_daily,
+                    long_only=long_only,
+                    min_weight=min_weight,
+                    max_weight=max_weight,
+                    constraints_df=constraints_df,
+                    asset_classes_df=asset_classes_df,
                 )
 
                 if w_raw is None:
                     raise ValueError("Solver returned None.")
 
                 w     = np.array(w_raw).flatten()
-                w     = np.clip(w, 0, None)
+                lo_clip = max(0.0, float(min_weight)) if long_only else float(min_weight)
+                w     = np.clip(w, lo_clip, None)
                 total = w.sum()
                 w     = w / total if total > 1e-8 else w_prev.copy()
 

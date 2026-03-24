@@ -143,6 +143,12 @@ export default function App() {
       estimation_window:  estimationWindow,
       rebalancing_freq:   rebalancingFreq,
       solver:             'CLARABEL',
+      constraints:        { max_weight: maxWeight, min_weight: minWeight },
+      rp_constraints:     constraints.length > 0 ? constraints : null,
+      asset_groups:       assetGroups.length > 0 ? assetGroups : null,
+      long_only:          longOnly,
+      benchmark_ticker:   benchmarkTicker ? benchmarkTicker.toUpperCase().trim() : undefined,
+      max_tracking_error: !optMethod.startsWith('TrackingError') && benchmarkTicker && maxTrackingError != null ? maxTrackingError : undefined,
     })
     setSideSection('backtest')
     setActiveTab('backtest')

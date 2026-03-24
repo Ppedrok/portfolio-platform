@@ -189,15 +189,21 @@ export interface PortfolioSnapshot {
 // ── Backtest ──────────────────────────────────────────────────────────────────
 
 export interface BacktestRequest {
-  tickers:            string[]
-  start:              string
-  end:                string
-  mu_method:          MuMethod
-  cov_method:         CovMethod
-  opt_method:         OptMethod
-  estimation_window:  number
-  rebalancing_freq:   number
-  solver:             string
+  tickers:             string[]
+  start:               string
+  end:                 string
+  mu_method:           MuMethod
+  cov_method:          CovMethod
+  opt_method:          OptMethod
+  estimation_window:   number
+  rebalancing_freq:    number
+  solver:              string
+  constraints:         WeightConstraints
+  rp_constraints:      ConstraintRow[] | null
+  asset_groups:        AssetGroup[] | null
+  long_only:           boolean
+  benchmark_ticker?:   string
+  max_tracking_error?: number
 }
 
 export interface EquityCurvePoint {
