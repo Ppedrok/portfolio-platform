@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from fastapi import APIRouter, HTTPException
 
+import numpy as np
 from portfolio_engine.data       import download_prices, compute_returns
 from portfolio_engine.backtest   import Backtest
 
@@ -70,6 +71,22 @@ def run_backtest(body: BacktestRequest):
     ew_benchmark = returns.mean(axis=1)
     ew_benchmark.name = "Benchmark"
 
+    # ── Optional external benchmark for TE constraint ─────────────────────────
+    benchmark_external = None
+    max_te_daily: float | None = None
+    if body.benchmark_ticker and body.max_tracking_error:
+        try:
+            bm_ticker = body.benchmark_ticker.upper().strip()
+            bm_prices  = download_prices([bm_ticker], body.start, body.end)
+            bm_returns = compute_returns(bm_prices)[bm_ticker]
+            benchmark_external = bm_returns.reindex(returns.index).fillna(0)
+            max_te_daily = float(body.max_tracking_error) / np.sqrt(252)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Benchmark download failed for '{body.benchmark_ticker}': {exc}",
+            )
+
     # ── Run backtest ───────────────────────────────────────────────────────────
     try:
         bt = Backtest(
@@ -83,6 +100,8 @@ def run_backtest(body: BacktestRequest):
             opt_method=body.opt_method,
             benchmark=ew_benchmark,
             solver=body.solver,
+            benchmark_external=benchmark_external,
+            max_te_daily=max_te_daily,
         )
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Backtest failed: {exc}")

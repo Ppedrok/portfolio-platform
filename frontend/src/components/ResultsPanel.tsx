@@ -174,6 +174,7 @@ export function ResultsPanel({
                     metrics={od.metrics}
                     risk_decomposition={od.risk_decomposition ?? undefined}
                     assets={assets}
+                    tracking_error={od.tracking_error}
                   />
                   {od.risk_decomposition && (
                     <RiskDecomposition data={od.risk_decomposition} />

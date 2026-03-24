@@ -66,8 +66,10 @@ export default function App() {
   const [rebalancingFreq,  setRebalancingFreq]  = useState(21)
   const [constraints,  setConstraints]  = useState<ConstraintRow[]>([])
   const [assetGroups,  setAssetGroups]  = useState<AssetGroup[]>([])
-  const [blViews,      setBlViews]      = useState<BLView[]>([])
-  const [longOnly,     setLongOnly]     = useState(true)
+  const [blViews,           setBlViews]           = useState<BLView[]>([])
+  const [benchmarkTicker,   setBenchmarkTicker]   = useState<string>('')
+  const [maxTrackingError,  setMaxTrackingError]  = useState<number | null>(null)
+  const [longOnly,          setLongOnly]          = useState(true)
 
   // ── Navigation ───────────────────────────────────────────────────────────────
   const [sideSection, setSideSection] = useState<SideSection>('universe')
@@ -119,8 +121,10 @@ export default function App() {
       constraints:    { max_weight: maxWeight, min_weight: minWeight },
       rp_constraints: constraints.length > 0 ? constraints : null,
       asset_groups:   assetGroups.length > 0 ? assetGroups : null,
-      bl_views:       muMethod.startsWith('BL') && blViews.length > 0 ? blViews : null,
-      long_only:      longOnly,
+      bl_views:         muMethod.startsWith('BL') && blViews.length > 0 ? blViews : null,
+      benchmark_ticker:    benchmarkTicker ? benchmarkTicker.toUpperCase().trim() : undefined,
+      max_tracking_error:  !optMethod.startsWith('TrackingError') && benchmarkTicker && maxTrackingError != null ? maxTrackingError : undefined,
+      long_only:           longOnly,
       solver:         'CLARABEL',
     })
     setSideSection('results')
@@ -279,6 +283,10 @@ export default function App() {
               onGroupsChange={setAssetGroups}
               blViews={blViews}
               onBlViewsChange={setBlViews}
+              benchmarkTicker={benchmarkTicker}
+              onBenchmarkTicker={setBenchmarkTicker}
+              maxTrackingError={maxTrackingError}
+              onMaxTrackingError={setMaxTrackingError}
               onLongOnly={setLongOnly}
               onOptimize={handleOptimize}
               onBacktest={handleBacktest}

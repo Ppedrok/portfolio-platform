@@ -12,7 +12,7 @@ CodependenceMethod = Literal[
     "pearson", "spearman", "kendall", "gerber2",
     "distance", "mutual_info", "tail",
 ]
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 # ── /api/assets/prices ────────────────────────────────────────────────────────
@@ -66,6 +66,9 @@ OptMethod = Literal[
     "LowerPartialMoments",
     "CVaR", "EVaR",
     "Ulcer",
+    "TrackingError_L2",
+    "TrackingError_L1",
+    "TrackingError_Cov",
 ]
 
 
@@ -93,8 +96,17 @@ class OptimizeRequest(BaseModel):
     constraints:    WeightConstraints      = Field(default_factory=WeightConstraints)
     rp_constraints: Union[list[dict], None] = None
     asset_groups:   Union[list[dict], None] = None
-    bl_views:       Union[list[dict], None] = None
-    long_only:      bool                   = True
+    bl_views:            Union[list[dict], None] = None
+    benchmark_ticker:    Union[str, None]        = None
+    max_tracking_error:  Union[float, None]      = None
+    long_only:           bool                    = True
+
+    @field_validator("max_tracking_error")
+    @classmethod
+    def te_in_range(cls, v: float | None) -> float | None:
+        if v is not None and not (0.0 < v <= 1.0):
+            raise ValueError("max_tracking_error must be in (0, 1]")
+        return v
     solver:         str                    = "CLARABEL"
 
     model_config = {"json_schema_extra": {
@@ -128,8 +140,10 @@ class BacktestRequest(BaseModel):
     end:               str        = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     mu_method:         MuMethod   = "historical"
     cov_method:        CovMethod  = "ledoit_wolf"
-    opt_method:        OptMethod  = "CVaR"
-    estimation_window: Annotated[int, Field(ge=30, le=1260)] = 252
+    opt_method:           OptMethod          = "CVaR"
+    benchmark_ticker:     Union[str, None]   = None
+    max_tracking_error:   Union[float, None] = None
+    estimation_window:    Annotated[int, Field(ge=30, le=1260)] = 252
     rebalancing_freq:  Annotated[int, Field(ge=1,  le=252)]  = 21
     solver:            str        = "CLARABEL"
 

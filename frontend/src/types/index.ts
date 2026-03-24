@@ -35,6 +35,7 @@ export interface FactorExposureResponse {
 export type OptMethod =
   | 'markowitz' | 'CVaR' | 'MAD' | 'SMAD' | 'SemiVariance'
   | 'LowerPartialMoments' | 'EVaR' | 'Ulcer' | 'GMD' | 'Brownian'
+  | 'TrackingError_L2' | 'TrackingError_L1' | 'TrackingError_Cov'
 
 export type CodependenceMethod =
   | 'pearson' | 'spearman' | 'kendall' | 'gerber2'
@@ -106,19 +107,21 @@ export interface BLView {
 }
 
 export interface OptimizeRequest {
-  tickers:        string[]
-  start:          string
-  end:            string
-  mu_method:      MuMethod
-  cov_method:     CovMethod
-  opt_method:     OptMethod
-  target_return:  number | 'frontier' | null
-  constraints:    WeightConstraints
-  rp_constraints: ConstraintRow[] | null
-  asset_groups:   AssetGroup[] | null
-  bl_views:       BLView[] | null
-  long_only:      boolean
-  solver:         string
+  tickers:             string[]
+  start:               string
+  end:                 string
+  mu_method:           MuMethod
+  cov_method:          CovMethod
+  opt_method:          OptMethod
+  target_return:       number | 'frontier' | null
+  constraints:         WeightConstraints
+  rp_constraints:      ConstraintRow[] | null
+  asset_groups:        AssetGroup[] | null
+  bl_views:            BLView[] | null
+  benchmark_ticker?:   string
+  max_tracking_error?: number
+  long_only:           boolean
+  solver:              string
 }
 
 export interface PortfolioMetrics {
@@ -153,6 +156,7 @@ export interface OptimizeResponse {
   metrics:            PortfolioMetrics
   risk_decomposition: RiskDecompositionData | null
   warning:            string | null
+  tracking_error:     number | null
 }
 
 export interface FrontierPoint {

@@ -34,10 +34,11 @@ const SECTOR_COLORS: Record<string, string> = {
 }
 
 interface Props {
-  weights:             Record<string, number>
-  metrics?:            PortfolioMetrics
-  risk_decomposition?: RiskDecompositionData
-  assets?:             TickerMatch[]
+  weights:              Record<string, number>
+  metrics?:             PortfolioMetrics
+  risk_decomposition?:  RiskDecompositionData
+  assets?:              TickerMatch[]
+  tracking_error?:      number | null
 }
 
 type RiskLookup = Record<string, { mrc: number; prc: number; crc: number }>
@@ -156,7 +157,7 @@ const METRIC_DEFS: {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function WeightsChart({ weights, metrics, risk_decomposition, assets }: Props) {
+export function WeightsChart({ weights, metrics, risk_decomposition, assets, tracking_error }: Props) {
   const [activeIndex, setActiveIndex]   = useState<number | null>(null)
   const [activeSector, setActiveSector] = useState<number | null>(null)
   const [view, setView] = useState<'asset' | 'sector'>('asset')
@@ -421,6 +422,14 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets }: P
                 </div>
               )
             })}
+            {tracking_error != null && (
+              <div className="bg-[#07090f] border border-warning/30 rounded-lg p-3 hover:border-warning/50 transition-colors cursor-default">
+                <p className="text-[9px] text-warning/70 font-mono uppercase tracking-wider mb-1.5 leading-none">Tracking Error</p>
+                <p className="font-mono font-bold text-base leading-none text-warning">
+                  {(tracking_error * 100).toFixed(2)}%
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

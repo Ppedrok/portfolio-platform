@@ -61,6 +61,8 @@ class Optimizer:
         target_return=None,
         constraints_df: "pd.DataFrame | None" = None,
         asset_classes_df: "pd.DataFrame | None" = None,
+        R_b: "np.ndarray | None" = None,
+        max_te_daily: "float | None" = None,
     ):
         """
         Solve the portfolio optimisation problem.
@@ -242,6 +244,11 @@ class Optimizer:
                 constraints.append(A @ x <= b)
             except Exception as exc:
                 warnings.warn(f"[Optimizer] riskfolio constraints skipped: {exc}")
+
+        # ── Optional TE constraint (‖R_b − Rx‖₂ / √T ≤ max_te_daily) ─────────
+        if R_b is not None and max_te_daily is not None:
+            R_b_col = np.array(R_b)[:self.T].reshape(-1, 1)
+            constraints.append(cp.norm(R_b_col - self.R @ x, 2) / np.sqrt(self.T) <= max_te_daily)
 
         prob = cp.Problem(cp.Minimize(risk), constraints)
         prob.solve(solver=solver)

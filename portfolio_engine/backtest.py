@@ -57,11 +57,13 @@ class Backtest:
 
     def run(
         self,
-        mu_method:  str = "historical",
-        cov_method: str = "ledoit_wolf",
-        opt_method: str = "CVaR",
-        benchmark:  pd.Series = None,
-        solver:     str = "CLARABEL",
+        mu_method:          str = "historical",
+        cov_method:         str = "ledoit_wolf",
+        opt_method:         str = "CVaR",
+        benchmark:          pd.Series = None,
+        solver:             str = "CLARABEL",
+        benchmark_external: "pd.Series | None" = None,
+        max_te_daily:       "float | None" = None,
     ) -> dict:
         """
         Execute the walk-forward backtest.
@@ -127,7 +129,17 @@ class Backtest:
             try:
                 opt   = Optimizer(mu=mu, covar_matrix=cov, corr=None, dist=None,
                                   R=R_in, assets=self.assets)
-                w_raw = opt.optimize(method=opt_method, solver=solver)
+
+                # Build R_b window slice if external benchmark provided
+                R_b_window: "np.ndarray | None" = None
+                if benchmark_external is not None and max_te_daily is not None:
+                    bm_window = benchmark_external.reindex(window.index).fillna(0)
+                    R_b_window = bm_window.to_numpy().reshape(-1, 1)
+
+                w_raw = opt.optimize(
+                    method=opt_method, solver=solver,
+                    R_b=R_b_window, max_te_daily=max_te_daily,
+                )
 
                 if w_raw is None:
                     raise ValueError("Solver returned None.")

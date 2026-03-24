@@ -72,6 +72,7 @@ class OptimizeResponse(BaseModel):
     metrics:            PortfolioMetrics
     risk_decomposition: dict | None        = None
     warning:            str | None         = None
+    tracking_error:     float | None       = None
 
 
 # ── /api/optimize (efficient frontier) ───────────────────────────────────────
