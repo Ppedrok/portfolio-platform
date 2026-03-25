@@ -63,6 +63,9 @@ class Optimizer:
         asset_classes_df: "pd.DataFrame | None" = None,
         R_b: "np.ndarray | None" = None,
         max_te_daily: "float | None" = None,
+        long_only: bool = True,
+        min_weight: float = 0.0,
+        max_weight: float = 1.0,
     ):
         """
         Solve the portfolio optimisation problem.
@@ -107,12 +110,14 @@ class Optimizer:
             return self._frontier(solver=solver)
 
         mu_vec = np.array(self.mu).flatten()
+        lo = max(0.0, float(min_weight)) if long_only else float(min_weight)
+        hi = float(max_weight)
 
         # ── Build risk expression and constraints ─────────────────────────────
         if method == "markowitz":
             x    = cp.Variable((self.n, 1))
             risk = cp.quad_form(x, self.covar_matrix)
-            constraints = [cp.sum(x) == 1, x >= 0]
+            constraints = [cp.sum(x) == 1, x >= lo]
 
         elif method == "GMD":
             D = np.empty((0, self.n))
@@ -121,7 +126,7 @@ class Optimizer:
             x    = cp.Variable((self.n, 1))
             d    = cp.Variable((int(self.T * (self.T - 1) / 2), 1))
             risk = cp.sum(d) / ((self.T - 1) * self.T)
-            constraints = [d >= D @ x, d >= -D @ x, cp.sum(x) == 1, x >= 0]
+            constraints = [d >= D @ x, d >= -D @ x, cp.sum(x) == 1, x >= lo]
 
         elif method == "MAD":
             C_T  = np.eye(self.T) - np.ones((self.T, self.T)) / self.T
@@ -131,7 +136,7 @@ class Optimizer:
             constraints = [
                 d >= C_T @ self.R @ x,
                 d >= -(C_T @ self.R @ x),
-                cp.sum(x) == 1, x >= 0, d >= 0,
+                cp.sum(x) == 1, x >= lo, d >= 0,
             ]
 
         elif method == "SMAD":
@@ -141,7 +146,7 @@ class Optimizer:
             risk = cp.sum(d) / self.T
             constraints = [
                 d >= -(C_T @ self.R @ x), d >= 0,
-                cp.sum(x) == 1, x >= 0,
+                cp.sum(x) == 1, x >= lo,
             ]
 
         elif method == "Brownian":
@@ -153,7 +158,7 @@ class Optimizer:
             constraints = [
                 D >= y @ ones.T - ones @ y.T,
                 D >= -(y @ ones.T - ones @ y.T),
-                x >= 0, cp.sum(x) == 1,
+                x >= lo, cp.sum(x) == 1,
             ]
 
         elif method == "SemiVariance":
@@ -163,7 +168,7 @@ class Optimizer:
             risk = cp.sum_squares(d) / self.T
             constraints = [
                 d >= -(C_T @ self.R @ x), d >= 0,
-                cp.sum(x) == 1, x >= 0,
+                cp.sum(x) == 1, x >= lo,
             ]
 
         elif method == "LowerPartialMoments":
@@ -173,7 +178,7 @@ class Optimizer:
             risk = cp.sum(d) / self.T
             constraints = [
                 d >= tau - self.R @ x,
-                cp.sum(x) == 1, x >= 0, d >= 0,
+                cp.sum(x) == 1, x >= lo, d >= 0,
             ]
 
         elif method == "VaR":
@@ -186,7 +191,7 @@ class Optimizer:
             risk  = t
             constraints = [
                 0 >= -self.R @ x - t - M * z,
-                cp.sum(x) == 1, x >= 0,
+                cp.sum(x) == 1, x >= lo,
                 cp.sum(z) <= (alpha - pi) * self.T,
             ]
 
@@ -198,7 +203,7 @@ class Optimizer:
             risk  = t + 1 / (alpha * self.T) * cp.sum(u)
             constraints = [
                 u >= -self.R @ x - t,
-                cp.sum(x) == 1, x >= 0, u >= 0,
+                cp.sum(x) == 1, x >= lo, u >= 0,
             ]
 
         elif method == "EVaR":
@@ -212,7 +217,7 @@ class Optimizer:
             constraints = [
                 cp.sum(u) <= z,
                 cp.ExpCone(-self.R @ x - t, ones @ z, u),
-                cp.sum(x) == 1, x >= 0,
+                cp.sum(x) == 1, x >= lo,
             ]
 
         elif method == "Ulcer":
@@ -221,12 +226,44 @@ class Optimizer:
             risk = cp.norm(d[1:]) / self.T ** 0.5
             constraints = [
                 d[1:] >= d[:-1] - self.R @ x,
-                d[1:] >= 0, x >= 0,
+                d[1:] >= 0, x >= lo,
                 cp.sum(x) == 1, d[0] == 0,
             ]
 
+        elif method in ("TrackingError_L2", "TrackingError_L1", "TrackingError_Cov"):
+            if R_b is None:
+                raise ValueError(
+                    f"R_b (benchmark returns matrix) is required for '{method}'. "
+                    "Set benchmark_ticker in the request."
+                )
+            R_b_col = np.array(R_b)[:self.T].reshape(-1, 1)
+            x = cp.Variable((self.n, 1))
+
+            if method == "TrackingError_L2":
+                risk        = cp.norm(R_b_col - self.R @ x, 2) / np.sqrt(self.T)
+                constraints = [cp.sum(x) == 1, x >= lo]
+
+            elif method == "TrackingError_L1":
+                d           = cp.Variable((self.T, 1))
+                risk        = cp.sum(d) / self.T
+                constraints = [
+                    d >= R_b_col - self.R @ x,
+                    d >= self.R @ x - R_b_col,
+                    cp.sum(x) == 1, x >= lo,
+                ]
+
+            elif method == "TrackingError_Cov":
+                x_b         = np.ones((self.n, 1)) / self.n
+                diff        = x - x_b
+                risk        = cp.quad_form(diff, self.covar_matrix)
+                constraints = [cp.sum(x) == 1, x >= lo]
+
         else:
             raise ValueError(f"Unknown optimisation method: '{method}'")
+
+        # ── Box constraint: max weight (lo already embedded per method) ────────
+        if hi < 1.0 - 1e-8:
+            constraints.append(x <= hi)
 
         # ── Optional return constraint ────────────────────────────────────────
         if target_return is not None and target_return != "frontier":

@@ -225,4 +225,6 @@ export interface BacktestResponse {
   equity_curve:       EquityCurvePoint[]
   weights_history:    WeightsRecord[]
   metrics:            Record<string, Record<string, number | null>>
+  failed_steps:       number
+  opt_warnings:       string[]
 }

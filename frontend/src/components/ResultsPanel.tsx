@@ -233,6 +233,24 @@ export function ResultsPanel({
                 </div>
               </div>
 
+              {/* Failure warnings */}
+              {(backtestData.failed_steps ?? 0) > 0 && (
+                <div className={`rounded-lg border px-4 py-3 text-xs font-mono space-y-1 ${
+                  backtestData.failed_steps === backtestData.rebalancing_steps
+                    ? 'border-negative/40 bg-negative/5 text-negative'
+                    : 'border-warning/40 bg-warning/5 text-warning'
+                }`}>
+                  <p className="font-semibold">
+                    ⚠ {backtestData.failed_steps}/{backtestData.rebalancing_steps} rebalancing steps used the equal-weight fallback
+                    {backtestData.failed_steps === backtestData.rebalancing_steps &&
+                      ' — equity curve equals the benchmark.'}
+                  </p>
+                  {(backtestData.opt_warnings ?? []).length > 0 && (
+                    <p className="text-[10px] opacity-70 break-all">{backtestData.opt_warnings[0]}</p>
+                  )}
+                </div>
+              )}
+
               {/* Charts */}
               <EquityCurve data={backtestData} />
               <RollingCharts data={backtestData} />

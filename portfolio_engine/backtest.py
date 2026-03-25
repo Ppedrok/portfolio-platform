@@ -101,10 +101,12 @@ class Backtest:
         rf  = self.rebalancing_freq
         n   = self.n_assets
 
-        w_prev       = np.ones(n) / n      # equal-weight fallback
-        rebal_points = list(range(ew, T, rf))
-        weights_rows = []                  # (date, weight array)
-        oos_ret_list = []                  # list of pd.Series
+        w_prev          = np.ones(n) / n      # equal-weight fallback
+        rebal_points    = list(range(ew, T, rf))
+        weights_rows    = []                  # (date, weight array)
+        oos_ret_list    = []                  # list of pd.Series
+        failed_steps    = 0                   # rebalancing steps that fell back to EW
+        step_warnings   = []                  # human-readable warning strings
 
         for i, t in enumerate(rebal_points):
             t_end = rebal_points[i + 1] if i + 1 < len(rebal_points) else T
@@ -121,10 +123,10 @@ class Backtest:
                 cov  = np.array(port.cov_matrix)
                 R_in = window.to_numpy()
             except Exception as exc:
-                warnings.warn(
-                    f"[Backtest] Estimation failed at step {i} (t={t}): {exc}. "
-                    "Carrying forward previous weights."
-                )
+                msg = f"Step {i}: estimation failed ({exc.__class__.__name__}: {exc}). Used fallback weights."
+                warnings.warn(f"[Backtest] {msg}")
+                step_warnings.append(msg)
+                failed_steps += 1
                 w = w_prev.copy()
                 weights_rows.append((ret.index[t], w))
                 oos_ret_list.append((oos * w).sum(axis=1))
@@ -161,10 +163,10 @@ class Backtest:
                 w     = w / total if total > 1e-8 else w_prev.copy()
 
             except Exception as exc:
-                warnings.warn(
-                    f"[Backtest] Optimisation failed at step {i} (t={t}): {exc}. "
-                    "Carrying forward previous weights."
-                )
+                msg = f"Step {i}: optimisation failed ({exc.__class__.__name__}: {exc}). Used fallback weights."
+                warnings.warn(f"[Backtest] {msg}")
+                step_warnings.append(msg)
+                failed_steps += 1
                 w = w_prev.copy()
 
             w_prev = w.copy()
@@ -203,6 +205,8 @@ class Backtest:
             portfolio_returns      = portfolio_returns,
             equity_curve           = equity_curve,
             benchmark_equity_curve = bm_equity,
+            failed_steps           = failed_steps,
+            step_warnings          = step_warnings,
         )
 
     # ── Analytics ─────────────────────────────────────────────────────────────

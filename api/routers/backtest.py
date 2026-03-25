@@ -128,9 +128,11 @@ def run_backtest(body: BacktestRequest):
         raise HTTPException(status_code=422, detail=f"Backtest failed: {exc}")
 
     # ── Build equity curve ─────────────────────────────────────────────────────
-    port_eq: pd.Series  = result["equity_curve"]
-    bm_eq:   pd.Series | None = result["benchmark_equity_curve"]
-    wh:      pd.DataFrame     = result["weights_history"]
+    port_eq:       pd.Series       = result["equity_curve"]
+    bm_eq:         pd.Series | None = result["benchmark_equity_curve"]
+    wh:            pd.DataFrame     = result["weights_history"]
+    failed_steps:  int               = result.get("failed_steps", 0)
+    step_warnings: list[str]         = result.get("step_warnings", [])
 
     equity_points: list[EquityCurvePoint] = []
     for date, pv in port_eq.items():
@@ -171,4 +173,6 @@ def run_backtest(body: BacktestRequest):
         equity_curve=equity_points,
         weights_history=weights_records,
         metrics=metrics_out,
+        failed_steps=failed_steps,
+        opt_warnings=step_warnings[:20],   # cap at 20 to avoid huge payloads
     )

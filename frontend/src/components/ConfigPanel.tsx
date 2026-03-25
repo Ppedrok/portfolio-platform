@@ -219,29 +219,29 @@ export function ConfigPanel({
         </div>
       </div>
 
-      {/* Benchmark ticker — for TrackingError standalone methods OR active TE constraint */}
-      {(isTracking || benchmarkTicker) && (
-        <div className="space-y-3">
-          <div>
-            <label className="block text-[10px] text-muted mb-1 font-mono uppercase tracking-widest">
-              Benchmark Ticker
-            </label>
-            <input
-              type="text"
-              placeholder="SPY"
-              value={benchmarkTicker}
-              onChange={e => { onBenchmarkTicker(e.target.value.toUpperCase().trim()); if (!e.target.value) onMaxTrackingError(null) }}
-              className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2.5 text-xs text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#5a6a85]"
-            />
-            <p className="text-[9px] font-mono text-muted mt-1.5 italic">
-              {isTracking
-                ? 'Downloaded automatically for the same date range. Required for Index Tracking methods.'
-                : 'Set a benchmark to enable the Tracking Error constraint below.'}
-            </p>
-          </div>
+      {/* Benchmark ticker — always visible; mandatory for TrackingError, optional TE constraint for all other methods */}
+      <div className="space-y-3">
+        <div>
+          <label className="block text-[10px] text-muted mb-1 font-mono uppercase tracking-widest">
+            Benchmark Ticker
+            {isTracking && <span className="ml-1 text-warning/70">(required)</span>}
+          </label>
+          <input
+            type="text"
+            placeholder="SPY"
+            value={benchmarkTicker}
+            onChange={e => { onBenchmarkTicker(e.target.value.toUpperCase().trim()); if (!e.target.value) onMaxTrackingError(null) }}
+            className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2.5 text-xs text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#5a6a85]"
+          />
+          <p className="text-[9px] font-mono text-muted mt-1.5 italic">
+            {isTracking
+              ? 'Required for Index Tracking methods. The portfolio minimises tracking error vs this index.'
+              : 'Optional. Set a benchmark to add a Tracking Error constraint to any optimisation method.'}
+          </p>
+        </div>
 
-          {/* TE constraint — only when benchmark is set and NOT a standalone TE method */}
-          {benchmarkTicker && !isTracking && (
+        {/* TE constraint — shown when benchmark is set and NOT a standalone TE method */}
+        {benchmarkTicker && !isTracking && (
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-[10px] text-muted font-mono uppercase tracking-widest">
@@ -288,7 +288,7 @@ export function ConfigPanel({
             </div>
           )}
         </div>
-      )}
+      </div>
 
 
       {/* Target return — only in Single Portfolio mode */}
