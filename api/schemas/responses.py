@@ -114,3 +114,4 @@ class BacktestResponse(BaseModel):
     )
     failed_steps:     int                     = 0
     opt_warnings:     list[str]               = Field(default_factory=list)
+    benchmark_label:  str                     = "Equal Weight"

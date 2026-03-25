@@ -68,19 +68,21 @@ def run_backtest(body: BacktestRequest):
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Data download failed: {exc}")
 
-    # ── Equal-weight benchmark ─────────────────────────────────────────────────
+    # ── Equal-weight benchmark (fallback) ─────────────────────────────────────
     ew_benchmark = returns.mean(axis=1)
-    ew_benchmark.name = "Benchmark"
+    ew_benchmark.name = "Equal Weight"
 
-    # ── Optional external benchmark for TE constraint ─────────────────────────
+    # ── Optional external benchmark for TE constraint + equity curve display ──
     benchmark_external = None
     max_te_daily: float | None = None
+    benchmark_label = "Equal Weight"
     if body.benchmark_ticker:
         try:
             bm_ticker = body.benchmark_ticker.upper().strip()
             bm_prices  = download_prices([bm_ticker], body.start, body.end)
             bm_returns = compute_returns(bm_prices)[bm_ticker]
             benchmark_external = bm_returns.reindex(returns.index).fillna(0)
+            benchmark_label = bm_ticker
             if body.max_tracking_error:
                 max_te_daily = float(body.max_tracking_error) / np.sqrt(252)
         except Exception as exc:
@@ -110,11 +112,15 @@ def run_backtest(body: BacktestRequest):
             estimation_window=body.estimation_window,
             rebalancing_freq=body.rebalancing_freq,
         )
+        # When an external benchmark is provided, use it for the equity curve
+        # display; fall back to equal-weight otherwise.
+        display_benchmark = benchmark_external if benchmark_external is not None else ew_benchmark
+
         result = bt.run(
             mu_method=body.mu_method,
             cov_method=body.cov_method,
             opt_method=body.opt_method,
-            benchmark=ew_benchmark,
+            benchmark=display_benchmark,
             solver=body.solver,
             benchmark_external=benchmark_external,
             max_te_daily=max_te_daily,
@@ -174,5 +180,6 @@ def run_backtest(body: BacktestRequest):
         weights_history=weights_records,
         metrics=metrics_out,
         failed_steps=failed_steps,
-        opt_warnings=step_warnings[:20],   # cap at 20 to avoid huge payloads
+        opt_warnings=step_warnings[:20],
+        benchmark_label=benchmark_label,
     )

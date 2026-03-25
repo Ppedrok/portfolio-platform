@@ -227,4 +227,5 @@ export interface BacktestResponse {
   metrics:            Record<string, Record<string, number | null>>
   failed_steps:       number
   opt_warnings:       string[]
+  benchmark_label:    string
 }

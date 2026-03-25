@@ -22,11 +22,12 @@ interface ChartRow {
 }
 
 function EquityTooltip({
-  active, payload, label,
+  active, payload, label, bmLabel,
 }: {
-  active?:  boolean
-  payload?: { name: string; value: number; color: string; payload: ChartRow }[]
-  label?:   string
+  active?:   boolean
+  payload?:  { name: string; value: number; color: string; payload: ChartRow }[]
+  label?:    string
+  bmLabel?:  string
 }) {
   if (!active || !payload?.length) return null
   const row  = payload[0].payload
@@ -54,7 +55,7 @@ function EquityTooltip({
       )}
       {bm && bm.value !== undefined && (
         <div style={TOOLTIP_ROW}>
-          <span style={{ color: '#8892a4' }}>Benchmark</span>
+          <span style={{ color: '#8892a4' }}>{bmLabel ?? 'Benchmark'}</span>
           <span style={{ color: BM_COLOR, fontWeight: 700 }}>
             ${(bm.value * 1000).toFixed(2)}
           </span>
@@ -81,6 +82,7 @@ function EquityTooltip({
 interface Props { data: BacktestResponse }
 
 export function EquityCurve({ data }: Props) {
+  const bmLabel = data.benchmark_label ?? 'Equal Weight'
   let runningPeak = -Infinity
   const chartData: ChartRow[] = data.equity_curve.map((p, i) => {
     const nav     = +p.portfolio_value.toFixed(4)
@@ -108,6 +110,8 @@ export function EquityCurve({ data }: Props) {
         <span className="text-[#e8eaf0]">{data.oos_end}</span>
         <span className="text-muted mx-2">·</span>
         {data.rebalancing_steps} rebalancings
+        <span className="text-muted mx-2">·</span>
+        vs <span className="text-[#fb923c]">{bmLabel}</span>
       </p>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData} margin={{ top: 8, right: 24, bottom: 24, left: 4 }}>
@@ -126,12 +130,15 @@ export function EquityCurve({ data }: Props) {
             domain={['auto', 'auto']}
             label={{ value: 'NAV (base 1)', angle: -90, position: 'insideLeft', offset: 14, fill: AXIS_COLOR, fontSize: 11 }}
           />
-          <Tooltip content={<EquityTooltip />} />
+          <Tooltip content={<EquityTooltip bmLabel={bmLabel} />} />
           <Legend
             iconType="line"
-            formatter={(v: string) => (
-              <span style={{ color: '#8892a4', fontSize: 11, fontFamily: '"JetBrains Mono", monospace' }}>{v}</span>
-            )}
+            formatter={(v: string) => {
+              const display = v === 'Benchmark' ? bmLabel : v
+              return (
+                <span style={{ color: '#8892a4', fontSize: 11, fontFamily: '"JetBrains Mono", monospace' }}>{display}</span>
+              )
+            }}
           />
           <Line
             type="monotone"
@@ -144,6 +151,7 @@ export function EquityCurve({ data }: Props) {
           <Line
             type="monotone"
             dataKey="Benchmark"
+            name="Benchmark"
             stroke={BM_COLOR}
             strokeWidth={1.5}
             strokeDasharray="6 3"
