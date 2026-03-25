@@ -288,7 +288,6 @@ export function ConfigPanel({
             </div>
           )}
         </div>
-      </div>
 
 
       {/* Target return — only in Single Portfolio mode */}
