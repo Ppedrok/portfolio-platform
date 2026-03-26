@@ -18,14 +18,14 @@ import { getFactorExposure } from '../api/client'
 
 // ── colours per factor ─────────────────────────────────────────────────────────
 const FACTOR_COLORS: Record<string, string> = {
-  'Mkt-RF': '#0ea5e9',
+  'Mkt-RF': '#f97316',
   'SMB':    '#34d399',
   'HML':    '#f59e0b',
   'RMW':    '#a78bfa',
   'CMA':    '#fb923c',
   'MOM':    '#f472b6',
 }
-const FACTOR_FALLBACK = ['#0ea5e9','#34d399','#f59e0b','#a78bfa','#fb923c','#f472b6']
+const FACTOR_FALLBACK = ['#f97316','#34d399','#f59e0b','#a78bfa','#fb923c','#f472b6']
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 
@@ -103,8 +103,8 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
           <select
             value={model}
             onChange={e => setModel(e.target.value as FactorModel)}
-            className="bg-[#0b0f1a] border border-[#1a2035] rounded px-2 py-1 text-xs text-[#c8d0e0]
-                       focus:outline-none focus:border-[#0ea5e9]"
+            className="bg-[#100d06] border border-[#2a1e08] rounded px-2 py-1 text-xs text-[#f0e8d4]
+                       focus:outline-none focus:border-[#f97316]"
           >
             <option value="FF3">Fama-French 3 (MKT, SMB, HML)</option>
             <option value="FF5">Fama-French 5 (MKT, SMB, HML, RMW, CMA)</option>
@@ -117,9 +117,9 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
           disabled={loading || tickers.length === 0}
           className="px-4 py-1.5 rounded text-xs font-bold font-mono uppercase tracking-wider text-white disabled:opacity-35 disabled:cursor-not-allowed transition-all"
           style={{
-            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-            border: '1px solid rgba(59,130,246,0.25)',
-            boxShadow: '0 0 16px rgba(37,99,235,0.18)',
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            border: '1px solid rgba(245,158,11,0.25)',
+            boxShadow: '0 0 16px rgba(245,158,11,0.18)',
           }}
         >
           {loading ? 'Computing…' : 'Run Factor Analysis'}
@@ -134,7 +134,7 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
                 className={`px-3 py-1 rounded text-xs font-mono transition-colors ${
                   view === v
                     ? 'bg-accent text-white'
-                    : 'bg-[#07090f] border border-border text-muted hover:border-accent hover:text-muted-bright'
+                    : 'bg-[#0a0804] border border-border text-muted hover:border-accent hover:text-muted-bright'
                 }`}
               >
                 {v === 'heatmap' ? 'Beta Table' : v === 'bars' ? 'Bar Chart' : 'Statistics'}
@@ -160,7 +160,7 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
         <>
           {/* ── Model badge ── */}
           <div className="flex items-center gap-2 text-xs text-muted font-mono">
-            <span className="px-2 py-0.5 rounded bg-[#0ea5e9]/10 border border-[#0ea5e9]/30 text-[#0ea5e9]">
+            <span className="px-2 py-0.5 rounded bg-[#f97316]/10 border border-[#f97316]/30 text-[#f97316]">
               {data.model}
             </span>
             <span>factors: {data.factors.join(', ')}</span>
@@ -169,13 +169,13 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
 
           {/* ── HEATMAP VIEW ── */}
           {view === 'heatmap' && (
-            <div className="overflow-x-auto rounded border border-[#1a2035]">
+            <div className="overflow-x-auto rounded border border-[#2a1e08]">
               <table className="w-full text-xs font-mono">
                 <thead>
-                  <tr className="bg-[#0b0f1a] text-muted border-b border-[#1a2035]">
+                  <tr className="bg-[#100d06] text-muted border-b border-[#2a1e08]">
                     <th className="px-3 py-2 text-left">Ticker</th>
                     {factors.map(f => (
-                      <th key={f} className="px-3 py-2 text-center" style={{ color: FACTOR_COLORS[f] ?? '#e8eaf0' }}>
+                      <th key={f} className="px-3 py-2 text-center" style={{ color: FACTOR_COLORS[f] ?? '#f5f0e8' }}>
                         {f}
                       </th>
                     ))}
@@ -185,9 +185,9 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
                   {assets.map((a, i) => (
                     <tr
                       key={a.ticker}
-                      className={`border-b border-[#1a2035] ${i % 2 === 0 ? 'bg-[#0b0f1a]/50' : ''}`}
+                      className={`border-b border-[#2a1e08] ${i % 2 === 0 ? 'bg-[#100d06]/50' : ''}`}
                     >
-                      <td className="px-3 py-2 font-semibold text-[#c8d0e0]">{a.ticker}</td>
+                      <td className="px-3 py-2 font-semibold text-[#f0e8d4]">{a.ticker}</td>
                       {factors.map(f => {
                         const beta = a.betas[f]
                         const p    = a.p_values[f]
@@ -199,7 +199,7 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
                             title={`t = ${t.toFixed(2)}, p = ${p.toFixed(3)}`}
                           >
                             <span
-                              className="px-2 py-0.5 rounded text-[#0b0f1a] font-bold"
+                              className="px-2 py-0.5 rounded text-[#100d06] font-bold"
                               style={{ backgroundColor: betaColor(beta) }}
                             >
                               {fmt2(beta)}{sigStars(p)}
@@ -216,19 +216,19 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
 
           {/* ── BAR CHART VIEW ── */}
           {view === 'bars' && (
-            <div className="bg-[#0b0f1a] border border-[#1a2035] rounded p-4" style={{ height: 380 }}>
+            <div className="bg-[#100d06] border border-[#2a1e08] rounded p-4" style={{ height: 380 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1a2035" />
-                  <XAxis dataKey="ticker" tick={{ fill: '#5a6a85', fontSize: 11 }} />
-                  <YAxis tick={{ fill: '#5a6a85', fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2a1e08" />
+                  <XAxis dataKey="ticker" tick={{ fill: '#7a6848', fontSize: 11 }} />
+                  <YAxis tick={{ fill: '#7a6848', fontSize: 11 }} />
                   <Tooltip
-                    contentStyle={{ background: '#07090f', border: '1px solid #1a2035', borderRadius: 8, fontSize: 11, fontFamily: '"JetBrains Mono", monospace' }}
-                    labelStyle={{ color: '#e8eaf0', fontSize: 12 }}
+                    contentStyle={{ background: '#0a0804', border: '1px solid #2a1e08', borderRadius: 8, fontSize: 11, fontFamily: '"JetBrains Mono", monospace' }}
+                    labelStyle={{ color: '#f5f0e8', fontSize: 12 }}
                     itemStyle={{ fontSize: 11 }}
                     formatter={(v: number) => v.toFixed(3)}
                   />
-                  <Legend wrapperStyle={{ fontSize: 11, color: '#5a6a85' }} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: '#7a6848' }} />
                   <ReferenceLine y={0} stroke="#334155" />
                   {factors.map((f, idx) => (
                     <Bar
@@ -245,20 +245,20 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
 
           {/* ── STATISTICS VIEW ── */}
           {view === 'stats' && (
-            <div className="overflow-x-auto rounded border border-[#1a2035]">
+            <div className="overflow-x-auto rounded border border-[#2a1e08]">
               <table className="w-full text-xs font-mono">
                 <thead>
-                  <tr className="bg-[#0b0f1a] text-muted border-b border-[#1a2035]">
+                  <tr className="bg-[#100d06] text-muted border-b border-[#2a1e08]">
                     <th className="px-3 py-2 text-left">Ticker</th>
                     <th className="px-3 py-2 text-right">Alpha (ann.)</th>
                     <th className="px-3 py-2 text-right">R²</th>
                     {factors.map(f => (
-                      <th key={f} className="px-3 py-2 text-right" style={{ color: FACTOR_COLORS[f] ?? '#e8eaf0' }}>
+                      <th key={f} className="px-3 py-2 text-right" style={{ color: FACTOR_COLORS[f] ?? '#f5f0e8' }}>
                         β {f}
                       </th>
                     ))}
                     {factors.map(f => (
-                      <th key={`t_${f}`} className="px-3 py-2 text-right text-[#5a6a85]">
+                      <th key={`t_${f}`} className="px-3 py-2 text-right text-[#7a6848]">
                         t({f})
                       </th>
                     ))}
@@ -268,9 +268,9 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
                   {assets.map((a, i) => (
                     <tr
                       key={a.ticker}
-                      className={`border-b border-[#1a2035] ${i % 2 === 0 ? 'bg-[#0b0f1a]/50' : ''}`}
+                      className={`border-b border-[#2a1e08] ${i % 2 === 0 ? 'bg-[#100d06]/50' : ''}`}
                     >
-                      <td className="px-3 py-2 font-semibold text-[#c8d0e0]">{a.ticker}</td>
+                      <td className="px-3 py-2 font-semibold text-[#f0e8d4]">{a.ticker}</td>
                       <td className={`px-3 py-2 text-right font-semibold ${a.alpha >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {fmtPct(a.alpha)}
                       </td>
@@ -280,7 +280,7 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
                         </span>
                       </td>
                       {factors.map(f => (
-                        <td key={f} className="px-3 py-2 text-right text-[#c8d0e0]">
+                        <td key={f} className="px-3 py-2 text-right text-[#f0e8d4]">
                           {fmt2(a.betas[f])}{sigStars(a.p_values[f])}
                         </td>
                       ))}
@@ -297,8 +297,8 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
           )}
 
           {/* ── Interpretation footer ── */}
-          <div className="text-[10px] text-muted font-mono leading-relaxed bg-[#0b0f1a] border border-[#1a2035] rounded px-3 py-2">
-            <span className="text-[#0ea5e9]">Mkt-RF</span> market beta · &nbsp;
+          <div className="text-[10px] text-muted font-mono leading-relaxed bg-[#100d06] border border-[#2a1e08] rounded px-3 py-2">
+            <span className="text-[#f97316]">Mkt-RF</span> market beta · &nbsp;
             <span className="text-[#34d399]">SMB</span> small-minus-big (size) · &nbsp;
             <span className="text-[#f59e0b]">HML</span> high-minus-low (value) · &nbsp;
             {factors.includes('RMW') && <><span className="text-[#a78bfa]">RMW</span> robust-minus-weak (profitability) · &nbsp;</>}
@@ -311,7 +311,7 @@ export function FactorExposure({ tickers, startDate, endDate }: Props) {
 
       {!data && !loading && (
         <div className="flex flex-col items-center justify-center py-16 text-muted text-xs font-mono gap-2">
-          <span>Select a factor model and click <span className="text-[#0ea5e9]">Run Factor Analysis</span></span>
+          <span>Select a factor model and click <span className="text-[#f97316]">Run Factor Analysis</span></span>
           <span className="text-[10px]">Requires at least 2 assets and a valid date range</span>
         </div>
       )}

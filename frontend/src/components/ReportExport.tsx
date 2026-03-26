@@ -19,7 +19,7 @@ function fmt(v: number | null | undefined, pct: boolean): string {
 }
 
 function colorStyle(v: number | null | undefined, invert = false): string {
-  if (v == null) return 'color:#c8d0e0'
+  if (v == null) return 'color:#f0e8d4'
   const pos = invert ? v < 0 : v > 0
   return pos ? 'color:#00c77a' : 'color:#f43f5e'
 }
@@ -162,13 +162,13 @@ function generateHTML(opts: {
       justify-content: space-between;
       align-items: flex-start;
       padding-bottom: 18px;
-      border-bottom: 2px solid #2563eb;
+      border-bottom: 2px solid #f59e0b;
       margin-bottom: 24px;
     }
     .header h1 {
       font-size: 22px;
       font-weight: 700;
-      color: #2563eb;
+      color: #f59e0b;
       letter-spacing: -0.5px;
     }
     .header .subtitle {
@@ -194,7 +194,7 @@ function generateHTML(opts: {
       font-weight: 600;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: #2563eb;
+      color: #f59e0b;
       margin-bottom: 12px;
       padding-bottom: 4px;
       border-bottom: 1px solid #e2e8f0;
@@ -235,7 +235,7 @@ function generateHTML(opts: {
     .chip {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
-      color: #1d4ed8;
+      color: #d97706;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       font-weight: 600;
@@ -325,7 +325,7 @@ function generateHTML(opts: {
   <!-- Print button (hidden when printing) -->
   <div class="no-print" style="margin-bottom:20px;display:flex;gap:10px">
     <button onclick="window.print()" style="
-      background:#2563eb;color:#fff;border:none;border-radius:6px;
+      background:#f59e0b;color:#fff;border:none;border-radius:6px;
       padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif
     ">🖨 Save as PDF</button>
     <button onclick="window.close()" style="
@@ -418,7 +418,7 @@ function generateHTML(opts: {
         const bms = backtestData!.metrics['Sharpe Ratio']?.['Benchmark'] ?? null
         return `
         <div class="hero-grid">
-          <div class="hero-card" style="border-left:3px solid #2563eb">
+          <div class="hero-card" style="border-left:3px solid #f59e0b">
             <div class="hero-label">Portfolio — Ann. Return</div>
             <div class="hero-value" style="${colorStyle(ret)}">${fmt(ret, true)}</div>
             <div class="hero-sub">Sharpe ${fmt(sr, false)}</div>
@@ -518,7 +518,7 @@ export function ReportExportButton({
       onClick={handleExport}
       title="Export as PDF"
       className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono font-semibold
-                 text-muted hover:text-[#c8d0e0] border border-border hover:border-accent/40
+                 text-muted hover:text-[#f0e8d4] border border-border hover:border-accent/40
                  bg-transparent hover:bg-accent/5 transition-all"
     >
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">

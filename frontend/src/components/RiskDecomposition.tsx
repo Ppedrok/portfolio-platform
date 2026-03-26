@@ -35,7 +35,7 @@ function CustomTooltip({ active, payload, label }: {
   return (
     <div style={{
       background: '#0d1117',
-      border: '1px solid #1a2035',
+      border: '1px solid #2a1e08',
       borderRadius: 8,
       padding: '10px 14px',
       fontFamily: '"JetBrains Mono", monospace',
@@ -43,10 +43,10 @@ function CustomTooltip({ active, payload, label }: {
       minWidth: 180,
       boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#4f8ef7', fontWeight: 700, fontSize: 12, marginBottom: 8 }}>{label}</div>
+      <div style={{ color: '#f97316', fontWeight: 700, fontSize: 12, marginBottom: 8 }}>{label}</div>
       <div style={TOOLTIP_ROW}>
         <span style={{ color: '#8892a4' }}>Weight</span>
-        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{fmtPct(row.weight)}</span>
+        <span style={{ color: '#f97316', fontWeight: 700 }}>{fmtPct(row.weight)}</span>
       </div>
       <div style={TOOLTIP_ROW}>
         <span style={{ color: '#8892a4' }}>MRC</span>
@@ -68,9 +68,9 @@ function CustomTooltip({ active, payload, label }: {
 
 function MetricCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-[#07090f] border border-border rounded-lg p-3 hover:border-accent/30 transition-colors">
+    <div className="bg-[#0a0804] border border-border rounded-lg p-3 hover:border-accent/30 transition-colors">
       <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-1.5 leading-none">{label}</p>
-      <p className="font-mono font-bold text-base leading-none text-[#e8eaf0]">{value}</p>
+      <p className="font-mono font-bold text-base leading-none text-[#f5f0e8]">{value}</p>
       {sub && <p className="text-[10px] text-muted font-mono mt-1">{sub}</p>}
     </div>
   )
@@ -169,7 +169,7 @@ export function RiskDecomposition({ data }: Props) {
       </div>
 
       {/* ── Dual bar chart: Weight vs Risk % ── */}
-      <div className="bg-[#07090f] border border-border rounded-lg p-3">
+      <div className="bg-[#0a0804] border border-border rounded-lg p-3">
         <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-3">
           Weight vs Risk Contribution
         </p>
@@ -184,7 +184,7 @@ export function RiskDecomposition({ data }: Props) {
             <XAxis
               type="number"
               tickFormatter={v => `${(v * 100).toFixed(0)}%`}
-              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#7a6848', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
@@ -192,19 +192,19 @@ export function RiskDecomposition({ data }: Props) {
               type="category"
               dataKey="asset"
               width={52}
-              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#7a6848', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(37,99,235,0.04)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(245,158,11,0.04)' }} />
             <ReferenceLine x={0} stroke="#1e2530" />
-            <Bar dataKey="weight" name="Weight" fill="#2563eb" radius={[0, 2, 2, 0]} />
+            <Bar dataKey="weight" name="Weight" fill="#f59e0b" radius={[0, 2, 2, 0]} />
             <Bar dataKey="risk"   name="Risk %"  fill="#ef4444" radius={[0, 2, 2, 0]} />
           </BarChart>
         </ResponsiveContainer>
         {/* Legend */}
         <div className="flex gap-4 mt-2">
-          {[['#4f8ef7', 'Weight'], ['#f43f5e', 'Risk %']].map(([color, label]) => (
+          {[['#f97316', 'Weight'], ['#f43f5e', 'Risk %']].map(([color, label]) => (
             <div key={label} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
               <span className="text-[9px] text-muted font-mono">{label}</span>
@@ -214,7 +214,7 @@ export function RiskDecomposition({ data }: Props) {
       </div>
 
       {/* ── CVaR bar chart ── */}
-      <div className="bg-[#07090f] border border-border rounded-lg p-3">
+      <div className="bg-[#0a0804] border border-border rounded-lg p-3">
         <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-3">
           Weight vs CVaR Contribution
         </p>
@@ -229,7 +229,7 @@ export function RiskDecomposition({ data }: Props) {
             <XAxis
               type="number"
               tickFormatter={v => `${(v * 100).toFixed(0)}%`}
-              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#7a6848', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
@@ -237,13 +237,13 @@ export function RiskDecomposition({ data }: Props) {
               type="category"
               dataKey="asset"
               width={52}
-              tick={{ fill: '#5a6a85', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
+              tick={{ fill: '#7a6848', fontSize: 9, fontFamily: '"JetBrains Mono", monospace' }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(37,99,235,0.04)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(245,158,11,0.04)' }} />
             <ReferenceLine x={0} stroke="#1e2530" />
-            <Bar dataKey="weight"   name="Weight"   fill="#2563eb" radius={[0, 2, 2, 0]} />
+            <Bar dataKey="weight"   name="Weight"   fill="#f59e0b" radius={[0, 2, 2, 0]} />
             <Bar dataKey="cvar_pct" name="CVaR %"   fill="#f59e0b" radius={[0, 2, 2, 0]}>
               {cvarData.map((_, i) => (
                 <Cell key={i} fill={pcvar[i] < 0 ? '#00d4aa' : '#f59e0b'} />
@@ -252,7 +252,7 @@ export function RiskDecomposition({ data }: Props) {
           </BarChart>
         </ResponsiveContainer>
         <div className="flex gap-4 mt-2">
-          {[['#4f8ef7', 'Weight'], ['#f59e0b', 'CVaR %']].map(([color, label]) => (
+          {[['#f97316', 'Weight'], ['#f59e0b', 'CVaR %']].map(([color, label]) => (
             <div key={label} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
               <span className="text-[9px] text-muted font-mono">{label}</span>
@@ -262,7 +262,7 @@ export function RiskDecomposition({ data }: Props) {
       </div>
 
       {/* ── Risk efficiency table ── */}
-      <div className="bg-[#07090f] border border-border rounded-lg p-3">
+      <div className="bg-[#0a0804] border border-border rounded-lg p-3">
         <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-3">
           Risk Efficiency (sorted by imbalance)
         </p>
@@ -284,9 +284,9 @@ export function RiskDecomposition({ data }: Props) {
               return (
                 <tr key={row.asset} style={{ backgroundColor: rowColor }}>
                   <td className="py-1.5 font-mono font-semibold text-accent text-[10px]">{row.asset}</td>
-                  <td className="py-1.5 pl-2 font-mono text-[#e8eaf0] text-[10px]">{fmtPct(row.weight)}</td>
+                  <td className="py-1.5 pl-2 font-mono text-[#f5f0e8] text-[10px]">{fmtPct(row.weight)}</td>
                   <td className="py-1.5 pl-2 font-mono text-muted text-[10px]">{fmtPct(row.indiv_vol)}</td>
-                  <td className={`py-1.5 pl-2 font-mono font-medium text-[10px] ${over ? 'text-negative' : under ? 'text-positive' : 'text-[#e8eaf0]'}`}>
+                  <td className={`py-1.5 pl-2 font-mono font-medium text-[10px] ${over ? 'text-negative' : under ? 'text-positive' : 'text-[#f5f0e8]'}`}>
                     {fmtPct(row.prc)}
                   </td>
                   <td className={`py-1.5 pl-2 font-mono text-[10px] ${row.imbalance > 0.05 ? 'text-negative' : 'text-muted'}`}>

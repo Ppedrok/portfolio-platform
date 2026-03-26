@@ -4,17 +4,17 @@ interface Props { data: BacktestResponse }
 
 /** Teal → blue → indigo based on weight magnitude */
 function weightToColor(w: number): string {
-  if (w < 0.001) return '#0b0f1a'
+  if (w < 0.001) return '#100d06'
   const t = Math.min(1, w * 2.5)   // 40%+ → full colour
   if (t <= 0.5) {
-    // teal (#0ea5e9) → blue (#2563eb)
+    // teal (#f97316) → blue (#f59e0b)
     const s = t * 2
     const r = Math.round(14  + (37  - 14)  * s)
     const g = Math.round(165 + (99  - 165) * s)
     const b = Math.round(233 + (235 - 233) * s)
     return `rgb(${r},${g},${b})`
   } else {
-    // blue (#2563eb) → indigo (#6366f1)
+    // blue (#f59e0b) → indigo (#6366f1)
     const s = (t - 0.5) * 2
     const r = Math.round(37  + (99  - 37)  * s)
     const g = Math.round(99  + (102 - 99)  * s)
@@ -53,7 +53,7 @@ export function WeightsHeatmap({ data }: Props) {
                   writingMode: 'vertical-rl',
                   transform: 'rotate(180deg)',
                   fontSize: 8,
-                  color: '#5a6a85',
+                  color: '#7a6848',
                   height: 44,
                   textAlign: 'left',
                   fontFamily: '"JetBrains Mono", monospace',
@@ -69,7 +69,7 @@ export function WeightsHeatmap({ data }: Props) {
         {tickers.map(ticker => (
           <div key={ticker} className="flex items-center gap-px mb-px">
             <div
-              className="w-[72px] shrink-0 text-[#e8eaf0] pr-2 truncate"
+              className="w-[72px] shrink-0 text-[#f5f0e8] pr-2 truncate"
               style={{ fontSize: 10, fontFamily: '"JetBrains Mono", monospace' }}
             >
               {ticker}
@@ -95,7 +95,7 @@ export function WeightsHeatmap({ data }: Props) {
           <span className="text-[10px] text-muted font-mono">0%</span>
           <div
             className="h-1.5 flex-1 rounded-full"
-            style={{ background: 'linear-gradient(to right, #0ea5e9, #2563eb, #6366f1)' }}
+            style={{ background: 'linear-gradient(to right, #f97316, #f59e0b, #6366f1)' }}
           />
           <span className="text-[10px] text-muted font-mono">40%+</span>
         </div>

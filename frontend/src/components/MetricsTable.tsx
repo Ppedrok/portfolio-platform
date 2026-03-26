@@ -7,16 +7,16 @@ function fmt(v: number | null | undefined, isPercent: boolean): string {
 }
 
 function valColor(v: number | null | undefined, invert = false): string {
-  if (v == null) return 'text-[#c8d0e0]'
+  if (v == null) return 'text-[#f0e8d4]'
   const pos = invert ? v < 0 : v > 0
   return pos ? 'text-positive' : 'text-negative'
 }
 
 function ratioColor(v: number | null | undefined): string {
-  if (v == null) return 'text-[#c8d0e0]'
+  if (v == null) return 'text-[#f0e8d4]'
   if (v >= 1)   return 'text-positive'
   if (v < 0.5)  return 'text-warning'
-  return 'text-[#c8d0e0]'
+  return 'text-[#f0e8d4]'
 }
 
 // ── Single portfolio metrics ───────────────────────────────────────────────────
@@ -45,13 +45,13 @@ export function MetricsTable({ metrics }: { metrics: PortfolioMetrics }) {
 
       {/* Hero stats */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-[#07090f] rounded-panel p-3 border border-border">
+        <div className="bg-[#0a0804] rounded-panel p-3 border border-border">
           <p className="terminal-label mb-1.5">Ann. Return</p>
-          <p className={`text-xl font-mono font-semibold num ${ret != null && ret > 0 ? 'text-positive glow-green' : ret != null ? 'text-negative' : 'text-[#c8d0e0]'}`}>
+          <p className={`text-xl font-mono font-semibold num ${ret != null && ret > 0 ? 'text-positive glow-green' : ret != null ? 'text-negative' : 'text-[#f0e8d4]'}`}>
             {fmt(ret, true)}
           </p>
         </div>
-        <div className="bg-[#07090f] rounded-panel p-3 border border-border">
+        <div className="bg-[#0a0804] rounded-panel p-3 border border-border">
           <p className="terminal-label mb-1.5">Sharpe Ratio</p>
           <p className={`text-xl font-mono font-semibold num ${ratioColor(sr)}`}>
             {fmt(sr, false)}
@@ -65,7 +65,7 @@ export function MetricsTable({ metrics }: { metrics: PortfolioMetrics }) {
           {SINGLE_ROWS.map(({ key, label, pct, colored, invert, isRatio }) => {
             const v = metrics[key]
             const colorCls = !colored
-              ? 'text-[#c8d0e0]'
+              ? 'text-[#f0e8d4]'
               : isRatio
                 ? ratioColor(v)
                 : valColor(v, invert)
@@ -121,9 +121,9 @@ export function BacktestMetricsTable({
       {/* Hero stat comparison */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         {/* Portfolio */}
-        <div className="bg-[#07090f] rounded-panel p-3 border border-accent/20 card-accent-left">
+        <div className="bg-[#0a0804] rounded-panel p-3 border border-accent/20 card-accent-left">
           <p className="terminal-label text-accent mb-1.5">Portfolio</p>
-          <p className={`text-lg font-mono font-semibold num ${heroRet != null && heroRet > 0 ? 'text-positive' : heroRet != null ? 'text-negative' : 'text-[#c8d0e0]'}`}>
+          <p className={`text-lg font-mono font-semibold num ${heroRet != null && heroRet > 0 ? 'text-positive' : heroRet != null ? 'text-negative' : 'text-[#f0e8d4]'}`}>
             {fmt(heroRet, true)}
           </p>
           <p className={`text-xs font-mono num mt-0.5 ${ratioColor(heroSR)}`}>
@@ -132,9 +132,9 @@ export function BacktestMetricsTable({
         </div>
         {/* Benchmark */}
         {columns.includes('Benchmark') && (
-          <div className="bg-[#07090f] rounded-panel p-3 border border-border">
+          <div className="bg-[#0a0804] rounded-panel p-3 border border-border">
             <p className="terminal-label mb-1.5">Benchmark EW</p>
-            <p className={`text-lg font-mono font-semibold num ${heroBmRet != null && heroBmRet > 0 ? 'text-positive' : heroBmRet != null ? 'text-negative' : 'text-[#c8d0e0]'}`}>
+            <p className={`text-lg font-mono font-semibold num ${heroBmRet != null && heroBmRet > 0 ? 'text-positive' : heroBmRet != null ? 'text-negative' : 'text-[#f0e8d4]'}`}>
               {fmt(heroBmRet, true)}
             </p>
             <p className={`text-xs font-mono num mt-0.5 ${ratioColor(heroBmSR)}`}>
@@ -163,7 +163,7 @@ export function BacktestMetricsTable({
                 {columns.map(col => {
                   const v = row[col] ?? null
                   const colorCls = !colored
-                    ? 'text-[#c8d0e0]'
+                    ? 'text-[#f0e8d4]'
                     : isRatio
                       ? ratioColor(v)
                       : valColor(v, invert)

@@ -115,7 +115,7 @@ export function ResultsPanel({
         <span className="terminal-label border border-accent/40 text-accent bg-accent/5 px-2 py-0.5 rounded">
           03
         </span>
-        <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Results Dashboard</h2>
+        <h2 className="text-sm font-semibold text-[#f0e8d4] uppercase tracking-wider">Results Dashboard</h2>
       </div>
 
       {/* Tab switcher */}
@@ -128,7 +128,7 @@ export function ResultsPanel({
               onClick={() => onTabChange(id)}
               className={`px-5 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2 -mb-px whitespace-nowrap relative ${
                 activeTab === id
-                  ? 'border-accent text-[#e8eaf0] bg-accent/5'
+                  ? 'border-accent text-[#f5f0e8] bg-accent/5'
                   : 'border-transparent text-muted hover:text-muted-bright'
               }`}
             >

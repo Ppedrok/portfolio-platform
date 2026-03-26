@@ -28,14 +28,14 @@ export function GlobalLoadingBar({ loading }: Props) {
         width:      '100%',
         height:     2,
         zIndex:     10000,
-        background: '#0b0f1a',
+        background: '#100d06',
         overflow:   'hidden',
         animation:  '_glb_fade_in 0.15s ease forwards',
       }}>
         <div style={{
           width:      '28%',
           height:     '100%',
-          background: 'linear-gradient(90deg, transparent 0%, #2563eb 30%, #38bdf8 60%, #2563eb 80%, transparent 100%)',
+          background: 'linear-gradient(90deg, transparent 0%, #f59e0b 25%, #f97316 55%, #fbbf24 75%, transparent 100%)',
           animation:  '_glb_slide 1.1s cubic-bezier(0.4,0,0.2,1) infinite',
         }} />
       </div>

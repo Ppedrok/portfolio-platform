@@ -4,26 +4,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg:             '#05070d',
-        'bg-secondary': '#080c14',
-        card:           '#0b0f1a',
-        'card-raised':  '#0f1420',
-        border:         '#1a2035',
-        'border-bright':'#253050',
-        muted:          '#5a6a85',
-        'muted-bright': '#8899b8',
-        teal:           '#0ea5e9',
+        bg:             '#070504',
+        'bg-secondary': '#0a0804',
+        card:           '#100d06',
+        'card-raised':  '#181208',
+        border:         '#2a1e08',
+        'border-bright':'#3d2e10',
+        muted:          '#7a6848',
+        'muted-bright': '#a08550',
+        teal:           '#f97316',   // orange replaces teal as secondary accent
         accent: {
-          DEFAULT: '#2563eb',
-          hover:   '#1d4ed8',
-          dim:     '#2563eb14',
-          soft:    '#2563eb28',
-          glow:    '#2563eb40',
+          DEFAULT: '#f59e0b',
+          hover:   '#d97706',
+          dim:     '#f59e0b14',
+          soft:    '#f59e0b28',
+          glow:    '#f59e0b40',
         },
-        positive:       '#10b981',
+        positive:       '#22c55e',
         negative:       '#ef4444',
-        warning:        '#f59e0b',
-        header:         '#030508',
+        warning:        '#f97316',
+        header:         '#040302',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -31,7 +31,7 @@ export default {
       },
       boxShadow: {
         card: '0 4px 32px rgba(0,0,0,0.6)',
-        glow: '0 0 20px rgba(37,99,235,0.18)',
+        glow: '0 0 20px rgba(245,158,11,0.22)',
       },
       borderRadius: {
         panel: '8px',

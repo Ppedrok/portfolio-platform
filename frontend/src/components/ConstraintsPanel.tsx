@@ -4,7 +4,7 @@ import type { ConstraintRow, TickerMatch, AssetGroup } from '../types'
 // ── Palette (shared with WeightsChart) ────────────────────────────────────────
 
 const PALETTE = [
-  '#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444',
+  '#f59e0b', '#f97316', '#10b981', '#f59e0b', '#ef4444',
   '#a78bfa', '#34d399', '#fb923c', '#e879f9', '#facc15',
 ]
 
@@ -81,8 +81,8 @@ function buildConstraintRows(
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
 const INP =
-  'bg-[#07090f] border border-[#1a2035] rounded px-2 py-1 text-xs text-[#c8d0e0] ' +
-  'focus:outline-none focus:border-accent appearance-none placeholder-[#5a6a85]'
+  'bg-[#0a0804] border border-[#2a1e08] rounded px-2 py-1 text-xs text-[#f0e8d4] ' +
+  'focus:outline-none focus:border-accent appearance-none placeholder-[#7a6848]'
 const SS = { colorScheme: 'dark' as const }
 
 function Toggle({ val, onChange, label }: { val: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -91,7 +91,7 @@ function Toggle({ val, onChange, label }: { val: boolean; onChange: (v: boolean)
       <button
         type="button" role="switch" aria-checked={val}
         onClick={() => onChange(!val)}
-        className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${val ? 'bg-accent' : 'bg-[#1a2035]'}`}
+        className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${val ? 'bg-accent' : 'bg-[#2a1e08]'}`}
       >
         <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform mt-[3px] ${val ? 'translate-x-4' : 'translate-x-1'}`} />
       </button>
@@ -279,7 +279,7 @@ export function ConstraintsPanel({ assets, longOnly, onChange, onGroupsChange, o
             className={`px-3 py-2 text-[11px] font-mono flex items-center gap-1.5 transition-colors relative ${
               tab === t.id
                 ? 'text-accent border-b-2 border-accent -mb-px'
-                : 'text-muted hover:text-[#e8eaf0]'
+                : 'text-muted hover:text-[#f5f0e8]'
             }`}
           >
             {t.label}
@@ -421,7 +421,7 @@ function Tab1({ assets, limitMap, lockOpen, lockInput, sumMins, setLim, toggleLo
                 >Lock</button>
                 <button type="button"
                   onClick={() => setLim(a.ticker, { min: 0, max: 100 })}
-                  className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#1e2530] text-muted hover:text-[#e8eaf0] transition-colors"
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#1e2530] text-muted hover:text-[#f5f0e8] transition-colors"
                 >Reset</button>
               </div>
             </div>
@@ -443,7 +443,7 @@ function Tab1({ assets, limitMap, lockOpen, lockInput, sumMins, setLim, toggleLo
                   style={{ background: '#f59e0b22', color: '#f59e0b' }}
                 >Apply</button>
                 <button type="button" onClick={() => closeLock(a.ticker)}
-                  className="text-[10px] text-muted hover:text-[#e8eaf0] font-mono">×</button>
+                  className="text-[10px] text-muted hover:text-[#f5f0e8] font-mono">×</button>
               </div>
             )}
 
@@ -486,13 +486,13 @@ function Tab1({ assets, limitMap, lockOpen, lockInput, sumMins, setLim, toggleLo
 
 // Colour palette for sectors (12 distinct hues)
 const SECTOR_COLORS: Record<string, string> = {
-  'Technology':              '#2563eb',
+  'Technology':              '#f59e0b',
   'Healthcare':              '#10b981',
   'Financials':              '#f59e0b',
   'Consumer Discretionary':  '#ef4444',
   'Consumer Staples':        '#a78bfa',
   'Energy':                  '#fb923c',
-  'Industrials':             '#0ea5e9',
+  'Industrials':             '#f97316',
   'Materials':               '#34d399',
   'Utilities':               '#e879f9',
   'Real Estate':             '#facc15',
@@ -804,7 +804,7 @@ function Tab3({
                 className="flex items-center gap-1.5 bg-[#080a0f] border border-[#1e2530] rounded-full px-3 py-1 text-[11px] font-mono">
                 <span className="text-accent">{rc.assetA}</span>
                 <span className="text-muted">{rc.sign === '>=' ? '≥' : '≤'}</span>
-                <span className="text-[#e8eaf0]">{rc.factor}×</span>
+                <span className="text-[#f5f0e8]">{rc.factor}×</span>
                 <span className="text-accent">{rc.assetB}</span>
                 <button type="button" onClick={() => onRemoveRel(rc.id)}
                   className="text-muted hover:text-negative ml-1 leading-none">×</button>
@@ -989,7 +989,7 @@ function SummaryPills({ assets, limitMap, groupCons, relCons, globalRules }: {
           </span>
         ))}
         {extras > 0 && (
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1a2035] text-muted">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#2a1e08] text-muted">
             +{extras} more
           </span>
         )}

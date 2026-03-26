@@ -3,20 +3,20 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import type { PortfolioMetrics, RiskDecompositionData, TickerMatch } from '../types'
 
 const COLORS = [
-  '#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444',
+  '#f59e0b', '#f97316', '#10b981', '#f59e0b', '#ef4444',
   '#a78bfa', '#34d399', '#fb923c', '#e879f9', '#facc15',
   '#64748b', '#22d3ee', '#f97316', '#84cc16', '#ec4899',
 ]
 
 // ── Sector colour palette (consistent with ConstraintsPanel) ──────────────────
 const SECTOR_COLORS: Record<string, string> = {
-  'Technology':              '#2563eb',
+  'Technology':              '#f59e0b',
   'Healthcare':              '#10b981',
   'Financials':              '#f59e0b',
   'Consumer Discretionary':  '#ef4444',
   'Consumer Staples':        '#a78bfa',
   'Energy':                  '#fb923c',
-  'Industrials':             '#0ea5e9',
+  'Industrials':             '#f97316',
   'Materials':               '#34d399',
   'Utilities':               '#e879f9',
   'Real Estate':             '#facc15',
@@ -51,7 +51,7 @@ function fmt(v: number | null | undefined, pct: boolean): string {
 }
 
 function metricColor(v: number | null | undefined, invert = false): string {
-  if (v == null) return '#e8eaf0'
+  if (v == null) return '#f5f0e8'
   const isPos = invert ? v < 0 : v > 0
   return isPos ? '#00d4aa' : '#ff4d6a'
 }
@@ -81,7 +81,7 @@ function WeightsTooltip({
       fontFamily: '"JetBrains Mono", monospace', fontSize: 11,
       minWidth: 180, boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#4f8ef7', fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{name}</div>
+      <div style={{ color: '#f97316', fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{name}</div>
       {asset?.name && (
         <div style={{ color: '#8892a4', fontSize: 10, marginBottom: 6, lineHeight: 1.3 }}>{asset.name}</div>
       )}
@@ -90,7 +90,7 @@ function WeightsTooltip({
       )}
       <div style={ROW}>
         <span style={{ color: '#8892a4' }}>Weight</span>
-        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{value.toFixed(2)}%</span>
+        <span style={{ color: '#f97316', fontWeight: 700 }}>{value.toFixed(2)}%</span>
       </div>
       {risk && (
         <>
@@ -125,12 +125,12 @@ function SectorTooltip({
       fontFamily: '"JetBrains Mono", monospace', fontSize: 11,
       minWidth: 180, boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: SECTOR_COLORS[name] ?? '#4f8ef7', fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
+      <div style={{ color: SECTOR_COLORS[name] ?? '#f97316', fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
         {name}
       </div>
       <div style={ROW}>
         <span style={{ color: '#8892a4' }}>Allocation</span>
-        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{value.toFixed(2)}%</span>
+        <span style={{ color: '#f97316', fontWeight: 700 }}>{value.toFixed(2)}%</span>
       </div>
       <div style={{ marginTop: 6, color: '#8892a4', fontSize: 10 }}>
         {tickers.join(' · ')}
@@ -235,7 +235,7 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets, tra
                 className={`px-3 py-1 text-[10px] font-mono uppercase tracking-wide transition-colors ${
                   view === v
                     ? 'bg-accent/20 text-accent'
-                    : 'text-muted hover:text-[#e8eaf0]'
+                    : 'text-muted hover:text-[#f5f0e8]'
                 }`}
               >
                 {v === 'asset' ? 'By Asset' : 'By Sector'}
@@ -279,8 +279,8 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets, tra
             }}>
               {activeItem ? (
                 <>
-                  <div style={{ color: '#4f8ef7', fontWeight: 700, fontSize: 11 }}>{activeItem.name}</div>
-                  <div style={{ color: '#e8eaf0', fontWeight: 700, fontSize: 15, marginTop: 2 }}>
+                  <div style={{ color: '#f97316', fontWeight: 700, fontSize: 11 }}>{activeItem.name}</div>
+                  <div style={{ color: '#f5f0e8', fontWeight: 700, fontSize: 15, marginTop: 2 }}>
                     {activeItem.value.toFixed(1)}%
                   </div>
                 </>
@@ -306,7 +306,7 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets, tra
                       {item.name}
                     </span>
                     <span className="font-mono font-semibold text-xs shrink-0"
-                      style={{ color: highlight ? '#00d4aa' : '#e8eaf0' }}>
+                      style={{ color: highlight ? '#00d4aa' : '#f5f0e8' }}>
                       {pct.toFixed(1)}%
                     </span>
                   </div>
@@ -357,10 +357,10 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets, tra
             }}>
               {activeSec ? (
                 <>
-                  <div style={{ color: SECTOR_COLORS[activeSec.name] ?? '#4f8ef7', fontWeight: 700, fontSize: 10 }}>
+                  <div style={{ color: SECTOR_COLORS[activeSec.name] ?? '#f97316', fontWeight: 700, fontSize: 10 }}>
                     {activeSec.name.split(' ').slice(0, 2).join(' ')}
                   </div>
-                  <div style={{ color: '#e8eaf0', fontWeight: 700, fontSize: 15, marginTop: 2 }}>
+                  <div style={{ color: '#f5f0e8', fontWeight: 700, fontSize: 15, marginTop: 2 }}>
                     {activeSec.value.toFixed(1)}%
                   </div>
                 </>
@@ -385,7 +385,7 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets, tra
                     <span className="font-mono font-semibold text-xs flex-1 truncate" style={{ color }}>
                       {item.name}
                     </span>
-                    <span className="font-mono font-semibold text-xs shrink-0 text-[#e8eaf0]">
+                    <span className="font-mono font-semibold text-xs shrink-0 text-[#f5f0e8]">
                       {pct.toFixed(1)}%
                     </span>
                   </div>
@@ -415,7 +415,7 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets, tra
               const color = metricColor(v, invert)
               return (
                 <div key={key}
-                  className="bg-[#07090f] border border-border rounded-lg p-3 hover:border-border-bright transition-colors cursor-default"
+                  className="bg-[#0a0804] border border-border rounded-lg p-3 hover:border-border-bright transition-colors cursor-default"
                 >
                   <p className="text-[9px] text-muted font-mono uppercase tracking-wider mb-1.5 leading-none">{label}</p>
                   <p className="font-mono font-bold text-base leading-none" style={{ color }}>{fmt(v, pct)}</p>
@@ -423,7 +423,7 @@ export function WeightsChart({ weights, metrics, risk_decomposition, assets, tra
               )
             })}
             {tracking_error != null && (
-              <div className="bg-[#07090f] border border-warning/30 rounded-lg p-3 hover:border-warning/50 transition-colors cursor-default">
+              <div className="bg-[#0a0804] border border-warning/30 rounded-lg p-3 hover:border-warning/50 transition-colors cursor-default">
                 <p className="text-[9px] text-warning/70 font-mono uppercase tracking-wider mb-1.5 leading-none">Tracking Error</p>
                 <p className="font-mono font-bold text-base leading-none text-warning">
                   {(tracking_error * 100).toFixed(2)}%

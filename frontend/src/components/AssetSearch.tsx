@@ -68,7 +68,7 @@ export function AssetSearch({
         <span className="terminal-label border border-accent/40 text-accent bg-accent/5 px-2 py-0.5 rounded">
           01
         </span>
-        <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Asset Selection</h2>
+        <h2 className="text-sm font-semibold text-[#f0e8d4] uppercase tracking-wider">Asset Selection</h2>
       </div>
 
       {/* Search input */}
@@ -82,7 +82,7 @@ export function AssetSearch({
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search ticker or company name…"
-            className="w-full bg-[#07090f] border border-border rounded-panel pl-9 pr-4 py-2.5 text-sm text-[#c8d0e0] placeholder-muted focus:outline-none focus:border-accent transition-colors font-mono hover:border-border-bright"
+            className="w-full bg-[#0a0804] border border-border rounded-panel pl-9 pr-4 py-2.5 text-sm text-[#f0e8d4] placeholder-muted focus:outline-none focus:border-accent transition-colors font-mono hover:border-border-bright"
           />
           {busy && (
             <span className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -112,12 +112,12 @@ export function AssetSearch({
                 >
                   <span className="flex items-center gap-3 min-w-0">
                     <span className="font-mono font-bold text-teal text-xs w-[72px] shrink-0">{r.ticker}</span>
-                    <span className="text-[#c8d0e0] text-xs truncate">{r.name}</span>
+                    <span className="text-[#f0e8d4] text-xs truncate">{r.name}</span>
                   </span>
                   <span className="flex items-center gap-1.5 shrink-0 ml-2">
                     {enriched.sector && (
                       <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
-                        style={{ background: '#2563eb18', color: '#6366f1', border: '1px solid #6366f130' }}>
+                        style={{ background: '#f59e0b18', color: '#6366f1', border: '1px solid #6366f130' }}>
                         {enriched.sector}
                       </span>
                     )}
@@ -162,7 +162,7 @@ export function AssetSearch({
               type="date"
               value={value}
               onChange={e => onChange(e.target.value)}
-              className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2 text-sm text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright cursor-pointer"
+              className="w-full bg-[#0a0804] border border-border rounded-panel px-3 py-2 text-sm text-[#f0e8d4] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright cursor-pointer"
               style={{ colorScheme: 'dark' }}
             />
           </div>

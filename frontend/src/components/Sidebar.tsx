@@ -85,8 +85,8 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
       height:          '100vh',
       display:         'flex',
       flexDirection:   'column',
-      background:      '#060a0f',
-      borderRight:     '1px solid #1a2035',
+      background:      '#070504',
+      borderRight:     '1px solid #2a1e08',
       zIndex:          100,
       overflowY:       'auto',
     }}>
@@ -94,31 +94,32 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
       {/* ── Logo ─────────────────────────────────────────────────────────── */}
       <div style={{
         padding:      '18px 16px 14px',
-        borderBottom: '1px solid #1a2035',
+        borderBottom: '1px solid #2a1e08',
         flexShrink:   0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Amber icon mark */}
           <div style={{
             width:           28,
             height:          28,
             borderRadius:    6,
-            background:      '#2563eb',
+            background:      'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
             display:         'flex',
             alignItems:      'center',
             justifyContent:  'center',
             flexShrink:      0,
-            boxShadow:       '0 0 12px rgba(37,99,235,0.4)',
+            boxShadow:       '0 0 14px rgba(245,158,11,0.45)',
           }}>
             <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-              <path d="M1 10 L4 6 L7 8 L10 3 L13 5" stroke="white" strokeWidth="1.8"
+              <path d="M1 10 L4 6 L7 8 L10 3 L13 5" stroke="#070504" strokeWidth="2"
                     strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#e8eaf0', letterSpacing: '0.12em', fontFamily: '"JetBrains Mono", monospace' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#f5f0e8', letterSpacing: '0.12em', fontFamily: '"JetBrains Mono", monospace' }}>
               PortfolioOS
             </div>
-            <div style={{ fontSize: 9, color: '#4f8ef7', letterSpacing: '0.18em', fontFamily: '"JetBrains Mono", monospace', marginTop: 1 }}>
+            <div style={{ fontSize: 9, color: '#f59e0b', letterSpacing: '0.18em', fontFamily: '"JetBrains Mono", monospace', marginTop: 1 }}>
               QUANT PLATFORM
             </div>
           </div>
@@ -140,12 +141,11 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
                 alignItems:      'center',
                 gap:             10,
                 padding:         '9px 14px',
-                background:      isActive ? 'rgba(37,99,235,0.12)' : 'transparent',
-                borderLeft:      `2px solid ${isActive ? '#2563eb' : 'transparent'}`,
+                background:      isActive ? 'rgba(245,158,11,0.10)' : 'transparent',
                 border:          'none',
                 borderLeftStyle: 'solid',
                 borderLeftWidth: 2,
-                borderLeftColor: isActive ? '#2563eb' : 'transparent',
+                borderLeftColor: isActive ? '#f59e0b' : 'transparent',
                 cursor:          isDimmed ? 'default' : 'pointer',
                 opacity:         isDimmed ? 0.35 : 1,
                 transition:      'all 0.15s ease',
@@ -153,7 +153,7 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
               }}
               onMouseEnter={e => {
                 if (!isActive && !isDimmed) {
-                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(245,158,11,0.05)'
                 }
               }}
               onMouseLeave={e => {
@@ -166,7 +166,7 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
               <span style={{
                 fontSize:    9,
                 fontFamily:  '"JetBrains Mono", monospace',
-                color:       isActive ? '#4f8ef7' : '#2a3550',
+                color:       isActive ? '#f59e0b' : '#3d2e10',
                 fontWeight:  700,
                 letterSpacing: '0.05em',
                 flexShrink:  0,
@@ -177,7 +177,7 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
 
               {/* Icon */}
               <span style={{
-                color:     isActive ? '#4f8ef7' : '#3a4a65',
+                color:     isActive ? '#f97316' : '#4a3820',
                 flexShrink: 0,
                 display:   'flex',
                 alignItems: 'center',
@@ -190,7 +190,7 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
                 <div style={{
                   fontSize:    11,
                   fontWeight:  isActive ? 600 : 400,
-                  color:       isActive ? '#e8eaf0' : '#6a7a95',
+                  color:       isActive ? '#f5f0e8' : '#7a6848',
                   fontFamily:  '"JetBrains Mono", monospace',
                   letterSpacing: '0.04em',
                   whiteSpace:  'nowrap',
@@ -200,7 +200,7 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
                 {sub && (
                   <div style={{
                     fontSize:   9,
-                    color:      isActive ? '#4f8ef7' : '#2a3550',
+                    color:      isActive ? '#f59e0b' : '#3d2e10',
                     fontFamily: '"JetBrains Mono", monospace',
                     marginTop:  1,
                     letterSpacing: '0.06em',
@@ -217,9 +217,9 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
                   width:       5,
                   height:      5,
                   borderRadius: '50%',
-                  background:  '#2563eb',
+                  background:  '#f59e0b',
                   flexShrink:  0,
-                  boxShadow:   '0 0 6px #2563eb',
+                  boxShadow:   '0 0 6px #f59e0b',
                 }} />
               )}
             </button>
@@ -230,25 +230,38 @@ export function Sidebar({ active, onNavigate, hasData }: Props) {
       {/* ── Footer info ──────────────────────────────────────────────────── */}
       <div style={{
         padding:     '12px 14px',
-        borderTop:   '1px solid #1a2035',
+        borderTop:   '1px solid #2a1e08',
         flexShrink:  0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+        {/* Status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
           <span style={{
             width: 6, height: 6,
             borderRadius: '50%',
-            background: '#10b981',
-            boxShadow: '0 0 5px #10b981',
-            animation: 'pulse 2s infinite',
+            background: '#22c55e',
+            boxShadow: '0 0 5px #22c55e',
             flexShrink: 0,
           }} />
-          <span style={{ fontSize: 9, color: '#10b981', fontFamily: '"JetBrains Mono", monospace', letterSpacing: '0.12em' }}>
+          <span style={{ fontSize: 9, color: '#22c55e', fontFamily: '"JetBrains Mono", monospace', letterSpacing: '0.12em' }}>
             API LIVE
           </span>
         </div>
-        <div style={{ fontSize: 8.5, color: '#2a3550', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.5 }}>
+        {/* Stack info */}
+        <div style={{ fontSize: 8.5, color: '#3d2e10', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.5, marginBottom: 8 }}>
           CVXPY · RISKFOLIO<br />
           FAMA-FRENCH · CLARABEL
+        </div>
+        {/* Author */}
+        <div style={{
+          fontSize: 8,
+          color: '#7a6848',
+          fontFamily: '"JetBrains Mono", monospace',
+          letterSpacing: '0.10em',
+          paddingTop: 6,
+          borderTop: '1px solid #2a1e08',
+        }}>
+          <span style={{ color: '#f59e0b', fontWeight: 700 }}>A. PEDRINI</span>
+          <span style={{ display: 'block', marginTop: 1, color: '#3d2e10' }}>© 2025</span>
         </div>
       </div>
     </aside>

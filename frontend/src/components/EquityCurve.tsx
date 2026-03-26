@@ -4,9 +4,9 @@ import {
 } from 'recharts'
 import type { BacktestResponse } from '../types'
 
-const GRID_COLOR  = '#1a2035'
-const AXIS_COLOR  = '#5a6a85'
-const PORT_COLOR  = '#2563eb'
+const GRID_COLOR  = '#2a1e08'
+const AXIS_COLOR  = '#7a6848'
+const PORT_COLOR  = '#f59e0b'
 const BM_COLOR    = '#fb923c'
 
 const TOOLTIP_ROW: React.CSSProperties = {
@@ -44,7 +44,7 @@ function EquityTooltip({
       minWidth: 200,
       boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#e8eaf0', fontWeight: 700, marginBottom: 8 }}>{label}</div>
+      <div style={{ color: '#f5f0e8', fontWeight: 700, marginBottom: 8 }}>{label}</div>
       {port && (
         <div style={TOOLTIP_ROW}>
           <span style={{ color: '#8892a4' }}>Portfolio</span>
@@ -70,7 +70,7 @@ function EquityTooltip({
         </div>
         <div style={{ ...TOOLTIP_ROW, marginBottom: 0 }}>
           <span style={{ color: '#8892a4' }}>Drawdown</span>
-          <span style={{ color: row.drawdown < -0.05 ? '#f43f5e' : '#e8eaf0', fontWeight: 700 }}>
+          <span style={{ color: row.drawdown < -0.05 ? '#f43f5e' : '#f5f0e8', fontWeight: 700 }}>
             {(row.drawdown * 100).toFixed(2)}%
           </span>
         </div>
@@ -105,9 +105,9 @@ export function EquityCurve({ data }: Props) {
     <div className="bg-card card-top-accent rounded-panel p-4 border border-border">
       <p className="terminal-label mb-1">Equity Curve</p>
       <p className="text-xs text-muted font-mono mb-4">
-        <span className="text-[#e8eaf0]">{data.oos_start}</span>
+        <span className="text-[#f5f0e8]">{data.oos_start}</span>
         <span className="text-muted mx-1">→</span>
-        <span className="text-[#e8eaf0]">{data.oos_end}</span>
+        <span className="text-[#f5f0e8]">{data.oos_end}</span>
         <span className="text-muted mx-2">·</span>
         {data.rebalancing_steps} rebalancings
         <span className="text-muted mx-2">·</span>

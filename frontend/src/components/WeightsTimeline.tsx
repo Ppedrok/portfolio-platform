@@ -13,14 +13,14 @@ import {
 import type { BacktestResponse, TickerMatch } from '../types'
 
 const TICKER_COLORS = [
-  '#2563eb', '#00d4aa', '#fb923c', '#a78bfa', '#f43f5e',
+  '#f59e0b', '#00d4aa', '#fb923c', '#a78bfa', '#f43f5e',
   '#fbbf24', '#34d399', '#60a5fa', '#f472b6', '#818cf8',
   '#4ade80', '#fb7185', '#38bdf8', '#facc15', '#c084fc',
   '#64748b', '#a3e635', '#e879f9',
 ]
 
-const GRID = '#1a2035'
-const AXIS = '#5a6a85'
+const GRID = '#2a1e08'
+const AXIS = '#7a6848'
 const MONO = '"JetBrains Mono", monospace'
 
 type ChartRow = Record<string, number | string>   // date + ticker weights
@@ -78,7 +78,7 @@ function WeightsTooltip({
       boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
       maxHeight: 280, overflowY: 'auto',
     }}>
-      <div style={{ color: '#e8eaf0', fontWeight: 700, marginBottom: 8 }}>{label}</div>
+      <div style={{ color: '#f5f0e8', fontWeight: 700, marginBottom: 8 }}>{label}</div>
       {sorted.map(({ name, value, color }) =>
         value > 0.005 ? (
           <div key={name} style={{
@@ -86,7 +86,7 @@ function WeightsTooltip({
             gap: 20, marginBottom: 3,
           }}>
             <span style={{ color }}>{name}</span>
-            <span style={{ color: '#e8eaf0', fontWeight: 600 }}>
+            <span style={{ color: '#f5f0e8', fontWeight: 600 }}>
               {(value * 100).toFixed(1)}%
             </span>
           </div>

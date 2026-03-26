@@ -15,8 +15,8 @@ interface Props {
 }
 
 const SEL = `
-  bg-[#07090f] border border-[#1a2035] rounded px-2 py-1 text-xs text-[#c8d0e0]
-  font-mono focus:outline-none focus:border-[#0ea5e9] cursor-pointer
+  bg-[#0a0804] border border-[#2a1e08] rounded px-2 py-1 text-xs text-[#f0e8d4]
+  font-mono focus:outline-none focus:border-[#f97316] cursor-pointer
 `.trim()
 
 export function BLViewsPanel({ assets, views, onChange }: Props) {
@@ -40,7 +40,7 @@ export function BLViewsPanel({ assets, views, onChange }: Props) {
         <button
           onClick={addView}
           disabled={assets.length === 0}
-          className="text-[10px] font-mono text-[#0ea5e9] hover:text-[#38bdf8] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="text-[10px] font-mono text-[#f97316] hover:text-[#38bdf8] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           + Add View
         </button>
@@ -84,7 +84,7 @@ export function BLViewsPanel({ assets, views, onChange }: Props) {
                 step="0.5"
                 value={view.value}
                 onChange={e => update(i, { value: parseFloat(e.target.value) || 0 })}
-                className="w-20 bg-[#07090f] border border-[#1a2035] rounded px-2 py-1 text-xs text-[#c8d0e0] font-mono focus:outline-none focus:border-[#0ea5e9] text-right"
+                className="w-20 bg-[#0a0804] border border-[#2a1e08] rounded px-2 py-1 text-xs text-[#f0e8d4] font-mono focus:outline-none focus:border-[#f97316] text-right"
               />
               <span className="text-[10px] text-muted font-mono">%/yr</span>
             </div>

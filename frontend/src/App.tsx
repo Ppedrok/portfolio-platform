@@ -181,7 +181,7 @@ export default function App() {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#060a10' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#070504' }}>
 
       {/* ── Global loading bar ── */}
       <GlobalLoadingBar loading={anyLoading} />
@@ -206,7 +206,7 @@ export default function App() {
                 <span className="terminal-label shrink-0">Universe</span>
                 <div className="flex gap-1 flex-wrap">
                   {tickers.slice(0, 8).map(t => (
-                    <span key={t} className="text-[10px] font-mono text-teal bg-teal/10 border border-teal/20 px-1.5 py-0.5 rounded">
+                    <span key={t} className="text-[10px] font-mono text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded">
                       {t}
                     </span>
                   ))}
@@ -341,7 +341,11 @@ export default function App() {
 
         {/* ── Footer ── */}
         <footer className="border-t border-border px-6 py-3 flex items-center justify-between bg-header text-[9px] font-mono text-muted tracking-wider uppercase">
-          <span>© 2025 PortfolioOS — Institutional Grade Portfolio Analysis</span>
+          <span>
+            <span className="text-accent font-semibold">Alessandro Pedrini</span>
+            <span className="mx-2 text-muted/40">·</span>
+            PortfolioOS — Institutional Grade Portfolio Analysis
+          </span>
           <span>React · FastAPI · CVXPY · Riskfolio-Lib · Fama-French</span>
         </footer>
 

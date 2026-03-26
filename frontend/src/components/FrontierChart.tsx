@@ -25,9 +25,9 @@ const COLORS = [
   '#fca5a5',  // light red
   '#86efac',  // light green
 ]
-const GRID_COLOR   = '#1a2035'
-const AXIS_COLOR   = '#5a6a85'
-const ACCENT       = '#2563eb'
+const GRID_COLOR   = '#2a1e08'
+const AXIS_COLOR   = '#7a6848'
+const ACCENT       = '#f59e0b'
 const MAX_SHARPE_C = '#10b981'
 const SELECTED_C   = '#f59e0b'
 
@@ -79,7 +79,7 @@ function ScatterTooltip({
       </div>
       <div style={TOOLTIP_ROW}>
         <span style={{ color: '#8892a4' }}>Volatility</span>
-        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{pt.x.toFixed(2)}%</span>
+        <span style={{ color: '#f97316', fontWeight: 700 }}>{pt.x.toFixed(2)}%</span>
       </div>
       <div style={{ ...TOOLTIP_ROW, marginBottom: 6 }}>
         <span style={{ color: '#8892a4' }}>Sharpe Ratio</span>
@@ -164,7 +164,7 @@ function MiniWeights({
             </span>
             <span
               className="font-mono font-semibold text-[10px] shrink-0"
-              style={{ color: item.value > 20 ? '#00d4aa' : '#e8eaf0' }}
+              style={{ color: item.value > 20 ? '#00d4aa' : '#f5f0e8' }}
             >
               {item.value.toFixed(1)}%
             </span>

@@ -6,8 +6,8 @@
   :root { color-scheme: dark; }
 
   body {
-    background-color: #05070d;
-    color: #c8d0e0;
+    background-color: #070504;
+    color: #f0e8d4;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -20,16 +20,16 @@
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: #05070d; }
-  ::-webkit-scrollbar-thumb { background: #1a2035; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+  ::-webkit-scrollbar-track { background: #070504; }
+  ::-webkit-scrollbar-thumb { background: #2a1e08; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
 
   /* Range input */
   input[type='range'] {
     -webkit-appearance: none;
     appearance: none;
     height: 3px;
-    background: #1a2035;
+    background: #2a1e08;
     border-radius: 9999px;
     outline: none;
     cursor: pointer;
@@ -40,18 +40,18 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #2563eb;
-    border: 2px solid #05070d;
+    background: #f59e0b;
+    border: 2px solid #070504;
     cursor: pointer;
     transition: background 0.15s;
   }
-  input[type='range']::-webkit-slider-thumb:hover { background: #1d4ed8; }
+  input[type='range']::-webkit-slider-thumb:hover { background: #d97706; }
   input[type='range']::-moz-range-thumb {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #2563eb;
-    border: 2px solid #05070d;
+    background: #f59e0b;
+    border: 2px solid #070504;
     cursor: pointer;
   }
 
@@ -63,7 +63,7 @@
 
   /* Select arrow */
   select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6a85' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a6848' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
     padding-right: 32px !important;
@@ -77,19 +77,19 @@
   /* Select: dark colour-scheme */
   select {
     color-scheme: dark;
-    background-color: #07090f;
-    color: #c8d0e0;
+    background-color: #0a0804;
+    color: #f0e8d4;
   }
   select option {
-    background-color: #0b0f1a;
-    color: #c8d0e0;
+    background-color: #100d06;
+    color: #f0e8d4;
   }
 
   /* Date picker: dark calendar popup */
   input[type='date'] {
     color-scheme: dark;
-    background-color: #07090f;
-    color: #c8d0e0;
+    background-color: #0a0804;
+    color: #f0e8d4;
   }
 
   /* Text input focus ring */
@@ -97,24 +97,24 @@
   input[type='date']:focus,
   select:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37,99,235,0.13);
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245,158,11,0.13);
   }
 }
 
-/* ── Bloomberg-style top accent border on cards ──────────────────────────── */
+/* ── Amber-style top accent border on cards ──────────────────────────────── */
 .card-top-accent {
-  border-top: 1px solid rgba(37,99,235,0.38);
-  box-shadow: inset 0 1px 0 rgba(37,99,235,0.15), 0 4px 32px rgba(0,0,0,0.6);
+  border-top: 1px solid rgba(245,158,11,0.38);
+  box-shadow: inset 0 1px 0 rgba(245,158,11,0.12), 0 4px 32px rgba(0,0,0,0.7);
 }
 
 /* ── Section divider ─────────────────────────────────────────────────────── */
 .section-divider {
-  border-bottom: 1px solid #1a2035;
+  border-bottom: 1px solid #2a1e08;
 }
 
 /* ── Data value colours ──────────────────────────────────────────────────── */
-.data-positive { color: #10b981; }
+.data-positive { color: #22c55e; }
 .data-negative { color: #ef4444; }
 
 /* ── Terminal-style label ────────────────────────────────────────────────── */
@@ -123,26 +123,26 @@
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #5a6a85;
+  color: #7a6848;
 }
 
 /* ── Header surface ──────────────────────────────────────────────────────── */
 .header-surface {
-  background: linear-gradient(180deg, #060810 0%, #030508 100%);
-  border-bottom: 1px solid #1a2035;
-  box-shadow: 0 1px 20px rgba(0,0,0,0.8);
+  background: linear-gradient(180deg, #060402 0%, #040302 100%);
+  border-bottom: 1px solid #2a1e08;
+  box-shadow: 0 1px 20px rgba(0,0,0,0.85);
 }
 
 /* ── Card with left accent bar ───────────────────────────────────────────── */
 .card-accent-left {
-  border-left: 2px solid #2563eb;
+  border-left: 2px solid #f59e0b;
 }
 
 /* ── Metric chip variants ────────────────────────────────────────────────── */
 .metric-chip-positive {
-  background: rgba(16,185,129,0.08);
-  border: 1px solid rgba(16,185,129,0.19);
-  color: #10b981;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.19);
+  color: #22c55e;
 }
 .metric-chip-negative {
   background: rgba(239,68,68,0.08);
@@ -152,20 +152,20 @@
 
 /* ── Glow utilities ──────────────────────────────────────────────────────── */
 .glow-accent {
-  box-shadow: 0 0 16px rgba(37,99,235,0.22),
-              0 0 32px rgba(37,99,235,0.10);
+  box-shadow: 0 0 16px rgba(245,158,11,0.28),
+              0 0 32px rgba(245,158,11,0.12);
 }
 .glow-accent-strong {
-  box-shadow: 0 0 24px rgba(37,99,235,0.40),
-              0 0 48px rgba(37,99,235,0.18);
+  box-shadow: 0 0 24px rgba(245,158,11,0.45),
+              0 0 48px rgba(245,158,11,0.20);
 }
 .glow-green {
-  box-shadow: 0 0 10px rgba(16,185,129,0.18);
+  box-shadow: 0 0 10px rgba(34,197,94,0.18);
 }
 
 /* ── Card panel gradient background ─────────────────────────────────────── */
 .bg-card {
-  background: linear-gradient(135deg, #0b0f1a 0%, #090d18 100%) !important;
+  background: linear-gradient(135deg, #100d06 0%, #0e0b05 100%) !important;
 }
 
 /* ── Heatmap cell hover ──────────────────────────────────────────────────── */

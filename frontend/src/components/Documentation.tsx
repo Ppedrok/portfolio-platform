@@ -253,7 +253,7 @@ function renderBlock(block: DocBlock, i: number) {
                 fontFamily:   '"JetBrains Mono", monospace',
                 fontSize:     10,
                 fontWeight:   700,
-                color:        '#4f8ef7',
+                color:        '#f97316',
                 whiteSpace:   'nowrap',
                 paddingTop:   1,
                 minWidth:     160,
@@ -305,13 +305,13 @@ function renderBlock(block: DocBlock, i: number) {
     case 'code':
       return (
         <div key={i} style={{
-          background:   '#0b0f1a',
-          border:       '1px solid #1a2035',
+          background:   '#100d06',
+          border:       '1px solid #2a1e08',
           borderRadius: 6,
           padding:      '8px 12px',
           marginBottom: 12,
           fontSize:     10.5,
-          color:        '#c8d0e0',
+          color:        '#f0e8d4',
           fontFamily:   '"JetBrains Mono", monospace',
           lineHeight:   1.6,
         }}>
@@ -333,7 +333,7 @@ export function Documentation() {
       id="docs"
       style={{
         background:   '#0a0e17',
-        border:       '1px solid #1a2035',
+        border:       '1px solid #2a1e08',
         borderRadius: 12,
         overflow:     'hidden',
       }}
@@ -344,14 +344,14 @@ export function Documentation() {
         alignItems:   'center',
         gap:          10,
         padding:      '16px 20px',
-        borderBottom: '1px solid #1a2035',
-        background:   'linear-gradient(90deg, rgba(37,99,235,0.08) 0%, transparent 60%)',
+        borderBottom: '1px solid #2a1e08',
+        background:   'linear-gradient(90deg, rgba(245,158,11,0.08) 0%, transparent 60%)',
       }}>
         <span style={{
           fontFamily:    '"JetBrains Mono", monospace',
           fontSize:      9,
           fontWeight:    700,
-          color:         '#4f8ef7',
+          color:         '#f97316',
           letterSpacing: '0.15em',
           border:        '1px solid rgba(79,142,247,0.3)',
           background:    'rgba(79,142,247,0.08)',
@@ -364,7 +364,7 @@ export function Documentation() {
           fontFamily:    '"JetBrains Mono", monospace',
           fontSize:      12,
           fontWeight:    600,
-          color:         '#c8d0e0',
+          color:         '#f0e8d4',
           textTransform: 'uppercase',
           letterSpacing: '0.1em',
           margin:        0,
@@ -375,7 +375,7 @@ export function Documentation() {
           marginLeft:    'auto',
           fontFamily:    '"JetBrains Mono", monospace',
           fontSize:      9,
-          color:         '#2a3550',
+          color:         '#3d2e10',
           letterSpacing: '0.1em',
         }}>
           {SECTIONS.length} SECTIONS
@@ -400,12 +400,12 @@ export function Documentation() {
                   alignItems:  'center',
                   gap:         12,
                   padding:     '13px 20px',
-                  background:  isOpen ? 'rgba(37,99,235,0.06)' : 'transparent',
+                  background:  isOpen ? 'rgba(245,158,11,0.06)' : 'transparent',
                   border:      'none',
                   cursor:      'pointer',
                   textAlign:   'left',
                   transition:  'background 0.15s',
-                  borderLeft:  `2px solid ${isOpen ? '#2563eb' : 'transparent'}`,
+                  borderLeft:  `2px solid ${isOpen ? '#f59e0b' : 'transparent'}`,
                 }}
                 onMouseEnter={e => {
                   if (!isOpen) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)'
@@ -420,7 +420,7 @@ export function Documentation() {
                     fontFamily:    '"JetBrains Mono", monospace',
                     fontSize:      8.5,
                     fontWeight:    700,
-                    color:         isOpen ? '#4f8ef7' : '#2a3550',
+                    color:         isOpen ? '#f97316' : '#3d2e10',
                     letterSpacing: '0.12em',
                     whiteSpace:    'nowrap',
                     minWidth:      72,
@@ -434,7 +434,7 @@ export function Documentation() {
                   fontFamily:    '"JetBrains Mono", monospace',
                   fontSize:      11.5,
                   fontWeight:    isOpen ? 600 : 400,
-                  color:         isOpen ? '#e8eaf0' : '#6a7a95',
+                  color:         isOpen ? '#f5f0e8' : '#8a7455',
                   letterSpacing: '0.04em',
                   flex:          1,
                 }}>
@@ -446,7 +446,7 @@ export function Documentation() {
                   width="12" height="12"
                   viewBox="0 0 12 12"
                   fill="none"
-                  stroke={isOpen ? '#4f8ef7' : '#2a3550'}
+                  stroke={isOpen ? '#f97316' : '#3d2e10'}
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   style={{

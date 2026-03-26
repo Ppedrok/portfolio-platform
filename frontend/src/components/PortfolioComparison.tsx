@@ -20,12 +20,12 @@ import type { PortfolioSnapshot } from '../types'
 // ── Color palette ─────────────────────────────────────────────────────────────
 
 const SNAPSHOT_COLORS = [
-  '#2563eb', '#00d4aa', '#fb923c', '#a78bfa',
+  '#f59e0b', '#00d4aa', '#fb923c', '#a78bfa',
   '#f43f5e', '#fbbf24', '#34d399', '#60a5fa',
 ]
 
-const GRID = '#1a2035'
-const AXIS = '#5a6a85'
+const GRID = '#2a1e08'
+const AXIS = '#7a6848'
 const MONO = '"JetBrains Mono", monospace'
 
 // ── Utility ───────────────────────────────────────────────────────────────────
@@ -36,14 +36,14 @@ function fmt(v: number | null | undefined, pct: boolean): string {
 }
 
 function ratioColor(v: number | null | undefined): string {
-  if (v == null) return 'text-[#c8d0e0]'
+  if (v == null) return 'text-[#f0e8d4]'
   if (v >= 1) return 'text-positive'
   if (v < 0.5) return 'text-warning'
-  return 'text-[#c8d0e0]'
+  return 'text-[#f0e8d4]'
 }
 
 function valColor(v: number | null | undefined, invert = false): string {
-  if (v == null) return 'text-[#c8d0e0]'
+  if (v == null) return 'text-[#f0e8d4]'
   const pos = invert ? v < 0 : v > 0
   return pos ? 'text-positive' : 'text-negative'
 }
@@ -103,13 +103,13 @@ function OverlayTooltip({
       fontFamily: MONO, fontSize: 11, minWidth: 220,
       boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#e8eaf0', fontWeight: 700, marginBottom: 8 }}>{label}</div>
+      <div style={{ color: '#f5f0e8', fontWeight: 700, marginBottom: 8 }}>{label}</div>
       {[...payload].sort((a, b) => b.value - a.value).map(p => (
         <div key={p.name} style={{
           display: 'flex', justifyContent: 'space-between', gap: 20, marginBottom: 4,
         }}>
           <span style={{ color: p.color }}>{labelMap[p.name] ?? p.name}</span>
-          <span style={{ color: '#e8eaf0', fontWeight: 700 }}>
+          <span style={{ color: '#f5f0e8', fontWeight: 700 }}>
             ×{p.value.toFixed(3)}
           </span>
         </div>
@@ -149,15 +149,15 @@ export function PortfolioComparison({ snapshots, onDelete, onClear }: Props) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center mb-4">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a6a85" strokeWidth="1.5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a6848" strokeWidth="1.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
         </div>
-        <p className="text-[#c8d0e0] text-sm font-semibold mb-1">No snapshots saved</p>
+        <p className="text-[#f0e8d4] text-sm font-semibold mb-1">No snapshots saved</p>
         <p className="text-muted text-xs font-mono">
-          Run a backtest, then click <strong className="text-[#c8d0e0]">Save Snapshot</strong> in the Backtest tab to compare strategies.
+          Run a backtest, then click <strong className="text-[#f0e8d4]">Save Snapshot</strong> in the Backtest tab to compare strategies.
         </p>
       </div>
     )
@@ -197,7 +197,7 @@ export function PortfolioComparison({ snapshots, onDelete, onClear }: Props) {
                 />
                 {/* Label & info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-mono font-semibold text-[#c8d0e0] truncate">
+                  <p className="text-[11px] font-mono font-semibold text-[#f0e8d4] truncate">
                     {snap.label}
                   </p>
                   <p className="text-[10px] font-mono text-muted mt-0.5">
@@ -348,7 +348,7 @@ export function PortfolioComparison({ snapshots, onDelete, onClear }: Props) {
                 new Set(snapshots.flatMap(s => Object.keys(s.finalWeights)))
               ).sort().map(ticker => (
                 <tr key={ticker} className="border-b border-border/40 hover:bg-card-raised transition-colors">
-                  <td className="py-1.5 pl-1 font-mono font-semibold text-[#c8d0e0]">{ticker}</td>
+                  <td className="py-1.5 pl-1 font-mono font-semibold text-[#f0e8d4]">{ticker}</td>
                   {snapshots.map((snap) => {
                     const w = snap.finalWeights[ticker] ?? 0
                     return (
@@ -365,7 +365,7 @@ export function PortfolioComparison({ snapshots, onDelete, onClear }: Props) {
                               opacity: 0.7,
                             }}
                           />
-                          <span className={w > 0 ? 'text-[#c8d0e0]' : 'text-muted'}>
+                          <span className={w > 0 ? 'text-[#f0e8d4]' : 'text-muted'}>
                             {w > 0 ? `${(w * 100).toFixed(1)}%` : '—'}
                           </span>
                         </div>

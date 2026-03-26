@@ -127,7 +127,7 @@ const OPT_METHOD_GROUPS: { group: string; methods: { value: OptMethod; label: st
 // ── Shared sub-components ─────────────────────────────────────────────────────
 
 const SELECT_CLS =
-  'w-full bg-[#07090f] border border-border rounded-panel px-3 py-2.5 text-xs text-[#c8d0e0] ' +
+  'w-full bg-[#0a0804] border border-border rounded-panel px-3 py-2.5 text-xs text-[#f0e8d4] ' +
   'focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer hover:border-border-bright'
 
 function LabeledSelect<T extends string>({
@@ -274,7 +274,7 @@ export function ConfigPanel({
         <span className="terminal-label border border-accent/40 text-accent bg-accent/5 px-2 py-0.5 rounded">
           02
         </span>
-        <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Configuration</h2>
+        <h2 className="text-sm font-semibold text-[#f0e8d4] uppercase tracking-wider">Configuration</h2>
       </div>
 
       {/* ── Optimization method ──────────────────────────────────────────── */}
@@ -323,7 +323,7 @@ export function ConfigPanel({
                 className={`px-4 py-2 text-xs font-mono font-medium transition-colors ${
                   active
                     ? 'bg-accent text-white'
-                    : 'text-muted hover:text-[#e8eaf0]'
+                    : 'text-muted hover:text-[#f5f0e8]'
                 }`}
               >
                 {label}
@@ -346,7 +346,7 @@ export function ConfigPanel({
             placeholder="SPY"
             value={benchmarkTicker}
             onChange={e => { onBenchmarkTicker(e.target.value.toUpperCase().trim()); if (!e.target.value) onMaxTrackingError(null) }}
-            className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2.5 text-xs text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#5a6a85]"
+            className="w-full bg-[#0a0804] border border-border rounded-panel px-3 py-2.5 text-xs text-[#f0e8d4] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#7a6848]"
           />
           <p className="text-[9px] font-mono text-muted mt-1.5 italic">
             {isTracking
@@ -385,7 +385,7 @@ export function ConfigPanel({
                       const pct = parseFloat(v)
                       if (!isNaN(pct) && pct > 0) onMaxTrackingError(pct / 100)
                     }}
-                    className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2 text-xs text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#5a6a85]"
+                    className="w-full bg-[#0a0804] border border-border rounded-panel px-3 py-2 text-xs text-[#f0e8d4] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#7a6848]"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-muted pointer-events-none">
                     % / yr
@@ -438,7 +438,7 @@ export function ConfigPanel({
                   const pct = parseFloat(v)
                   if (!isNaN(pct)) onTargetReturn(pct / 100 / 252)
                 }}
-                className="w-full bg-[#07090f] border border-border rounded-panel px-3 py-2 text-xs text-[#c8d0e0] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#5a6a85]"
+                className="w-full bg-[#0a0804] border border-border rounded-panel px-3 py-2 text-xs text-[#f0e8d4] font-mono focus:outline-none focus:border-accent transition-colors hover:border-border-bright placeholder-[#7a6848]"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-muted pointer-events-none">
                 % / yr
@@ -526,11 +526,12 @@ export function ConfigPanel({
         <button
           onClick={onOptimize}
           disabled={!canRun || optimizeLoading}
-          className="flex-1 py-2.5 rounded-panel disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+          className="flex-1 py-2.5 rounded-panel disabled:opacity-35 disabled:cursor-not-allowed text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
           style={{
-            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-            border: '1px solid rgba(59,130,246,0.25)',
-            boxShadow: '0 0 20px rgba(37,99,235,0.21), 0 2px 8px rgba(0,0,0,0.4)',
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            border: '1px solid rgba(245,158,11,0.4)',
+            boxShadow: '0 0 22px rgba(245,158,11,0.28), 0 2px 8px rgba(0,0,0,0.5)',
+            color: '#070504',
           }}
         >
           {optimizeLoading ? (
@@ -540,8 +541,8 @@ export function ConfigPanel({
         <button
           onClick={onBacktest}
           disabled={!canRun || backtestLoading}
-          className="flex-1 py-2.5 rounded-panel disabled:opacity-35 disabled:cursor-not-allowed text-muted-bright text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 hover:border-accent hover:text-[#e8eaf0]"
-          style={{ background: 'transparent', border: '1px solid #253050' }}
+          className="flex-1 py-2.5 rounded-panel disabled:opacity-35 disabled:cursor-not-allowed text-muted-bright text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 hover:border-accent hover:text-[#f5f0e8]"
+          style={{ background: 'transparent', border: '1px solid #3d2e10' }}
         >
           {backtestLoading ? (
             <><Spinner /> Backtesting…</>

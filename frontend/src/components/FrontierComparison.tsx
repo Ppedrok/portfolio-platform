@@ -25,7 +25,7 @@ import { optimizePortfolio } from '../api/client'
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const METHOD_COLORS: Record<string, string> = {
-  markowitz:            '#2563eb',   // blue
+  markowitz:            '#f59e0b',   // blue
   CVaR:                 '#10b981',   // emerald
   MAD:                  '#f59e0b',   // amber
   SMAD:                 '#e879f9',   // fuchsia
@@ -80,8 +80,8 @@ const ALL_METHODS: MethodDef[] = [
   { id: 'Brownian',             label: 'Brownian Motion', heavy: true },
 ]
 
-const GRID_COLOR  = '#1a2035'
-const AXIS_COLOR  = '#5a6a85'
+const GRID_COLOR  = '#2a1e08'
+const AXIS_COLOR  = '#7a6848'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -120,7 +120,7 @@ function CompareTooltip({
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
         <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 3, backgroundColor: fill }} />
-        <span style={{ color: '#e8eaf0', fontWeight: 700 }}>{name}</span>
+        <span style={{ color: '#f5f0e8', fontWeight: 700 }}>{name}</span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, marginBottom: 3 }}>
         <span style={{ color: '#8892a4' }}>Return</span>
@@ -128,7 +128,7 @@ function CompareTooltip({
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, marginBottom: 3 }}>
         <span style={{ color: '#8892a4' }}>Volatility</span>
-        <span style={{ color: '#4f8ef7', fontWeight: 700 }}>{pt.x.toFixed(2)}%</span>
+        <span style={{ color: '#f97316', fontWeight: 700 }}>{pt.x.toFixed(2)}%</span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20 }}>
         <span style={{ color: '#8892a4' }}>Sharpe</span>
@@ -302,8 +302,8 @@ export function FrontierComparison({
                   flex items-center gap-2 px-3 py-2 rounded text-xs font-mono
                   border transition-all disabled:opacity-40 disabled:cursor-not-allowed
                   ${isSelected
-                    ? 'text-[#e8eaf0] bg-[#0b0f1a]'
-                    : 'text-muted bg-[#07090f] hover:text-muted-bright border-border'
+                    ? 'text-[#f5f0e8] bg-[#100d06]'
+                    : 'text-muted bg-[#0a0804] hover:text-muted-bright border-border'
                   }
                 `}
                 style={isSelected
@@ -333,9 +333,9 @@ export function FrontierComparison({
             className="px-5 py-2 rounded text-xs font-bold font-mono uppercase tracking-wider text-white
                        disabled:opacity-35 disabled:cursor-not-allowed transition-all"
             style={{
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              border: '1px solid rgba(59,130,246,0.25)',
-              boxShadow: running ? 'none' : '0 0 16px rgba(37,99,235,0.25)',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              border: '1px solid rgba(245,158,11,0.25)',
+              boxShadow: running ? 'none' : '0 0 16px rgba(245,158,11,0.25)',
             }}
           >
             {running
@@ -366,7 +366,7 @@ export function FrontierComparison({
                 className="flex items-center gap-1.5 px-2 py-1 rounded border text-[10px] font-mono"
                 style={{
                   borderColor: state.status === 'error' ? '#f43f5e60' : `${color}50`,
-                  background:  state.status === 'error' ? '#2a0a0a' : '#0b0f1a',
+                  background:  state.status === 'error' ? '#2a0a0a' : '#100d06',
                   color:       state.status === 'error' ? '#f43f5e' : '#8892a4',
                 }}
               >
@@ -379,7 +379,7 @@ export function FrontierComparison({
                 {state.status === 'error' && (
                   <span className="text-[#f43f5e] font-bold">✕</span>
                 )}
-                <span style={{ color: state.status === 'done' ? '#c8d0e0' : undefined }}>
+                <span style={{ color: state.status === 'done' ? '#f0e8d4' : undefined }}>
                   {def?.label ?? method}
                 </span>
                 {state.status === 'error' && (
@@ -442,9 +442,9 @@ export function FrontierComparison({
             if (!allSame) return null
             return (
               <div className="mb-3 px-3 py-2 rounded border border-amber-500/20 bg-amber-500/5 text-[10px] font-mono text-amber-400 leading-relaxed">
-                ⚠ Frontiers overlap — with <span className="text-[#e8eaf0]">historical μ / ledoit-wolf Σ</span> and elliptically distributed returns,
+                ⚠ Frontiers overlap — with <span className="text-[#f5f0e8]">historical μ / ledoit-wolf Σ</span> and elliptically distributed returns,
                 different risk measures produce nearly identical (σ, μ) loci.
-                Try switching to <span className="text-[#e8eaf0]">FF3/FF5 mu+cov</span> or a non-parametric covariance for visible divergence.
+                Try switching to <span className="text-[#f5f0e8]">FF3/FF5 mu+cov</span> or a non-parametric covariance for visible divergence.
                 Dash patterns still distinguish each series.
               </div>
             )
@@ -524,7 +524,7 @@ export function FrontierComparison({
           </div>
           <table className="w-full text-xs font-mono">
             <thead>
-              <tr className="bg-[#0b0f1a] text-muted border-b border-[#1a2035]">
+              <tr className="bg-[#100d06] text-muted border-b border-[#2a1e08]">
                 <th className="px-4 py-2 text-left">Method</th>
                 <th className="px-4 py-2 text-right">#Pts</th>
                 <th className="px-4 py-2 text-right">Min-Vol Ret</th>
@@ -544,7 +544,7 @@ export function FrontierComparison({
                 return (
                   <tr
                     key={method}
-                    className={`border-b border-[#1a2035] ${i % 2 === 0 ? 'bg-[#0b0f1a]/40' : ''}`}
+                    className={`border-b border-[#2a1e08] ${i % 2 === 0 ? 'bg-[#100d06]/40' : ''}`}
                   >
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
@@ -552,7 +552,7 @@ export function FrontierComparison({
                           className="w-2.5 h-2.5 rounded-sm shrink-0"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="text-[#c8d0e0] font-semibold">
+                        <span className="text-[#f0e8d4] font-semibold">
                           {def?.label ?? method}
                         </span>
                       </div>
@@ -561,7 +561,7 @@ export function FrontierComparison({
                     <td className="px-4 py-2 text-right text-[#00d4aa]">
                       {stats.minVol.ret.toFixed(2)}%
                     </td>
-                    <td className="px-4 py-2 text-right text-[#4f8ef7]">
+                    <td className="px-4 py-2 text-right text-[#f97316]">
                       {stats.minVol.vol.toFixed(2)}%
                     </td>
                     <td className="px-4 py-2 text-right font-bold text-[#10b981]">
@@ -570,10 +570,10 @@ export function FrontierComparison({
                     <td className="px-4 py-2 text-right text-[#00d4aa]">
                       {stats.maxSharpe.ret.toFixed(2)}%
                     </td>
-                    <td className="px-4 py-2 text-right text-[#4f8ef7]">
+                    <td className="px-4 py-2 text-right text-[#f97316]">
                       {stats.maxSharpe.vol.toFixed(2)}%
                     </td>
-                    <td className="px-4 py-2 text-right text-[#c8d0e0]">
+                    <td className="px-4 py-2 text-right text-[#f0e8d4]">
                       {stats.maxRet.ret.toFixed(2)}%
                     </td>
                   </tr>
@@ -694,14 +694,14 @@ export function FrontierComparison({
               </div>
               <table className="w-full text-xs font-mono">
                 <thead>
-                  <tr className="bg-[#0b0f1a] text-muted border-b border-[#1a2035]">
-                    <th className="px-4 py-2 text-left sticky left-0 bg-[#0b0f1a]">Method</th>
+                  <tr className="bg-[#100d06] text-muted border-b border-[#2a1e08]">
+                    <th className="px-4 py-2 text-left sticky left-0 bg-[#100d06]">Method</th>
                     {tickers.map(t => (
                       <th key={t} className="px-3 py-2 text-right text-teal">{t}</th>
                     ))}
                     <th className="px-3 py-2 text-right text-[#10b981]">Sharpe</th>
                     <th className="px-3 py-2 text-right">Ret</th>
-                    <th className="px-3 py-2 text-right text-[#4f8ef7]">Vol</th>
+                    <th className="px-3 py-2 text-right text-[#f97316]">Vol</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -710,23 +710,23 @@ export function FrontierComparison({
                       ? (pt!.expected_return! / pt!.expected_volatility!).toFixed(3)
                       : '—'
                     return (
-                      <tr key={method} className={`border-b border-[#1a2035] ${i % 2 === 0 ? 'bg-[#0b0f1a]/40' : ''}`}>
+                      <tr key={method} className={`border-b border-[#2a1e08] ${i % 2 === 0 ? 'bg-[#100d06]/40' : ''}`}>
                         <td className="px-4 py-2 sticky left-0 bg-inherit">
                           <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: color }} />
-                            <span className="text-[#c8d0e0] font-semibold">{label}</span>
+                            <span className="text-[#f0e8d4] font-semibold">{label}</span>
                           </div>
                         </td>
                         {tickers.map(t => {
                           const w = (pt!.weights[t] ?? 0) * 100
                           // Heatmap intensity: 0% = dark, 100% = bright
                           const intensity = Math.min(w / 50, 1)   // saturate at 50%
-                          const bg = `rgba(37,99,235,${(intensity * 0.35).toFixed(2)})`
+                          const bg = `rgba(245,158,11,${(intensity * 0.35).toFixed(2)})`
                           return (
                             <td
                               key={t}
                               className="px-3 py-2 text-right"
-                              style={{ background: bg, color: w > 5 ? '#e8eaf0' : '#5a6a85' }}
+                              style={{ background: bg, color: w > 5 ? '#f5f0e8' : '#7a6848' }}
                             >
                               {w > 0.05 ? `${w.toFixed(1)}%` : '—'}
                             </td>
@@ -736,7 +736,7 @@ export function FrontierComparison({
                         <td className="px-3 py-2 text-right text-[#00d4aa]">
                           {((pt!.expected_return! ?? 0) * 100).toFixed(2)}%
                         </td>
-                        <td className="px-3 py-2 text-right text-[#4f8ef7]">
+                        <td className="px-3 py-2 text-right text-[#f97316]">
                           {((pt!.expected_volatility! ?? 0) * 100).toFixed(2)}%
                         </td>
                       </tr>
@@ -752,7 +752,7 @@ export function FrontierComparison({
       {/* Empty state */}
       {!hasAnyResults && !running && results.size === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted text-xs font-mono gap-2">
-          <span>Select methods above and click <span className="text-[#2563eb]">Compare Frontiers</span></span>
+          <span>Select methods above and click <span className="text-[#f59e0b]">Compare Frontiers</span></span>
           <span className="text-[10px] opacity-60">
             Each method traces its own risk-return curve — compare them side by side
           </span>

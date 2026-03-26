@@ -17,8 +17,8 @@ import type { BacktestResponse } from '../types'
 
 const ROLLING_WINDOW = 63
 
-const GRID   = '#1a2035'
-const AXIS   = '#5a6a85'
+const GRID   = '#2a1e08'
+const AXIS   = '#7a6848'
 const MONO   = '"JetBrains Mono", monospace'
 
 interface RollingPoint {
@@ -43,11 +43,11 @@ function SharpeTooltip({ active, payload, label }: {
       fontFamily: MONO, fontSize: 11, minWidth: 160,
       boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#e8eaf0', fontWeight: 700, marginBottom: 6 }}>{label}</div>
+      <div style={{ color: '#f5f0e8', fontWeight: 700, marginBottom: 6 }}>{label}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20 }}>
         <span style={{ color: '#8892a4' }}>Rolling Sharpe</span>
         <span style={{
-          color: v === null ? '#5a6a85' : v >= 1 ? '#00d4aa' : v < 0 ? '#f43f5e' : '#e8eaf0',
+          color: v === null ? '#7a6848' : v >= 1 ? '#00d4aa' : v < 0 ? '#f43f5e' : '#f5f0e8',
           fontWeight: 700,
         }}>
           {v !== null ? v.toFixed(2) : '—'}
@@ -71,11 +71,11 @@ function DrawdownTooltip({ active, payload, label }: {
       fontFamily: MONO, fontSize: 11, minWidth: 160,
       boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
     }}>
-      <div style={{ color: '#e8eaf0', fontWeight: 700, marginBottom: 6 }}>{label}</div>
+      <div style={{ color: '#f5f0e8', fontWeight: 700, marginBottom: 6 }}>{label}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20 }}>
         <span style={{ color: '#8892a4' }}>Drawdown</span>
         <span style={{
-          color: v !== null && v < -0.10 ? '#f43f5e' : '#e8eaf0',
+          color: v !== null && v < -0.10 ? '#f43f5e' : '#f5f0e8',
           fontWeight: 700,
         }}>
           {v !== null ? `${(v * 100).toFixed(2)}%` : '—'}
@@ -149,7 +149,7 @@ export function RollingCharts({ data }: Props) {
         <p className="text-xs text-muted font-mono mb-4">
           Average:&nbsp;
           <span className={`font-semibold ${
-            meanSharpe >= 1 ? 'text-positive' : meanSharpe < 0 ? 'text-negative' : 'text-[#c8d0e0]'
+            meanSharpe >= 1 ? 'text-positive' : meanSharpe < 0 ? 'text-negative' : 'text-[#f0e8d4]'
           }`}>
             {meanSharpe.toFixed(2)}
           </span>
@@ -161,7 +161,7 @@ export function RollingCharts({ data }: Props) {
             <ReferenceLine y={0} stroke="#3a4a5f" strokeWidth={1} />
             <ReferenceLine
               y={meanSharpe}
-              stroke="#2563eb"
+              stroke="#f59e0b"
               strokeDasharray="4 3"
               strokeOpacity={0.5}
               label={{ value: `μ=${meanSharpe.toFixed(2)}`, position: 'right', fill: '#3b6fd4', fontSize: 9, fontFamily: MONO }}
@@ -177,13 +177,13 @@ export function RollingCharts({ data }: Props) {
             <Area
               type="monotone"
               dataKey="sharpe"
-              stroke="#2563eb"
+              stroke="#f59e0b"
               strokeWidth={1.5}
-              fill="#2563eb"
+              fill="#f59e0b"
               fillOpacity={0.12}
               dot={false}
               connectNulls={false}
-              activeDot={{ r: 3, fill: '#2563eb', stroke: '#0d1117', strokeWidth: 1 }}
+              activeDot={{ r: 3, fill: '#f59e0b', stroke: '#0d1117', strokeWidth: 1 }}
             />
           </ComposedChart>
         </ResponsiveContainer>
