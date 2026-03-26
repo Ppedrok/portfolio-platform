@@ -9,8 +9,11 @@ from __future__ import annotations
 
 import math
 from typing import Annotated
+from datetime import timedelta
 
 import numpy as np
+import pandas as pd
+import scipy.stats as sp_stats
 import riskfolio as rp
 import yfinance as yf
 from fastapi import APIRouter, HTTPException, Query
@@ -332,6 +335,7 @@ def get_overview(body: OverviewRequest):
         prices  = download_prices(tickers, body.start, body.end)
         returns = compute_returns(prices)[tickers]
 
+        # ── Codependence & distance matrices ──────────────────────────────────
         kwargs: dict = {"codependence": body.method}
         if body.method == "mutual_info":
             kwargs["bins_info"] = "KN"
@@ -342,14 +346,98 @@ def get_overview(body: OverviewRequest):
 
         codep, dist = rp.codep_dist(returns, **kwargs)
 
-        ann_ret, ann_vol, sharpes = {}, {}, {}
+        # ── Per-asset performance statistics ─────────────────────────────────
+        ann_ret, ann_vol, sharpes   = {}, {}, {}
+        sortinos, calmars, max_dds  = {}, {}, {}
+        vars_95, cvars_95           = {}, {}
+        skews, kurts, win_rates     = {}, {}, {}
+
         for t in tickers:
-            s = returns[t]
-            r = float((1 + s).prod() ** (252 / len(s)) - 1)
+            s = returns[t].dropna()
+            T = len(s)
+            r = float((1 + s).prod() ** (252 / T) - 1) if T > 1 else 0.0
             v = float(s.std() * np.sqrt(252))
-            ann_ret[t] = round(r, 6)
-            ann_vol[t] = round(v, 6)
-            sharpes[t] = round(r / v if v > 0 else 0, 4)
+
+            # Sharpe
+            sharpe = round(r / v, 4) if v > 0 else 0.0
+
+            # Sortino (downside std)
+            neg = s[s < 0]
+            dv  = float(neg.std() * np.sqrt(252)) if len(neg) > 1 else v
+            sortino = round(r / dv, 4) if dv > 0 else 0.0
+
+            # Max drawdown
+            cum = (1 + s).cumprod()
+            roll_max = cum.cummax()
+            dd = (cum - roll_max) / roll_max
+            mdd = float(dd.min())
+
+            # Calmar ratio
+            calmar = round(r / abs(mdd), 4) if mdd < -1e-8 else 0.0
+
+            # Historical VaR and CVaR at 95%
+            var95  = float(np.percentile(s, 5))
+            tail   = s[s <= var95]
+            cvar95 = float(tail.mean()) if len(tail) > 0 else var95
+
+            # Skewness and excess kurtosis
+            skew = float(sp_stats.skew(s)) if T > 3 else 0.0
+            kurt = float(sp_stats.kurtosis(s, fisher=True)) if T > 3 else 0.0
+
+            # Win rate
+            win_rate = float((s > 0).mean())
+
+            ann_ret[t]  = round(r,      6)
+            ann_vol[t]  = round(v,      6)
+            sharpes[t]  = sharpe
+            sortinos[t] = sortino
+            calmars[t]  = calmar
+            max_dds[t]  = round(mdd,    6)
+            vars_95[t]  = round(var95,  6)
+            cvars_95[t] = round(cvar95, 6)
+            skews[t]    = round(skew,   4)
+            kurts[t]    = round(kurt,   4)
+            win_rates[t]= round(win_rate, 4)
+
+        # ── Period returns (1W, 1M, 3M, 6M, YTD, 1Y, 3Y) ────────────────────
+        price_series: dict[str, pd.Series] = {
+            t: prices[t].dropna() for t in tickers
+        }
+        period_offsets = {
+            "1W":  5,
+            "1M":  21,
+            "3M":  63,
+            "6M":  126,
+            "1Y":  252,
+            "3Y":  756,
+        }
+        period_returns: dict[str, dict[str, float | None]] = {}
+        for t in tickers:
+            ps = price_series[t]
+            pr: dict[str, float | None] = {}
+            if len(ps) < 2:
+                period_returns[t] = {k: None for k in list(period_offsets) + ["YTD"]}
+                continue
+
+            end_price = float(ps.iloc[-1])
+            end_date  = ps.index[-1]
+
+            for label, n_days in period_offsets.items():
+                if len(ps) > n_days:
+                    past_price = float(ps.iloc[-(n_days + 1)])
+                    pr[label] = round(end_price / past_price - 1, 6) if past_price > 0 else None
+                else:
+                    pr[label] = None
+
+            # YTD: first available price in the current calendar year
+            ytd_mask = ps.index.year == end_date.year  # type: ignore[attr-defined]
+            ytd_series = ps[ytd_mask]
+            if len(ytd_series) > 1:
+                pr["YTD"] = round(end_price / float(ytd_series.iloc[0]) - 1, 6)
+            else:
+                pr["YTD"] = pr.get("1Y")
+
+            period_returns[t] = pr
 
         return {
             "tickers":            tickers,
@@ -359,6 +447,15 @@ def get_overview(body: OverviewRequest):
             "annualized_returns": ann_ret,
             "annualized_vols":    ann_vol,
             "sharpes":            sharpes,
+            "sortinos":           sortinos,
+            "calmars":            calmars,
+            "max_drawdowns":      max_dds,
+            "vars_95":            vars_95,
+            "cvars_95":           cvars_95,
+            "skews":              skews,
+            "kurts":              kurts,
+            "win_rates":          win_rates,
+            "period_returns":     period_returns,
         }
     except Exception as exc:
         raise HTTPException(status_code=422, detail=str(exc))

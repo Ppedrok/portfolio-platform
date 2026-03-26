@@ -50,6 +50,15 @@ class OverviewResponse(BaseModel):
     annualized_returns: dict[str, float | None]
     annualized_vols:    dict[str, float | None]
     sharpes:            dict[str, float | None]
+    sortinos:           dict[str, float | None]  = {}
+    calmars:            dict[str, float | None]  = {}
+    max_drawdowns:      dict[str, float | None]  = {}
+    vars_95:            dict[str, float | None]  = {}
+    cvars_95:           dict[str, float | None]  = {}
+    skews:              dict[str, float | None]  = {}
+    kurts:              dict[str, float | None]  = {}
+    win_rates:          dict[str, float | None]  = {}
+    period_returns:     dict[str, dict[str, float | None]] = {}
 
 
 # ── /api/optimize (single portfolio) ─────────────────────────────────────────

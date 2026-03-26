@@ -73,6 +73,15 @@ export interface OverviewResponse {
   annualized_returns: Record<string, number | null>
   annualized_vols:    Record<string, number | null>
   sharpes:            Record<string, number | null>
+  sortinos:           Record<string, number | null>
+  calmars:            Record<string, number | null>
+  max_drawdowns:      Record<string, number | null>
+  vars_95:            Record<string, number | null>
+  cvars_95:           Record<string, number | null>
+  skews:              Record<string, number | null>
+  kurts:              Record<string, number | null>
+  win_rates:          Record<string, number | null>
+  period_returns:     Record<string, Record<string, number | null>>
 }
 
 // ── Optimize ──────────────────────────────────────────────────────────────────
