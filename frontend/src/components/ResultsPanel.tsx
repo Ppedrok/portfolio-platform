@@ -94,6 +94,12 @@ export function ResultsPanel({
 
   if (!hasAny) return null
 
+  // Loading indicators on inactive tabs
+  const tabLoadingState: Partial<Record<Tab, boolean>> = {
+    optimization: optimizeLoading,
+    backtest:     backtestLoading,
+  }
+
   const TABS: { id: Tab; label: string; badge?: number }[] = [
     { id: 'optimization', label: 'Optimization' },
     { id: 'backtest',     label: 'Backtest' },
@@ -114,24 +120,35 @@ export function ResultsPanel({
 
       {/* Tab switcher */}
       <div className="flex border-b border-border mb-5 overflow-x-auto">
-        {TABS.map(({ id, label, badge }) => (
-          <button
-            key={id}
-            onClick={() => onTabChange(id)}
-            className={`px-5 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2 -mb-px whitespace-nowrap relative ${
-              activeTab === id
-                ? 'border-accent text-[#e8eaf0] bg-accent/5'
-                : 'border-transparent text-muted hover:text-muted-bright'
-            }`}
-          >
-            {label}
-            {badge !== undefined && (
-              <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-accent text-[8px] font-bold text-white">
-                {badge}
-              </span>
-            )}
-          </button>
-        ))}
+        {TABS.map(({ id, label, badge }) => {
+          const isLoading = tabLoadingState[id] && activeTab !== id
+          return (
+            <button
+              key={id}
+              onClick={() => onTabChange(id)}
+              className={`px-5 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2 -mb-px whitespace-nowrap relative ${
+                activeTab === id
+                  ? 'border-accent text-[#e8eaf0] bg-accent/5'
+                  : 'border-transparent text-muted hover:text-muted-bright'
+              }`}
+            >
+              {label}
+              {badge !== undefined && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-accent text-[8px] font-bold text-white">
+                  {badge}
+                </span>
+              )}
+              {isLoading && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-accent/20 border border-accent/40">
+                  <svg className="animate-spin w-2.5 h-2.5 text-accent" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* ── Optimization tab ─────────────────────────────────────────────── */}

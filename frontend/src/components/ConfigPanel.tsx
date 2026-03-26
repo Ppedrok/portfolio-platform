@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { MuMethod, CovMethod, OptMethod, ConstraintRow, TickerMatch, AssetGroup, BLView } from '../types'
 import { ConstraintsPanel } from './ConstraintsPanel'
 import { BLViewsPanel }    from './BLViewsPanel'
@@ -76,21 +77,52 @@ const COV_METHODS: { value: CovMethod; label: string; group?: string }[] = [
   { value: 'Carhart4_cov',    label: 'Carhart 4-Factor (Σ)',             group: 'Factor Models' },
 ]
 
-const OPT_METHODS: { value: OptMethod; label: string }[] = [
-  { value: 'markowitz',           label: 'Mean-Variance (Markowitz)' },
-  { value: 'CVaR',                label: 'CVaR — Conditional Value at Risk' },
-  { value: 'MAD',                 label: 'MAD — Mean Absolute Deviation' },
-  { value: 'SMAD',                label: 'SMAD — Semi Mean Absolute Deviation' },
-  { value: 'SemiVariance',        label: 'Semi-Variance (Downside Risk)' },
-  { value: 'LowerPartialMoments', label: 'Lower Partial Moments' },
-  { value: 'EVaR',                label: 'EVaR — Entropic Value at Risk' },
-  { value: 'Ulcer',               label: 'Ulcer Index' },
-  { value: 'GMD',                 label: 'GMD — Gini Mean Difference (slow)' },
-  { value: 'Brownian',            label: 'Brownian Motion Distance (slow)' },
-  { value: 'TrackingError_L2',    label: 'Index Tracking (L2)' },
-  { value: 'TrackingError_L1',    label: 'Index Tracking (L1 robust)' },
-  { value: 'TrackingError_Cov',   label: 'Index Tracking (Covariance)' },
+const OPT_METHOD_GROUPS: { group: string; methods: { value: OptMethod; label: string }[] }[] = [
+  {
+    group: 'Variance-Based',
+    methods: [
+      { value: 'markowitz',           label: 'Mean-Variance (Markowitz)' },
+    ],
+  },
+  {
+    group: 'CVaR Family',
+    methods: [
+      { value: 'CVaR',  label: 'CVaR — Conditional Value at Risk' },
+      { value: 'EVaR',  label: 'EVaR — Entropic Value at Risk' },
+    ],
+  },
+  {
+    group: 'Deviation-Based',
+    methods: [
+      { value: 'MAD',  label: 'MAD — Mean Absolute Deviation' },
+      { value: 'SMAD', label: 'SMAD — Semi Mean Absolute Deviation' },
+      { value: 'GMD',  label: 'GMD — Gini Mean Difference (slow)' },
+    ],
+  },
+  {
+    group: 'Downside Risk',
+    methods: [
+      { value: 'SemiVariance',        label: 'Semi-Variance' },
+      { value: 'LowerPartialMoments', label: 'Lower Partial Moments' },
+    ],
+  },
+  {
+    group: 'Drawdown-Based',
+    methods: [
+      { value: 'Ulcer',    label: 'Ulcer Index' },
+      { value: 'Brownian', label: 'Brownian Motion Distance (slow)' },
+    ],
+  },
+  {
+    group: 'Index Tracking',
+    methods: [
+      { value: 'TrackingError_L2',  label: 'Index Tracking (L2)' },
+      { value: 'TrackingError_L1',  label: 'Index Tracking (L1 robust)' },
+      { value: 'TrackingError_Cov', label: 'Index Tracking (Covariance)' },
+    ],
+  },
 ]
+
 
 // ── Shared sub-components ─────────────────────────────────────────────────────
 
@@ -106,7 +138,7 @@ function LabeledSelect<T extends string>({
 }: {
   label:    string
   value:    T
-  options:  { value: T; label: string }[]
+  options:  { value: T; label: string; group?: string }[]
   onChange: (v: T) => void
 }) {
   return (
@@ -124,6 +156,64 @@ function LabeledSelect<T extends string>({
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
+    </div>
+  )
+}
+
+function GroupedMethodSelect({
+  label,
+  value,
+  groups,
+  onChange,
+  badge,
+}: {
+  label:    string
+  value:    OptMethod
+  groups:   typeof OPT_METHOD_GROUPS
+  onChange: (v: OptMethod) => void
+  badge?:   ReactNode
+}) {
+  const currentLabel = groups.flatMap(g => g.methods).find(m => m.value === value)?.label ?? value
+  const currentGroup = groups.find(g => g.methods.some(m => m.value === value))?.group ?? ''
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-1">
+        <label className="text-[10px] text-muted font-mono uppercase tracking-widest">
+          {label}
+        </label>
+        {badge}
+      </div>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value as OptMethod)}
+        className={SELECT_CLS}
+        style={{ colorScheme: 'dark' }}
+      >
+        {groups.map(g => (
+          <optgroup key={g.group} label={`── ${g.group}`}>
+            {g.methods.map(m => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      <p className="text-[9px] font-mono text-muted mt-1 italic">
+        <span className="text-accent/60">{currentGroup}</span>
+        <span className="mx-1 text-muted/40">·</span>
+        <span>{currentLabel}</span>
+      </p>
+    </div>
+  )
+}
+
+function SectionHeader({ label, number }: { label: string; number?: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      {number && (
+        <span className="text-[9px] font-mono text-muted/50 tabular-nums">{number}</span>
+      )}
+      <span className="text-[10px] text-muted font-mono uppercase tracking-widest">{label}</span>
+      <div className="flex-1 h-px bg-border" />
     </div>
   )
 }
@@ -187,16 +277,40 @@ export function ConfigPanel({
         <h2 className="text-sm font-semibold text-[#c8d0e0] uppercase tracking-wider">Configuration</h2>
       </div>
 
-      {/* Method selects */}
-      <div className="grid grid-cols-3 gap-3">
-        <LabeledSelect label="Expected Returns"   value={muMethod}  options={MU_METHODS}  onChange={onMuMethod}  />
-        <LabeledSelect label="Covariance Matrix"  value={covMethod} options={COV_METHODS} onChange={onCovMethod} />
-        <LabeledSelect label="Optimization Method" value={optMethod} options={OPT_METHODS} onChange={onOptMethod} />
+      {/* ── Optimization method ──────────────────────────────────────────── */}
+      <SectionHeader label="Optimization Objective" />
+      <GroupedMethodSelect
+        label="Risk Measure"
+        value={optMethod}
+        groups={OPT_METHOD_GROUPS}
+        onChange={onOptMethod}
+        badge={
+          isTracking ? (
+            <span className="text-[9px] font-mono text-warning/70 border border-warning/30 bg-warning/5 rounded px-1.5 py-0.5">
+              Tracking Mode
+            </span>
+          ) : undefined
+        }
+      />
+
+      {/* ── Estimation parameters (collapsible hint) ─────────────────────── */}
+      <SectionHeader label="Parameter Estimation" />
+      <p className="text-[9px] font-mono text-muted/60 italic -mt-2">
+        {optMethod === 'markowitz'
+          ? 'Both μ and Σ are used by Mean-Variance optimization.'
+          : optMethod === 'TrackingError_Cov'
+          ? 'Σ is used by the Covariance tracking error formulation.'
+          : 'These estimators affect Markowitz and TE-Cov only. For all other methods only the raw return matrix is used.'}
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <LabeledSelect label="Expected Returns (μ)" value={muMethod}  options={MU_METHODS}  onChange={onMuMethod}  />
+        <LabeledSelect label="Covariance Matrix (Σ)" value={covMethod} options={COV_METHODS} onChange={onCovMethod} />
       </div>
 
-      {/* Mode toggle */}
+      {/* ── Optimization mode ────────────────────────────────────────────── */}
+      <SectionHeader label="Optimization Mode" />
       <div>
-        <span className="block text-[10px] text-muted mb-2 font-mono uppercase tracking-widest">
+        <span className="block text-[10px] text-muted mb-2 font-mono uppercase tracking-widest sr-only">
           Optimization Mode
         </span>
         <div className="inline-flex rounded-panel overflow-hidden border border-border bg-bg">
@@ -219,7 +333,8 @@ export function ConfigPanel({
         </div>
       </div>
 
-      {/* Benchmark ticker — always visible; mandatory for TrackingError, optional TE constraint for all other methods */}
+      {/* ── Benchmark & Tracking Error ───────────────────────────────────── */}
+      <SectionHeader label="Benchmark & Tracking Error" />
       <div className="space-y-3">
         <div>
           <label className="block text-[10px] text-muted mb-1 font-mono uppercase tracking-widest">
@@ -290,7 +405,10 @@ export function ConfigPanel({
         </div>
 
 
-      {/* Target return — only in Single Portfolio mode */}
+      {/* ── Return constraint (single portfolio mode only) ───────────────── */}
+      {!isFrontier && (
+        <SectionHeader label="Return Constraint (optional)" />
+      )}
       {!isFrontier && (
         <div>
           <div className="flex items-center justify-between mb-2">
@@ -340,7 +458,8 @@ export function ConfigPanel({
         </div>
       )}
 
-      {/* Weight constraints */}
+      {/* ── Weight constraints ───────────────────────────────────────────── */}
+      <SectionHeader label="Weight Constraints" />
       <div className="grid grid-cols-2 gap-5">
         <SliderRow
           label="Max Weight / Asset"
@@ -360,41 +479,39 @@ export function ConfigPanel({
         />
       </div>
 
-      {/* Backtest settings */}
-      <div className="border-t border-border pt-4 space-y-4">
-        <span className="block text-[10px] text-muted font-mono uppercase tracking-widest">
-          Backtest Settings
-        </span>
-        <div className="grid grid-cols-2 gap-5">
-          <SliderRow
-            label="Estimation Window"
-            value={estimationWindow}
-            min={60} max={504} step={21}
-            format={v => `${v}d`}
-            onChange={onEstimationWindow}
-          />
-          <SliderRow
-            label="Rebalancing Freq"
-            value={rebalancingFreq}
-            min={5} max={63}
-            format={v => `${v}d`}
-            onChange={onRebalancingFreq}
-          />
-        </div>
+      {/* ── Backtest settings ────────────────────────────────────────────── */}
+      <SectionHeader label="Backtest Settings" />
+      <div className="grid grid-cols-2 gap-5">
+        <SliderRow
+          label="Estimation Window"
+          value={estimationWindow}
+          min={60} max={504} step={21}
+          format={v => `${v}d`}
+          onChange={onEstimationWindow}
+        />
+        <SliderRow
+          label="Rebalancing Freq"
+          value={rebalancingFreq}
+          min={5} max={63}
+          format={v => `${v}d`}
+          onChange={onRebalancingFreq}
+        />
       </div>
 
-      {/* BL views panel — only shown when a BL mu method is active */}
+      {/* ── Black-Litterman views ────────────────────────────────────────── */}
       {isBL && (
-        <div className="border-t border-border pt-4">
+        <>
+          <SectionHeader label="Black-Litterman Views" />
           <BLViewsPanel
             assets={assets.map(a => a.ticker)}
             views={blViews}
             onChange={onBlViewsChange}
           />
-        </div>
+        </>
       )}
 
-      {/* Constraints panel */}
+      {/* ── Asset constraints ────────────────────────────────────────────── */}
+      <SectionHeader label="Asset Constraints & Groups" />
       <ConstraintsPanel
         assets={assets}
         longOnly={longOnly}
@@ -403,7 +520,8 @@ export function ConfigPanel({
         onLongOnly={onLongOnly}
       />
 
-      {/* Action buttons */}
+      {/* ── Run ─────────────────────────────────────────────────────────── */}
+      <SectionHeader label="Run" />
       <div className="flex gap-3 pt-1">
         <button
           onClick={onOptimize}
