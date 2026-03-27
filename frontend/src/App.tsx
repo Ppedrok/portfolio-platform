@@ -97,6 +97,22 @@ export default function App() {
       equity_curve: data.equity_curve,
       metrics:      data.metrics,
       finalWeights: last?.weights ?? {},
+      weightsHistory: data.weights_history,
+      config: {
+        trainStart:       startDate,
+        trainEnd:         endDate,
+        muMethod,
+        covMethod,
+        optMethod,
+        estimationWindow,
+        rebalancingFreq,
+        longOnly,
+        minWeight,
+        maxWeight,
+        benchmarkTicker,
+        maxTrackingError,
+        solver:           'CLARABEL',
+      },
     }
     setSnapshots(prev => [...prev, snap])
     setActiveTab('snapshots')

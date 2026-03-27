@@ -188,6 +188,27 @@ export interface FrontierResponse {
 
 // ── Portfolio Snapshot (for multi-strategy comparison) ────────────────────────
 
+export interface SnapshotConfig {
+  // Date range
+  trainStart:       string
+  trainEnd:         string
+  // Methods
+  muMethod:         string
+  covMethod:        string
+  optMethod:        string
+  // Walk-forward params
+  estimationWindow: number
+  rebalancingFreq:  number
+  // Constraints
+  longOnly:         boolean
+  minWeight:        number
+  maxWeight:        number
+  benchmarkTicker:  string
+  maxTrackingError: number | null
+  // Solver
+  solver:           string
+}
+
 export interface PortfolioSnapshot {
   id:           string
   label:        string
@@ -199,6 +220,10 @@ export interface PortfolioSnapshot {
   equity_curve: EquityCurvePoint[]
   metrics:      Record<string, Record<string, number | null>>
   finalWeights: Record<string, number>
+  // ── Full run configuration ──
+  config?:      SnapshotConfig
+  // ── All rebalancing weights over time ──
+  weightsHistory?: { date: string; weights: Record<string, number> }[]
 }
 
 // ── Backtest ──────────────────────────────────────────────────────────────────
