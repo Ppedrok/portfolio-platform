@@ -340,6 +340,173 @@ function PeriodReturnsTable({ data }: { data: OverviewResponse }) {
   )
 }
 
+// ── SVG Dendrogram component ──────────────────────────────────────────────────
+//
+// Renders the hierarchical clustering tree produced by scipy's dendrogram().
+// Coordinate system from scipy:
+//   icoord[k] = [x0, x1, x2, x3]   — x-positions of the k-th U-shape
+//   dcoord[k] = [y0, y1, y2, y3]   — y-positions (heights) of the k-th U-shape
+// Leaves are at y=0; root is at y=max_height.
+// We flip the y-axis so the root is at the top (standard dendrogram orientation).
+
+interface DendrogramProps {
+  icoord: number[][]
+  dcoord: number[][]
+  ivl:    string[]
+}
+
+function DendrogramChart({ icoord, dcoord, ivl }: DendrogramProps) {
+  const [hoveredCluster, setHoveredCluster] = useState<number | null>(null)
+
+  const n = ivl.length
+  if (n < 2 || icoord.length === 0) return null
+
+  // ── Layout constants ───────────────────────────────────────────────────
+  const PAD_LEFT   = 10
+  const PAD_RIGHT  = 10
+  const PAD_TOP    = 12
+  const PAD_BOTTOM = 48   // space for leaf labels
+  const TREE_H     = 160  // height of the tree drawing area
+  const LABEL_W    = 38   // rough px per label character
+
+  const totalW  = Math.max(n * LABEL_W + PAD_LEFT + PAD_RIGHT, 300)
+  const totalH  = TREE_H + PAD_TOP + PAD_BOTTOM
+  const treeW   = totalW - PAD_LEFT - PAD_RIGHT
+
+  // scipy puts leaves at x = 5, 15, 25 … (step 10, n leaves → range [5, 5+10*(n-1)])
+  const xMin = 5
+  const xMax = 5 + 10 * (n - 1)
+
+  // y range: leaves at 0, root at max height
+  const allY   = dcoord.flat()
+  const yMax   = Math.max(...allY)
+
+  function scaleX(x: number) {
+    return PAD_LEFT + ((x - xMin) / (xMax - xMin)) * treeW
+  }
+  function scaleY(y: number) {
+    // flip: 0 (leaves) → bottom of tree area, yMax → top
+    return PAD_TOP + TREE_H - (y / yMax) * TREE_H
+  }
+
+  // ── Height-based colour for each U-shape (top bar height = dcoord[k][1]) ──
+  function branchColor(k: number): string {
+    const h = dcoord[k][1]  // height of the top horizontal bar
+    const t = h / yMax       // 0 = shallow merge, 1 = deepest merge
+    // amber at shallow → orange at mid → warm white at root
+    const r = Math.round(180 + (245 - 180) * t)
+    const g = Math.round(80  + (158 - 80)  * (1 - t * 0.4))
+    const b = Math.round(10  + (11  - 10)  * t)
+    return `rgb(${r},${g},${b})`
+  }
+
+  return (
+    <div className="select-none overflow-x-auto">
+      <svg width={totalW} height={totalH} style={{ display: 'block' }}>
+
+        {/* ── U-shaped branches ── */}
+        {icoord.map((xs, k) => {
+          const ys = dcoord[k]
+          // Points: (x0,y0) bottom-left → (x1,y1) top-left → (x2,y2) top-right → (x3,y3) bottom-right
+          const px0 = scaleX(xs[0]); const py0 = scaleY(ys[0])
+          const px1 = scaleX(xs[1]); const py1 = scaleY(ys[1])
+          const px2 = scaleX(xs[2]); const py2 = scaleY(ys[2])
+          const px3 = scaleX(xs[3]); const py3 = scaleY(ys[3])
+          const col = branchColor(k)
+          const isHov = hoveredCluster === k
+          return (
+            <g key={k}
+               onMouseEnter={() => setHoveredCluster(k)}
+               onMouseLeave={() => setHoveredCluster(null)}
+               style={{ cursor: 'default' }}
+            >
+              {/* Left vertical stem */}
+              <line x1={px0} y1={py0} x2={px1} y2={py1}
+                    stroke={col} strokeWidth={isHov ? 2 : 1.5} strokeLinecap="round" />
+              {/* Horizontal bar */}
+              <line x1={px1} y1={py1} x2={px2} y2={py2}
+                    stroke={col} strokeWidth={isHov ? 2 : 1.5} strokeLinecap="round" />
+              {/* Right vertical stem */}
+              <line x1={px2} y1={py2} x2={px3} y2={py3}
+                    stroke={col} strokeWidth={isHov ? 2 : 1.5} strokeLinecap="round" />
+              {/* Hover height label on horizontal bar */}
+              {isHov && (
+                <text
+                  x={(px1 + px2) / 2}
+                  y={py1 - 4}
+                  textAnchor="middle"
+                  fill="#f59e0b"
+                  fontSize={8}
+                  fontFamily='"JetBrains Mono", monospace'
+                >
+                  {dcoord[k][1].toFixed(3)}
+                </text>
+              )}
+            </g>
+          )
+        })}
+
+        {/* ── Leaf drop-lines (thin vertical lines to label area) ── */}
+        {ivl.map((label, i) => {
+          const lx = PAD_LEFT + (i / (n - 1)) * treeW
+          const ly = PAD_TOP + TREE_H
+          return (
+            <line key={`dl-${i}`}
+                  x1={lx} y1={ly} x2={lx} y2={ly + 5}
+                  stroke="#3d2e10" strokeWidth={1} />
+          )
+        })}
+
+        {/* ── Leaf labels ── */}
+        {ivl.map((label, i) => {
+          const lx = PAD_LEFT + (i / (n - 1)) * treeW
+          const ly = PAD_TOP + TREE_H + 8
+          return (
+            <text
+              key={`lbl-${i}`}
+              x={lx}
+              y={ly}
+              textAnchor="start"
+              transform={`rotate(40, ${lx}, ${ly})`}
+              fill="#f59e0b"
+              fontSize={9}
+              fontFamily='"JetBrains Mono", monospace'
+              fontWeight="600"
+            >
+              {label}
+            </text>
+          )
+        })}
+
+        {/* ── Y-axis height ruler (3 ticks) ── */}
+        {[0, 0.5, 1].map(t => {
+          const y   = scaleY(t * yMax)
+          const val = (t * yMax).toFixed(3)
+          return (
+            <g key={`tick-${t}`}>
+              <line x1={PAD_LEFT - 4} y1={y} x2={PAD_LEFT} y2={y}
+                    stroke="#3d2e10" strokeWidth={1} />
+              <text x={PAD_LEFT - 6} y={y + 3}
+                    textAnchor="end" fill="#7a6848"
+                    fontSize={7} fontFamily='"JetBrains Mono", monospace'>
+                {val}
+              </text>
+            </g>
+          )
+        })}
+        {/* Vertical axis line */}
+        <line x1={PAD_LEFT} y1={PAD_TOP} x2={PAD_LEFT} y2={PAD_TOP + TREE_H}
+              stroke="#2a1e08" strokeWidth={1} />
+
+      </svg>
+      <p className="text-[9px] font-mono text-muted mt-1 italic">
+        Ward linkage on the distance matrix. Hover a branch to see its merge height.
+        Closer assets (shorter branches) cluster first.
+      </p>
+    </div>
+  )
+}
+
 // ── Codependence tab ──────────────────────────────────────────────────────────
 
 function CodependenceTab({
@@ -353,6 +520,7 @@ function CodependenceTab({
 }) {
   const [showDistance, setShowDistance] = useState(false)
   const isCorrelation = CORRELATION_METHODS.has(method)
+  const dend = data.dendrogram
 
   return (
     <div className="space-y-6">
@@ -370,6 +538,22 @@ function CodependenceTab({
           ))}
         </select>
       </div>
+
+      {/* ── Dendrogram ── */}
+      {dend && dend.icoord && dend.icoord.length > 0 && (
+        <div>
+          <p className="text-[10px] text-muted font-mono uppercase tracking-widest mb-3">
+            Hierarchical Clustering Dendrogram
+          </p>
+          <div className="bg-[#0a0804] border border-border/60 rounded-panel p-4">
+            <DendrogramChart
+              icoord={dend.icoord}
+              dcoord={dend.dcoord}
+              ivl={dend.ivl}
+            />
+          </div>
+        </div>
+      )}
 
       <Heatmap
         tickers={data.tickers}

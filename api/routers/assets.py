@@ -14,6 +14,8 @@ from datetime import timedelta
 import numpy as np
 import pandas as pd
 import scipy.stats as sp_stats
+from scipy.cluster.hierarchy import linkage as sp_linkage, dendrogram as sp_dendrogram
+from scipy.spatial.distance import squareform
 import riskfolio as rp
 import yfinance as yf
 from fastapi import APIRouter, HTTPException, Query
@@ -439,6 +441,26 @@ def get_overview(body: OverviewRequest):
 
             period_returns[t] = pr
 
+        # ── Hierarchical clustering dendrogram ────────────────────────────────
+        # Use the distance matrix produced by rp.codep_dist.
+        # Ward linkage minimises total within-cluster variance.
+        dend_payload: dict = {}
+        try:
+            dist_arr = dist.values.copy().astype(float)
+            np.fill_diagonal(dist_arr, 0.0)
+            # squareform expects a symmetric matrix with zero diagonal
+            condensed = squareform(dist_arr, checks=False)
+            Z = sp_linkage(condensed, method="ward")
+            dend = sp_dendrogram(Z, labels=tickers, no_plot=True)
+            dend_payload = {
+                "icoord":    dend["icoord"],   # list of [x0,x1,x2,x3] per U-shape
+                "dcoord":    dend["dcoord"],   # list of [y0,y1,y2,y3] per U-shape
+                "ivl":       dend["ivl"],      # leaf labels left→right
+                "leaves":    dend["leaves"],   # original indices of leaves
+            }
+        except Exception:
+            pass  # non-fatal: frontend will hide dendrogram if payload is empty
+
         return {
             "tickers":            tickers,
             "method":             body.method,
@@ -456,6 +478,7 @@ def get_overview(body: OverviewRequest):
             "kurts":              kurts,
             "win_rates":          win_rates,
             "period_returns":     period_returns,
+            "dendrogram":         dend_payload,
         }
     except Exception as exc:
         raise HTTPException(status_code=422, detail=str(exc))

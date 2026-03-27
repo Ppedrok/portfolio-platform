@@ -82,6 +82,12 @@ export interface OverviewResponse {
   kurts:              Record<string, number | null>
   win_rates:          Record<string, number | null>
   period_returns:     Record<string, Record<string, number | null>>
+  dendrogram?: {
+    icoord:  number[][]   // [x0,x1,x2,x3] for each U-shape
+    dcoord:  number[][]   // [y0,y1,y2,y3] for each U-shape
+    ivl:     string[]     // leaf labels left→right
+    leaves:  number[]     // original leaf indices
+  }
 }
 
 // ── Optimize ──────────────────────────────────────────────────────────────────

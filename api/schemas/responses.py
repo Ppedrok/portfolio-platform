@@ -59,6 +59,7 @@ class OverviewResponse(BaseModel):
     kurts:              dict[str, float | None]  = {}
     win_rates:          dict[str, float | None]  = {}
     period_returns:     dict[str, dict[str, float | None]] = {}
+    dendrogram:         dict                               = Field(default_factory=dict)
 
 
 # ── /api/optimize (single portfolio) ─────────────────────────────────────────
